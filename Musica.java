@@ -136,7 +136,7 @@ public class Musica {
      * uma string.
      * @param strDate - string, contendo a data de lancamento.
      */
-    private void lerDataLancamento (String strDate) {
+    private void lerDataLancamento(String strDate) {
 
         try {
             Locale US = new Locale("US");
@@ -149,8 +149,8 @@ public class Musica {
             }
             dataLancamento = df.parse(strDate);
 
-        } catch (Exception e) {
-            System.out.print("ERRO: data invalida: " + strDate);
+        } catch (Exception parseException) {
+            System.out.print("ERRO: data invalida: " + strDate + " ");
         }
 
     }

@@ -15,17 +15,16 @@ public class CRUD {
     private static final String registroDB = "Registro.db";
     private int ultimoId;
 
-    public CRUD () {
+    public CRUD() {
         ultimoId = 0;
     }
     
-    public void carregarCSV () throws Exception {
+    public void carregarCSV() throws Exception {
         try {
             BufferedReader csv = new BufferedReader (new FileReader (arquivoCSV));
             String linhaLida;
 
             while ((linhaLida = csv.readLine()) != null) {
-                System.out.println("LinhaLida: " + linhaLida);
                 ultimoId++;
                 Musica musica = new Musica (linhaLida, ultimoId);
                 System.out.println(musica);
