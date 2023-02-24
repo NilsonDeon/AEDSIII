@@ -1,5 +1,5 @@
 /**
- * TP01 - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
+ * Musica - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
  * @version 1.0 02/2023
  */
@@ -10,10 +10,8 @@ import java.util.Locale;
 
 import java.text.SimpleDateFormat;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 
 import java.io.DataOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -23,17 +21,19 @@ import java.io.IOException;
  */
 public class Musica {
   
-    protected char lapede;
+    protected char lapide;
     protected int id;
 
     protected String nome;          // String de tamanho variavel
     protected String artistas;
     protected String nomeAlbum;   
-    protected String[] imagens;     // Lista de valores com separador " "
+    protected String[] imagens;     // Lista de valores com separador "\"
     protected String pais;          // String tamanho fixo
     protected Date dataLancamento;  // Data
-    protected int popularidade;     // inteiro
-    protected int duracao;          
+    protected int danceabilidade;   // inteiro
+    protected int duracao;
+    protected int vivacidade;
+    protected int popularidade;       
     protected String uri;      
 
 
@@ -41,7 +41,7 @@ public class Musica {
      * Construtor padrao da classe Musica.
      */
     public Musica () {
-        lapede = ' ';
+        lapide = ' ';
         id = 0;
         nome = "";
         artistas = "";
@@ -49,8 +49,10 @@ public class Musica {
         imagens = new String[10];
         pais = "";
         dataLancamento = null;
-        popularidade = 0;
+        danceabilidade = 0;
         duracao = 0;
+        vivacidade = 0;
+        popularidade = 0;
         uri = "";
     }
 
@@ -61,10 +63,10 @@ public class Musica {
      * criado.
      * @param id - id do objeto criado.
      */
-    protected Musica (String linha, int id) {
+    public Musica (String linha, int id) {
         String[] atributos = linha.split(",");
 
-        lapede = ' ';
+        lapide = ' ';
         this.id = id;
         nome = atributos[0];
         artistas = atributos[1];
@@ -72,9 +74,11 @@ public class Musica {
         lerImagens(atributos[3]);
         pais = atributos[4];
         lerDataLancamento(atributos[5]);
-        popularidade = Integer.parseInt(atributos[6]);
+        danceabilidade = Integer.parseInt(atributos[6]);
         duracao = Integer.parseInt(atributos[7]);
-        uri = atributos[8];
+        vivacidade = Integer.parseInt(atributos[8]);
+        popularidade = Integer.parseInt(atributos[9]);
+        uri = atributos[10];
     }
 
     /**
@@ -83,16 +87,18 @@ public class Musica {
      * @return String com os atributos.
      */
     public String toString () {
-        return "\nLapede: [" + lapede + "]" +
+        return "\nlapide: [" + lapide + "]" +
                "\nId: " + id +
                "\nNome: " + nome +
                "\nArtistas " + artistas +
-               "\nNome Álbum: " + nomeAlbum +
+               "\nNome Album: " + nomeAlbum +
                "\nImagens: " + mostrarImagens() +
-               "\nPaís: " + pais +
+               "\nPais: " + pais +
                "\nData Lançamento: " + dataLancamento +
+               "\nDanceabilidade: " + danceabilidade +
+               "\nDuracao: " + duracao +
+               "\nVivacidade: " + vivacidade +
                "\nPopularidade: " + popularidade + 
-               "\nDuração: " + duracao +
                "\nUri: " + uri;
 
     }
@@ -103,12 +109,14 @@ public class Musica {
      */
     private String mostrarImagens () {
         
-        int i = 0;
         String arrayImagens = "[ ";
 
-        while (imagens[i++] != null) {
-            arrayImagens += imagens[i] + " ";
+        for (String img : imagens) {
+            
+            arrayImagens += (" " + img);
+            
         }
+
         arrayImagens += "]";
 
         return arrayImagens;
@@ -151,7 +159,7 @@ public class Musica {
      * Metodo para converter os atributos da classe em um array de bytes.
      * @return - array de bytes.
      */
-    protected byte[] toByteArray () {
+    public byte[] toByteArray () {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
@@ -160,7 +168,7 @@ public class Musica {
 
             short lengthNome = (short)nome.length();
             
-            dos.writeChar(lapede);
+            dos.writeChar(lapide);
             dos.writeInt(id);
             dos.writeShort(lengthNome);
             dos.writeUTF(nome);
