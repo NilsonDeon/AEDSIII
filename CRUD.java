@@ -251,8 +251,7 @@ public class CRUD {
                         musica.lapide = false;
 
                         dbFile.seek(posicaoInicial);
-                        byte[] byteArray = musica.toByteArray();
-                        dbFile.write(byteArray);
+                        dbFile.writeBoolean(musica.lapide);
 
                         find = true;
                         System.out.println("\nMusica [" + musica.id + "]: \"" +
