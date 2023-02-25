@@ -54,7 +54,7 @@ class Main {
                    case 1 : crud.carregarCSV();  break;
                    case 2 : crud.create();       break;
                    case 3 : crud.read();         break;
-                   case 4 : /*crud.update();  */ break;
+                   case 4 : crud.update();       break;
                    case 5 : crud.delete();       break;
                    case 6 : /*sort.orderBy(); */ break;
                    default: mostrarErro();       break;

@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.InputMismatchException;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -249,6 +250,56 @@ public class Musica {
         } catch (Exception e) {
             System.out.println("\nERRO: Informacoes invalidas!\n\n");
         }
+    }
+
+    /**
+     * Metodo privado para atualizar algum atributo do objeto.
+     */
+    protected void atualizar() {
+
+        Scanner sc = new Scanner(System.in);
+        int opcao = -1;
+
+        String menu = "\n 0 - Nome            1 - Artistas" +
+                      "\n 2 - Nome do Album   3 - Imagens" +
+                      "\n 4 - Pais            5 - Data Lancamento" +
+                      "\n 6 - Danceabilidade  7 - Duracao" + 
+                      "\n 8 - Vivacidade      9 - Popularidade" +
+                      "\n10 - Uri"; 
+
+        do {
+            try {
+                System.out.println(menu);
+                System.out.println("\nEscolha qual atributo deseja alterar: ");
+                String input = sc.nextLine();
+                opcao = Integer.parseInt(input);
+
+                switch (opcao) {
+                    case 0:
+                        System.out.println("Nome atual: " + this.nome);
+                        System.out.print("Digite novo nome: ");
+                        String newNome = sc.nextLine();
+                        this.nome = newNome;
+                        break;
+                    
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    case 8:
+                    case 9:
+                    case 10:
+                    default: break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("\nERRO: Por favor, digite uma opcao valida"+
+                                   "de 0 a 10.");
+                sc.nextLine();
+            }
+        } while (opcao < 0 || opcao > 10);
     }
 
     /**

@@ -37,9 +37,11 @@ public class CRUD {
 
             int ultimoId = 0;
 
+            // Reservar espaco no cabecalho do arquivo para o inteiro ultimo ID
             dbFile.seek(0);
             dbFile.writeInt(ultimoId);
 
+            // Ler CSV, criar array de bytes e salva-lo em arquivo
             String linhaLida;
             while ((linhaLida = csvFile.readLine()) != null) {
                 ultimoId++;
@@ -48,6 +50,7 @@ public class CRUD {
                 dbFile.write(byteArray); 
             }
 
+            // Atualizar ultimo ID no cabecalho do arquivo
             dbFile.seek(0);
             dbFile.writeInt(ultimoId);
 
@@ -76,21 +79,24 @@ public class CRUD {
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
 
+            // Ler ultimo ID no cabecalho do arquivo
             dbFile.seek(0);
             int ultimoId = dbFile.readInt();
 
+            // Criar nova Musica
             Musica musica = new Musica();
             musica.lerMusica();
-            musica.id = ultimoId + 1;
-
+            ultimoId++;
+            musica.id = ultimoId;
             System.out.println(musica);
 
+            // Atualizar ultimo ID no cabecalho do arquivo
             dbFile.seek(0);
             dbFile.writeInt(ultimoId);
 
+            // Escrever musica no final do arquivo
             long finalRegistro = dbFile.length();
             dbFile.seek(finalRegistro);
-
             byte[] byteArray = musica.toByteArray();
             dbFile.write(byteArray);
 
@@ -157,6 +163,32 @@ public class CRUD {
     }
 
     /**
+     * Metodo para atualizar uma musica a partir do seu ID.
+     * @return true, se a música foi atualizada; false, caso contrario.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     */
+    public boolean update () throws Exception {
+        Scanner sc = new Scanner(System.in);
+        int idProcurado = 0;
+
+       do {
+           System.out.print("\nDigite o ID procurado: ");
+           try {
+               idProcurado = sc.nextInt();
+               sc.nextLine();
+           } catch (InputMismatchException e) {
+               sc.nextLine();
+               System.out.println("\nERRO: ID invalido!\n");
+               idProcurado = 0;
+           }
+       } while (idProcurado == 0);
+
+       sc.close();
+
+       return update(idProcurado);
+    }
+
+    /**
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
      * @return true, se a música foi encontrada; false, caso contrario.
@@ -172,6 +204,7 @@ public class CRUD {
             boolean lapide;
             int tamRegistro;
 
+            // Obter tamanho do arquivo == ultimo ID adicionado
             dbFile.seek(0);
             int tamArquivo = dbFile.readInt();
 
@@ -180,9 +213,11 @@ public class CRUD {
                 
                 musica = new Musica();
 
+                // Ler informacoes do registro   
                 lapide = dbFile.readBoolean();
                 tamRegistro = dbFile.readInt();
 
+                // Se registro for valido, ler e comparar com ID procurado
                 if (lapide == true) {
                     byte[] registro = new byte[tamRegistro];
                     dbFile.read(registro);
@@ -192,6 +227,8 @@ public class CRUD {
                         find = true;
                         System.out.println(musica); 
                     }
+
+                // Se nao for, pular o registro e reposicionar ponteiro
                 } else {
                     long posicaoAtual = dbFile.getFilePointer();
                     long proximaPosicao = posicaoAtual + (long)tamRegistro;
@@ -230,6 +267,7 @@ public class CRUD {
             int tamRegistro;
             long posicaoInicial;
 
+            // Obter tamanho do arquivo == ultimo ID adicionado
             dbFile.seek(0);
             int tamArquivo = dbFile.readInt();
 
@@ -238,10 +276,12 @@ public class CRUD {
                 
                 musica = new Musica();
 
+                // Ler informacoes do registro  
                 posicaoInicial = dbFile.getFilePointer();
                 lapide = dbFile.readBoolean();
                 tamRegistro = dbFile.readInt();
 
+                // Se registro for valido, ler e comparar com ID procurado
                 if (lapide == true) {
                     byte[] registro = new byte[tamRegistro];
                     dbFile.read(registro);
@@ -250,6 +290,7 @@ public class CRUD {
                     if (idProcurado == musica.id) {
                         musica.lapide = false;
 
+                        // Apagar logicamente o registro
                         dbFile.seek(posicaoInicial);
                         dbFile.writeBoolean(musica.lapide);
 
@@ -258,11 +299,104 @@ public class CRUD {
                                            musica.nome + "\" " +
                                            "deletada com sucesso!");
                     }
+
+                // Se nao for, pular o registro e reposicionar ponteiro    
                 } else {
                     long proximaPosicao = posicaoInicial + (long)tamRegistro;
                     dbFile.seek(proximaPosicao);
                 }
 
+                i++;
+            }
+
+            if (find == false) {
+                System.out.println("\nMusica de ID (" + idProcurado + 
+                                   ") nao esta' cadastrada!"); 
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: registro nao encontrado!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+            return find;
+        }
+    }
+
+    /**
+     * Metodo privado para atualizar uma musica a partir do seu ID.
+     * @return true, se a música foi excluida; false, caso contrario.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     */
+    private boolean update (int idProcurado) throws Exception {
+        RandomAccessFile dbFile = null;
+        boolean find = false;
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+            Musica musica = null;
+            boolean lapide;
+            int tamRegistro;
+            long posicaoInicial;
+
+            // Obter tamanho do arquivo == ultimo ID adicionado
+            dbFile.seek(0);
+            int tamArquivo = dbFile.readInt();
+            int ultimoId = tamArquivo;
+
+            int i = 0;
+            while (i < tamArquivo && find == false) {
+                
+                musica = new Musica();
+
+                // Ler informacoes do registro
+                posicaoInicial = dbFile.getFilePointer();
+                lapide = dbFile.readBoolean();
+                tamRegistro = dbFile.readInt();
+
+                // Se registro for valido, ler e comparar com ID procurado
+                if (lapide == true) {
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+
+                    if (idProcurado == musica.id) {
+
+                        // Ler e criar novo Objeto musica
+                        Musica newMusica = new Musica();
+                        newMusica.atualizar();
+                        byte[] newRegistro = newMusica.toByteArray();
+
+                        if (newRegistro.length <= registro.length) {
+
+                            // Salvar novo registro, mas manter tamanho antigo
+
+                        } else {
+                            
+                            // Marcar registro como invalido
+                            dbFile.seek(posicaoInicial);
+                            dbFile.writeBoolean(false);
+
+                            // Atualizar ultimo ID no cabecalho do arquivo
+                            ultimoId++;
+                            dbFile.seek(0);
+                            dbFile.writeInt(ultimoId);
+
+                            // Escrever a musica atualizada no final do arquivo
+                            long finalRegistro = dbFile.length();
+                            dbFile.seek(finalRegistro);
+                            newMusica.id = ultimoId;
+                            newRegistro = newMusica.toByteArray();
+                            dbFile.write(newRegistro);
+                        }
+
+                        find = true;
+                        System.out.println("\nMusica [" + musica.id + "]: \"" +
+                                           musica.nome + "\" " +
+                                           "atualizada com sucesso!");
+                    }
+                } else {
+                    long proximaPosicao = posicaoInicial + (long)tamRegistro;
+                    dbFile.seek(proximaPosicao);
+                }
                 i++;
             }
 
