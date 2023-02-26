@@ -17,21 +17,21 @@ class Main {
      */
     public static void main (String args[]) throws Exception {
 
-       Scanner sc = new Scanner(System.in);
+       IO io = new IO();
        CRUD crud = new CRUD();
        OrdenacaoExterna sort = new OrdenacaoExterna();
 
-       String introducao = "\nTrabalho Pratico 01 - TP01" +
-                           "\nAlgoritmos e Estruturas de Dados III" + 
-                           "\nGabriel Vargas e Nilson Deon" +
-                           "\nBase de dados: Musicas do Spotify" +
-                           "\n02 / 2023";
+       String intro = "\n        Trabalho Pratico 01 - TP01         " +
+                      "\n    Algoritmos e Estruturas de Dados III   " + 
+                      "\n       Gabriel Vargas e Nilson Deon        " +
+                      "\n     Base de dados: Músicas do Spotify     " +
+                      "\n                  02/2023                  ";
 
        String menu = "\n+------------------------------------------+" +
                      "\n|                   MENU                   |" +
                      "\n|------------------------------------------|" +
                      "\n| 0 - Sair                                 |" +
-                     "\n| 1 - Realizar cargas inicial dos dados    |" +
+                     "\n| 1 - Carregar dados iniciais              |" +
                      "\n| 2 - Cadastrar                            |" +
                      "\n| 3 - Pesquisar                            |" +
                      "\n| 4 - Atualizar                            |" +
@@ -41,14 +41,12 @@ class Main {
                      "\n+------------------------------------------+";
        int opcao = -1;
 
-       System.out.println(introducao);
+       System.out.println(intro);
 
        do {
            try {
                System.out.println(menu);
-               System.out.print("\nDigite uma opcao: ");
-               String input = sc.next();
-               opcao = Integer.parseInt(input);
+               opcao = io.readInt("\nDigite uma opcao: ");
 
                switch (opcao) {
                    case 0 :                      break;
@@ -58,16 +56,14 @@ class Main {
                    case 4 : crud.update();       break;
                    case 5 : crud.delete();       break;
                    case 6 : /*sort.orderBy(); */ break;
-                   case 7 : crud.abrirMusica(); 
+                   case 7 : crud.abrirMusica();  break;
                    default: mostrarErro();       break;
                }
            } catch (InputMismatchException e) {
                mostrarErro();
-               sc.nextLine();
+               io.readLine();
            }
        } while (opcao != 0);
-
-       sc.close(); 
    }
 
     /**

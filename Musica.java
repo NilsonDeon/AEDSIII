@@ -31,10 +31,10 @@ public class Musica {
     protected String nome;          // String de tamanho variavel
     protected String artistas;
     protected String nomeAlbum;   
-    protected String[] imagens;     // Lista de valores com separador "\"
+    protected String[] imagens;     // Lista de valores com separador " "
     protected String pais;          // String tamanho fixo
     protected Date dataLancamento;  // Data
-    protected int danceabilidade;   // inteiro
+    protected int danceabilidade;   // Inteiro
     protected int duracao;
     protected int vivacidade;
     protected int popularidade;       
@@ -137,21 +137,18 @@ public class Musica {
      */
     private void lerImagens () {
         try {
-            Scanner sc = new Scanner(System.in);
+            IO io = new IO();
 
             System.out.print("\nDigite o numero de imagens para adicionar: ");
-            int tam = sc.nextInt();
-            sc.nextLine();
+            int tam = io.readInt();
             imagens = new String[tam];
             for (int i = 0; i < tam; i++) {
                 System.out.print("[" + (i+1) + "]: ");
-                imagens[i] = sc.nextLine();
+                imagens[i] = io.readLine();
             }
 
-            sc.close();
         } catch (Exception e) {
             System.out.println("\nERRO: Informacoes invalidas!\n\n");
-            //lerImagens();
         }
     }
 
@@ -199,53 +196,43 @@ public class Musica {
      */
     public void lerMusica () {
         try {
-            Scanner sc = new Scanner(System.in);
+            IO io = new IO();
 
             lapide = true;
             id = 0;
 
             System.out.print("\nNome: ");
-            nome = sc.nextLine ();
+            nome = io.readLine ();
 
             System.out.print("\nArtistas: ");
-            artistas = sc.nextLine ();
+            artistas = io.readLine ();
 
             System.out.print("\nNome Album: ");
-            nomeAlbum = sc.nextLine ();
+            nomeAlbum = io.readLine ();
 
-            //lerImagens();
-
-            imagens = new String[2];
-            imagens[0] = "img_00";
-            imagens[1] = "img_01";
+            lerImagens();
 
             System.out.print("\nSigla pais: ");
-            pais = sc.nextLine ();
+            pais = io.readLine ();
 
             System.out.print("\nData Lancamento YYYY-MM-DD: ");
-            String strDate = sc.nextLine();
+            String strDate = io.readLine();
             lerDataLancamento(strDate);
 
             System.out.print("\nDanceabilidade: ");
-            danceabilidade = sc.nextInt ();
-            sc.nextLine();
+            danceabilidade = io.readInt ();
 
             System.out.print("\nDuracao: ");
-            duracao = sc.nextInt ();
-            sc.nextLine();
+            duracao = io.readInt ();
 
             System.out.print("\nVivacidade: ");
-            vivacidade = sc.nextInt ();
-            sc.nextLine();
+            vivacidade = io.readInt ();
  
             System.out.print("\nPopularidade: ");
-            popularidade = sc.nextInt ();
-            sc.nextLine();
+            popularidade = io.readInt ();
 
             System.out.print("\nUri: ");
-            uri = sc.next();
-
-            sc.close();
+            uri = io.readLine();
 
         } catch (Exception e) {
             System.out.println("\nERRO: Informacoes invalidas!\n\n");
@@ -257,7 +244,7 @@ public class Musica {
      */
     protected void atualizar() {
 
-        Scanner sc = new Scanner(System.in);
+        IO io = new IO();
         int opcao = -1;
 
         String menu = "\n 0 - Nome            1 - Artistas" +
@@ -270,15 +257,13 @@ public class Musica {
         do {
             try {
                 System.out.println(menu);
-                System.out.println("\nEscolha qual atributo deseja alterar: ");
-                String input = sc.nextLine();
-                opcao = Integer.parseInt(input);
+                opcao = io.readInt("\nEscolha qual atributo deseja alterar: ");
 
                 switch (opcao) {
                     case 0:
-                        System.out.println("Nome atual: " + this.nome);
+                        System.out.println("\nNome atual: " + this.nome);
                         System.out.print("Digite novo nome: ");
-                        String newNome = sc.nextLine();
+                        String newNome = io.readLine();
                         this.nome = newNome;
                         break;
                     
@@ -297,7 +282,7 @@ public class Musica {
             } catch (InputMismatchException e) {
                 System.out.println("\nERRO: Por favor, digite uma opcao valida"+
                                    "de 0 a 10.");
-                sc.nextLine();
+                io.readLine();
             }
         } while (opcao < 0 || opcao > 10);
     }

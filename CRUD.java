@@ -116,22 +116,19 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
     public boolean read () throws Exception {
-        Scanner sc = new Scanner(System.in);
+        IO io = new IO();
         int idProcurado = 0;
 
        do {
            System.out.print("\nDigite o ID procurado: ");
            try {
-               idProcurado = sc.nextInt();
-               sc.nextLine();
+               idProcurado = io.readInt();
            } catch (InputMismatchException e) {
-               sc.nextLine();
+               io.readLine();
                System.out.println("\nERRO: ID invalido!\n");
                idProcurado = 0;
            }
        } while (idProcurado == 0);
-
-       sc.close();
 
        return read(idProcurado);
     }
@@ -142,22 +139,19 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
     public boolean delete () throws Exception {
-        Scanner sc = new Scanner(System.in);
+        IO io = new IO();
         int idProcurado = 0;
 
        do {
            System.out.print("\nDigite o ID procurado: ");
            try {
-               idProcurado = sc.nextInt();
-               sc.nextLine();
+               idProcurado = io.readInt();
            } catch (InputMismatchException e) {
-               sc.nextLine();
+               io.readLine();
                System.out.println("\nERRO: ID invalido!\n");
                idProcurado = 0;
            }
        } while (idProcurado == 0);
-
-       sc.close();
 
        return delete(idProcurado);
     }
@@ -168,22 +162,19 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
     public boolean update () throws Exception {
-        Scanner sc = new Scanner(System.in);
+        IO io = new IO();
         int idProcurado = 0;
 
        do {
            System.out.print("\nDigite o ID procurado: ");
            try {
-               idProcurado = sc.nextInt();
-               sc.nextLine();
+               idProcurado = io.readInt();
            } catch (InputMismatchException e) {
-               sc.nextLine();
+               io.readLine();
                System.out.println("\nERRO: ID invalido!\n");
                idProcurado = 0;
            }
        } while (idProcurado == 0);
-
-       sc.close();
 
        return update(idProcurado);
     }
@@ -361,7 +352,7 @@ public class CRUD {
                     if (idProcurado == musica.id) {
 
                         // Ler e criar novo Objeto musica
-                        Musica newMusica = new Musica();
+                        Musica newMusica = musica;
                         newMusica.atualizar();
                         byte[] newRegistro = newMusica.toByteArray();
 
@@ -380,7 +371,7 @@ public class CRUD {
                             dbFile.seek(0);
                             dbFile.writeInt(ultimoId);
 
-                            // Escrever a musica atualizada no final do arquivo
+                            // Eoprever a musica atualizada no final do arquivo
                             long finalRegistro = dbFile.length();
                             dbFile.seek(finalRegistro);
                             newMusica.id = ultimoId;
@@ -418,22 +409,19 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
     */
     public void abrirMusica() throws Exception {
-        Scanner sc = new Scanner(System.in);
+        IO io = new IO();
         int idProcurado = 0;
 
        do {
            System.out.print("\nDigite o ID procurado: ");
            try {
-               idProcurado = sc.nextInt();
-               sc.nextLine();
+               idProcurado = io.readInt();
            } catch (InputMismatchException e) {
-               sc.nextLine();
+               io.readLine();
                System.out.println("\nERRO: ID invalido!\n");
                idProcurado = 0;
            }
        } while (idProcurado == 0);
-
-       sc.close();
 
        abrirMusica(idProcurado);
     }
@@ -441,7 +429,8 @@ public class CRUD {
     /**
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo ou ID não seja encontrado
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo ou ID nao
+     * seja encontrado
      */
     public void abrirMusica(int idProcurado) throws Exception{
 
@@ -504,8 +493,8 @@ public class CRUD {
     }
 
     /**
-     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI
-     * @param uri link da musica
+     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
+     * @param uri link da musica.
      */
     private void pesquisar(URI uri){
         try {

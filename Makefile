@@ -18,3 +18,4 @@ run: Main.class
 # Limpar
 clean:
 	rm -f *.class
+	rm -f *.db
