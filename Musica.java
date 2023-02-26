@@ -362,7 +362,7 @@ public class Musica {
             long dataEmMilissegundos = dataLancamento.getTime();
             dos.writeLong(dataEmMilissegundos);
 
-            dos.writeInt(danceabilidade);
+            dos.writeInt(dancabilidade);
             dos.writeInt(duracao);
             dos.writeInt(vivacidade);
             dos.writeInt(popularidade);
