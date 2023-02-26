@@ -7,17 +7,17 @@
 // bibliotecas
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.awt.Desktop;
+import java.net.URI;
 
 public class CRUD {
 
-    private static final String arquivoCSV = "Spotify.csv";
+    private static final String arquivoCSV = "dados/Spotify.csv";
     private static final String registroDB = "Registro.db";
 
     public CRUD () {}
@@ -410,6 +410,110 @@ public class CRUD {
             if (dbFile != null) dbFile.close();
             return find;
         }
+    }
+
+    /**
+     * Metodo para exibir as informacoes de uma musica a partir do seu ID.
+     * @return true, se a música foi encontrada; false, caso contrario.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+    */
+    public void abrirMusica() throws Exception {
+        Scanner sc = new Scanner(System.in);
+        int idProcurado = 0;
+
+       do {
+           System.out.print("\nDigite o ID procurado: ");
+           try {
+               idProcurado = sc.nextInt();
+               sc.nextLine();
+           } catch (InputMismatchException e) {
+               sc.nextLine();
+               System.out.println("\nERRO: ID invalido!\n");
+               idProcurado = 0;
+           }
+       } while (idProcurado == 0);
+
+       sc.close();
+
+       abrirMusica(idProcurado);
+    }
+
+    /**
+     * Metodo privado para exibir as informacoes de uma musica a partir do seu
+     * ID.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo ou ID não seja encontrado
+     */
+    public void abrirMusica(int idProcurado) throws Exception{
+
+        RandomAccessFile dbFile = null;
+        boolean find = false;
+        Musica musica = null;
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "r");
+            boolean lapide;
+            int tamRegistro;
+
+            // Obter tamanho do arquivo == ultimo ID adicionado
+            dbFile.seek(0);
+            int tamArquivo = dbFile.readInt();
+
+            int i = 0;
+            while (i < tamArquivo && find == false) {
+                
+                musica = new Musica();
+
+                // Ler informacoes do registro   
+                lapide = dbFile.readBoolean();
+                tamRegistro = dbFile.readInt();
+
+                // Se registro for valido, ler e comparar com ID procurado
+                if (lapide == true) {
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+
+                    if (idProcurado == musica.id) {
+                        find = true;
+                    }
+
+                // Se nao for, pular o registro e reposicionar ponteiro
+                } else {
+                    long posicaoAtual = dbFile.getFilePointer();
+                    long proximaPosicao = posicaoAtual + (long)tamRegistro;
+                    dbFile.seek(proximaPosicao);
+                }
+
+                i++;
+            }
+
+            if (find == false) {
+                System.out.println("\nMusica de ID (" + idProcurado + 
+                                   ") nao esta' cadastrada!");
+                throw new Exception("ID não encontrado");
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: registro não encontrado!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+            URI uri = new URI(musica.uri);
+            pesquisar(uri);
+        }
+
+    }
+
+    /**
+     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI
+     * @param uri link da musica
+     */
+    private void pesquisar(URI uri){
+        try {
+            Desktop.getDesktop().browse(uri);
+        } catch (Exception e) {
+            System.out.println("Erro ao abrir o link: " + e.getMessage());
+        }
+        /* Para abrir no navegador usar https://open.spotify.com/track/ + código da música*/
     }
 
 }

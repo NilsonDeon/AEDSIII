@@ -37,6 +37,7 @@ class Main {
                      "\n| 4 - Atualizar                            |" +
                      "\n| 5 - Deletar                              |" +
                      "\n| 6 - Ordenar                              |" +
+                     "\n| 7 - Abrir música no Spotify              |" +
                      "\n+------------------------------------------+";
        int opcao = -1;
 
@@ -57,6 +58,7 @@ class Main {
                    case 4 : crud.update();       break;
                    case 5 : crud.delete();       break;
                    case 6 : /*sort.orderBy(); */ break;
+                   case 7 : crud.abrirMusica(); 
                    default: mostrarErro();       break;
                }
            } catch (InputMismatchException e) {
@@ -74,6 +76,6 @@ class Main {
      */
     public static void mostrarErro() {
         System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
-                           "0 a 6.");
+                           "0 a 7.");
     }
 }
