@@ -12,7 +12,7 @@ all: $(SOURCES:.java=.class)
 	javac $<
 
 # Executar
-run: Main.class
+run: clean Main.class
 	java Main
 
 # Limpar

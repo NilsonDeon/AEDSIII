@@ -4,8 +4,12 @@
  * @version 1.0 02/2023
  */
 
-import java.io.*;
-import java.nio.charset.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
 
 public class IO {
 
@@ -26,7 +30,9 @@ public class IO {
       try {
          PrintStream out = new PrintStream(System.out, true, charset);
          out.print(str);
-      }catch(UnsupportedEncodingException e){ System.out.println("Erro: charset invalido"); }
+      }catch(UnsupportedEncodingException e){
+         System.out.println("Erro: charset invalido");
+      }
       return readInt();
    }
 

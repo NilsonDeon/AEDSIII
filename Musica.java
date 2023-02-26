@@ -262,8 +262,7 @@ public class Musica {
                 switch (opcao) {
                     case 0:
                         System.out.println("\nNome atual: " + this.nome);
-                        System.out.print("Digite novo nome: ");
-                        String newNome = io.readLine();
+                        String newNome = io.readLine("Digite novo nome: ");
                         this.nome = newNome;
                         break;
                     
