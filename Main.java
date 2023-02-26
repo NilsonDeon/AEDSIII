@@ -1,13 +1,15 @@
+
+
 /**
  * Main - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
  * @version 1.0 02/2023
  */
 
-package src;
-
-// Bibliotecas
 import java.util.InputMismatchException;
+
+import src.*;
+import src.ordenacoes.*;
 
 class Main {
 
