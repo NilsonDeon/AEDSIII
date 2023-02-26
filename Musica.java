@@ -12,12 +12,10 @@ import java.io.DataOutputStream;
 import java.util.InputMismatchException;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Scanner;
 
 /**
  * Classe Musica que contem todos os atributos presentes nos registros do
@@ -34,7 +32,7 @@ public class Musica {
     protected String[] imagens;     // Lista de valores com separador " "
     protected String pais;          // String tamanho fixo
     protected Date dataLancamento;  // Data
-    protected int danceabilidade;   // Inteiro
+    protected int dancabilidade;   // Inteiro
     protected int duracao;
     protected int vivacidade;
     protected int popularidade;       
@@ -53,7 +51,7 @@ public class Musica {
         imagens = new String[10];
         pais = null;
         dataLancamento = null;
-        danceabilidade = 0;
+        dancabilidade = 0;
         duracao = 0;
         vivacidade = 0;
         popularidade = 0;
@@ -79,7 +77,7 @@ public class Musica {
         lerImagens(atributos[3]);
         pais = atributos[4];
         lerDataLancamento(atributos[5]);
-        danceabilidade = Integer.parseInt(atributos[6]);
+        dancabilidade = Integer.parseInt(atributos[6]);
         duracao = Integer.parseInt(atributos[7]);
         vivacidade = Integer.parseInt(atributos[8]);
         popularidade = Integer.parseInt(atributos[9]);
@@ -99,7 +97,7 @@ public class Musica {
                "\nImagens        : " + mostrarImagens() +
                "\nPais           : " + pais +
                "\nData Lançamento: " + mostrarDataLancamento() +
-               "\nDanceabilidade : " + danceabilidade +
+               "\ndancabilidade : " + dancabilidade +
                "\nDuracao        : " + duracao +
                "\nVivacidade     : " + vivacidade +
                "\nPopularidade   : " + popularidade + 
@@ -219,8 +217,8 @@ public class Musica {
             String strDate = io.readLine();
             lerDataLancamento(strDate);
 
-            System.out.print("\nDanceabilidade: ");
-            danceabilidade = io.readInt ();
+            System.out.print("\ndancabilidade: ");
+            dancabilidade = io.readInt ();
 
             System.out.print("\nDuracao: ");
             duracao = io.readInt ();
@@ -250,7 +248,7 @@ public class Musica {
         String menu = "\n 0 - Nome            1 - Artistas" +
                       "\n 2 - Nome do Album   3 - Imagens" +
                       "\n 4 - Pais            5 - Data Lancamento" +
-                      "\n 6 - Danceabilidade  7 - Duracao" + 
+                      "\n 6 - Dancabilidade  7 - Duracao" + 
                       "\n 8 - Vivacidade      9 - Popularidade" +
                       "\n10 - Uri"; 
 
@@ -265,17 +263,58 @@ public class Musica {
                         String newNome = io.readLine("Digite novo nome: ");
                         this.nome = newNome;
                         break;
-                    
                     case 1:
+                        System.out.println("\nArtistas atual: " + this.artistas);
+                        String newArtista = io.readLine("Digite novo artista: ");
+                        this.artistas = newArtista;
+                        break;
                     case 2:
+                        System.out.println("\nNome do album atual: " + this.nomeAlbum);
+                        String newAlbum = io.readLine("Digite novo nome do album: ");
+                        this.nomeAlbum = newAlbum;
+                        break;
                     case 3:
+                        System.out.println("\nCapas atuais:");
+                        for (String imagem: this.imagens) {
+                            System.out.println(" " + imagem);
+                        }
+                        lerImagens();
+                        break;
                     case 4:
+                    System.out.println("\nPaís de lançamento atual: " + this.pais);
+                        String newPais = io.readLine("Digite novo pais de origem: ");
+                        this.pais = newPais;
+                        break;
                     case 5:
+                        System.out.println("\nData de lançamento atual: " + this.dataLancamento);
+                        String newData = io.readLine("Digite nova data de laçamento: ");
+                        lerDataLancamento (newData);
+                        break;
                     case 6:
+                        System.out.println("\nDaçabilidade atual: " + this.dancabilidade);
+                        int newDancabilidade = io.readInt("Digite novo valor de dançabilidade: ");
+                        this.dancabilidade = newDancabilidade;
+                        break;
                     case 7:
+                        System.out.println("\nDurção atual: " + this.duracao);
+                        int newDuracao = io.readInt("Digite nova duração: ");
+                        this.duracao = newDuracao;
+                        break;
                     case 8:
+                        System.out.println("\nVivacidade atual: " + this.vivacidade);
+                        int newVivacidade = io.readInt("Digite nova vivacidade: ");
+                        this.vivacidade = newVivacidade;
+                        break;
                     case 9:
+                        System.out.println("\nPopularidade atual: " + this.popularidade);
+                        int newPopularidade = io.readInt("Digite nova popularidade: ");
+                        this.popularidade = newPopularidade;
+                        break;
                     case 10:
+                        System.out.println("\nLink da música atual: " + this.uri);
+                        String newUri = io.readLine("Digite novo link: ");
+                        this.nome = newUri;
+                        break;
                     default: break;
                 }
             } catch (InputMismatchException e) {
@@ -322,7 +361,7 @@ public class Musica {
             long dataEmMilissegundos = dataLancamento.getTime();
             aux.writeLong(dataEmMilissegundos);
 
-            aux.writeInt(danceabilidade);
+            aux.writeInt(dancabilidade);
             aux.writeInt(duracao);
             aux.writeInt(vivacidade);
             aux.writeInt(popularidade);
@@ -376,7 +415,7 @@ public class Musica {
             long dataEmMilissegundos = dis.readLong();
             dataLancamento = new Date(dataEmMilissegundos);
 
-            danceabilidade = dis.readInt();
+            dancabilidade = dis.readInt();
             duracao = dis.readInt();
             vivacidade = dis.readInt();
             popularidade = dis.readInt();
