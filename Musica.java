@@ -325,6 +325,59 @@ public class Musica {
         } while (opcao < 0 || opcao > 10);
     }
 
+      /**
+     * Metodo para converter os atributos da classe em um array de bytes.
+     * @param tamanho - do array de bytes pre-definido.
+     * @return - array de bytes.
+     */
+    public byte[] toByteArray (int tamanho) {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+
+        try {
+
+            dos.writeBoolean(lapide);
+            dos.writeInt(tamanho);
+ 
+            dos.writeInt(id);
+
+            dos.writeShort(nome.length());
+            dos.writeUTF(nome);
+
+            dos.writeShort(artistas.length());
+            dos.writeUTF(artistas);
+
+            dos.writeShort(nomeAlbum.length());
+            dos.writeUTF(nomeAlbum);
+
+            dos.writeShort(imagens.length);
+            for(int i = 0; i < imagens.length; i++) {
+                dos.writeShort(imagens[i].length());
+                dos.writeUTF(imagens[i]);
+            }
+
+            dos.writeUTF(pais);
+
+            long dataEmMilissegundos = dataLancamento.getTime();
+            dos.writeLong(dataEmMilissegundos);
+
+            dos.writeInt(danceabilidade);
+            dos.writeInt(duracao);
+            dos.writeInt(vivacidade);
+            dos.writeInt(popularidade);
+
+            dos.writeShort(uri.length());
+            dos.writeUTF(uri);
+
+        } catch (IOException e) {
+            System.out.println("\nERRO ao converter Musica para um array de " +
+                               "bytes");
+        }
+
+        return baos.toByteArray();
+    }
+  
     /**
      * Metodo para converter os atributos da classe em um array de bytes.
      * @return - array de bytes.
