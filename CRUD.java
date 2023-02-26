@@ -312,6 +312,7 @@ public class CRUD {
         }
     }
 
+
     /**
      * Metodo privado para atualizar uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
@@ -359,6 +360,9 @@ public class CRUD {
                         if (newRegistro.length <= registro.length) {
 
                             // Salvar novo registro, mas manter tamanho antigo
+                            newRegistro = newMusica.toByteArray(registro.length);
+                            dbFile.seek(posicaoInicial);
+                            dbFile.write(newRegistro);
 
                         } else {
                             
@@ -402,6 +406,7 @@ public class CRUD {
             return find;
         }
     }
+
 
     /**
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
