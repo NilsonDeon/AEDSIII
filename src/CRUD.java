@@ -4,14 +4,15 @@
  * @version 1.0 02/2023
  */
 
-// bibliotecas
+ package src;
+
+// Bibliotecas
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.InputMismatchException;
-import java.util.Scanner;
 import java.awt.Desktop;
 import java.net.URI;
 

@@ -4,7 +4,9 @@
  * @version 1.0 02/2023
  */
 
-// bibliotecas
+ package src;
+
+// Bibliotecas
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;

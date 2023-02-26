@@ -4,8 +4,9 @@
  * @version 1.0 02/2023
  */
 
-// bibliotecas
-import java.util.Scanner;
+package src;
+
+// Bibliotecas
 import java.util.InputMismatchException;
 
 class Main {
@@ -19,7 +20,6 @@ class Main {
 
        IO io = new IO();
        CRUD crud = new CRUD();
-       OrdenacaoExterna sort = new OrdenacaoExterna();
 
        String intro = "\n        Trabalho Pratico 01 - TP01         " +
                       "\n    Algoritmos e Estruturas de Dados III   " + 
