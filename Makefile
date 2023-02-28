@@ -3,7 +3,7 @@
 # Data: 02/2023
 
 # Arquivos de origem
-SOURCES := Musica.java CRUD.java Main.java 
+SOURCES := IO.java Musica.java CRUD.java Main.java 
 
 # Compilar
 all: $(SOURCES:.java=.class)

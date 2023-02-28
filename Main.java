@@ -1,5 +1,3 @@
-
-
 /**
  * Main - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
@@ -7,8 +5,8 @@
  */
 
 import java.util.InputMismatchException;
-import src.*;
-import src.ordenacoes.*;
+// import src.*;
+// import src.ordenacoes.*;
 
 class Main {
 
@@ -31,14 +29,14 @@ class Main {
        String menu = "\n+------------------------------------------+" +
                      "\n|                   MENU                   |" +
                      "\n|------------------------------------------|" +
-                     "\n| 0 - Sair                                 |" +
-                     "\n| 1 - Carregar dados iniciais              |" +
-                     "\n| 2 - Cadastrar                            |" +
-                     "\n| 3 - Pesquisar                            |" +
-                     "\n| 4 - Atualizar                            |" +
-                     "\n| 5 - Deletar                              |" +
-                     "\n| 6 - Ordenar                              |" +
-                     "\n| 7 - Abrir música no Spotify              |" +
+                     "\n| 1 - Sair                                 |" +
+                     "\n| 2 - Carregar dados iniciais              |" +
+                     "\n| 3 - Cadastrar                            |" +
+                     "\n| 4 - Pesquisar                            |" +
+                     "\n| 5 - Atualizar                            |" +
+                     "\n| 6 - Deletar                              |" +
+                     "\n| 7 - Ordenar                              |" +
+                     "\n| 8 - Abrir música no Spotify              |" +
                      "\n+------------------------------------------+";
        int opcao = -1;
 
@@ -47,24 +45,24 @@ class Main {
        do {
            try {
                System.out.println(menu);
-               opcao = io.readInt("\nDigite uma opcao: ");
+               opcao = io.readInt("\nDigite uma opção: ");
 
                switch (opcao) {
-                   case 0 :                      break;
-                   case 1 : crud.carregarCSV();  break;
-                   case 2 : crud.create();       break;
-                   case 3 : crud.read();         break;
-                   case 4 : crud.update();       break;
-                   case 5 : crud.delete();       break;
-                   case 6 : /*sort.orderBy(); */ break;
-                   case 7 : crud.abrirMusica();  break;
+                   case 1 :                      break;
+                   case 2 : crud.carregarCSV();  break;
+                   case 3 : crud.create();       break;
+                   case 4 : crud.read();         break;
+                   case 5 : crud.update();       break;
+                   case 6 : crud.delete();       break;
+                   case 7 : /*sort.orderBy(); */ break;
+                   case 8 : crud.abrirMusica();  break;
                    default: mostrarErro();       break;
                }
            } catch (InputMismatchException e) {
                mostrarErro();
                io.readLine();
            }
-       } while (opcao != 0);
+       } while (opcao != 1);
    }
 
     /**
@@ -72,7 +70,7 @@ class Main {
      * valida.
      */
     public static void mostrarErro() {
-        System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
-                           "0 a 7.");
+        System.out.println("\nERRO: Por favor, digite uma opção válida de " + 
+                           "1 a 8.");
     }
 }
