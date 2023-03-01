@@ -20,16 +20,16 @@ import java.util.Locale;
  * banco de dados do csv.
  */
 public class Musica {
-  
-    protected boolean lapide;
+
+    protected boolean lapide;      // implementada como boolean, por ser um byte
     protected int id;
 
-    protected String nome;          // String de tamanho variavel
+    protected String nome;         // String de tamanho variavel
     protected String artistas;
     protected String nomeAlbum;   
-    protected String[] imagens;     // Lista de valores com separador " "
-    protected String pais;          // String tamanho fixo
-    protected Date dataLancamento;  // Data
+    protected String[] imagens;    // Lista de valores com separador " "
+    protected char[] pais;         // String tamanho fixo
+    protected Date dataLancamento; // Data
     protected int dancabilidade;   // Inteiro
     protected int duracao;
     protected int vivacidade;
@@ -41,13 +41,13 @@ public class Musica {
      * Construtor padrao da classe Musica.
      */
     public Musica () {
-        lapide = false;
+        lapide = true;
         id = 0;
         nome = null;
         artistas = null;
         nomeAlbum = null;
         imagens = new String[10];
-        pais = null;
+        pais = new char[2];
         dataLancamento = null;
         dancabilidade = 0;
         duracao = 0;
@@ -68,13 +68,13 @@ public class Musica {
 
         String[] atributos = linha.split(",");
 
-        lapide = true;
+        lapide = false;
         this.id = id;
         nome = atributos[0];
         artistas = atributos[1];
         nomeAlbum = atributos[2];
         lerImagens(atributos[3]);
-        pais = atributos[4];
+        lerPais(atributos[4]);
         lerDataLancamento(atributos[5]);
         dancabilidade = Integer.parseInt(atributos[6]);
         duracao = Integer.parseInt(atributos[7]);
@@ -118,7 +118,7 @@ public class Musica {
                "\nArtistas       : " + artistas +
                "\nNome Album     : " + nomeAlbum +
                "\nImagens da capa: " + mostrarImagens() +
-               "\nPaís           : " + pais +
+               "\nPaís           : " + pais[0] + pais[1] +
                "\nData Lançamento: " + mostrarDataLancamento() +
                "\nDançabilidade  : " + dancabilidade +
                "\nDuração        : " + duracao +
@@ -153,6 +153,21 @@ public class Musica {
      */
     private void lerImagens (String arrayImagens) {
         imagens = arrayImagens.split(" ");
+    }
+
+    /**
+     * Metodo para preencher o atributo pais com um array de char, de modo a 
+     * simular uma string de tamanho fixo igual a 2.
+     * @param arrayImagens - string contendo a lista de imagens.
+     */
+    private void lerPais (String siglaPais) {
+        
+        pais = new char[2];
+        pais[0] = pais[1] = ' ';
+
+        for(int i = 0; i < siglaPais.length() && i < 2; i++) {
+            pais[i] = siglaPais.charAt(i);
+        }
     }
 
     /**
@@ -228,41 +243,32 @@ public class Musica {
         try {
             IO io = new IO();
 
-            lapide = true;
+            lapide = false;
             id = 0;
 
-            System.out.print("\nNome: ");
-            nome = io.readLine ();
+            nome = io.readLine ("\nNome: ");
 
-            System.out.print("\nArtistas: ");
-            artistas = io.readLine ();
+            artistas = io.readLine ("\nArtistas: ");
 
-            System.out.print("\nNome Album: ");
-            nomeAlbum = io.readLine ();
+            nomeAlbum = io.readLine ("\nNome Album: ");
 
             lerImagens();
 
-            System.out.print("\nSigla país: ");
-            pais = io.readLine ();
+            String strPais = io.readLine ("\nSigla país [--]: ");
+            lerPais(strPais);
 
-            System.out.print("\nData Lançamento YYYY-MM-DD: ");
-            String strDate = io.readLine();
+            String strDate = io.readLine("\nData Lançamento [YYYY-MM-DD]: ");
             lerDataLancamento(strDate);
 
-            System.out.print("\nDancabilidade: ");
-            dancabilidade = io.readInt ();
+            dancabilidade = io.readInt ("\nDancabilidade: ");
 
-            System.out.print("\nDuração: ");
-            duracao = io.readInt ();
+            duracao = io.readInt ("\nDuração: ");
 
-            System.out.print("\nVivacidade: ");
-            vivacidade = io.readInt ();
+            vivacidade = io.readInt ("\nVivacidade: ");
  
-            System.out.print("\nPopularidade: ");
-            popularidade = io.readInt ();
+            popularidade = io.readInt ("\nPopularidade: ");
 
-            System.out.print("\nLink da música: ");
-            uri = io.readLine();
+            uri = io.readLine("\nLink da música: ");
 
         } catch (Exception e) {
             System.out.println("\nERRO: Informacoes invalidas!\n\n");
@@ -313,9 +319,10 @@ public class Musica {
                         lerImagens();
                         break;
                     case 4:
-                    System.out.println("\nPaís de lançamento atual: " + this.pais);
-                        String newPais = io.readLine("Digite o novo país de origem: ");
-                        this.pais = newPais;
+                        System.out.println("\nPaís de lançamento atual: " + this.pais);
+                        String newPais = io.readLine("Digite o novo país de origem [--]: ");
+                        this.pais[0] = newPais.charAt(0);
+                        this.pais[1] = newPais.charAt(1);
                         break;
                     case 5:
                         System.out.println("\nData de lançamento atual: " + mostrarDataLancamento());
@@ -392,8 +399,15 @@ public class Musica {
                 dos.writeUTF(imagens[i]);
             }
 
-            dos.writeUTF(pais);
 
+/*
+            dos.writeShort(pais.length);
+            
+            System.out.println("pais.length = " + pais.length);
+
+            dos.writeChar(pais[0]);
+            dos.writeChar(pais[1]);
+*/
             long dataEmMilissegundos = dataLancamento.getTime();
             dos.writeLong(dataEmMilissegundos);
 
@@ -444,8 +458,14 @@ public class Musica {
                 aux.writeUTF(imagens[i]);
             }
 
-            aux.writeUTF(pais);
+/*
+            dos.writeShort(pais.length);
 
+            System.out.println("pais.length = " + pais.length);
+
+            dos.writeChar(pais[0]);
+            dos.writeChar(pais[1]);
+*/
             long dataEmMilissegundos = dataLancamento.getTime();
             aux.writeLong(dataEmMilissegundos);
 
@@ -519,7 +539,7 @@ public class Musica {
             ByteArrayInputStream bais = new ByteArrayInputStream(ba);
             DataInputStream dis = new DataInputStream(bais);
 
-            lapide = true;
+            lapide = false;
             id = dis.readInt();
             
             short tamNome = dis.readShort();
@@ -538,8 +558,13 @@ public class Musica {
                 imagens[i] = dis.readUTF();
             }
 
-            pais = dis.readUTF();
+/*
+            dis.readShort();
 
+            pais = new char[2];
+            pais[0] = dis.readChar();
+            pais[1] = dis.readChar();
+*/
             long dataEmMilissegundos = dis.readLong();
             dataLancamento = new Date(dataEmMilissegundos);
 
