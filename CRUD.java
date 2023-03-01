@@ -1,8 +1,4 @@
-/**
- * CRUD - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
- * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
- * @version 1.0 02/2023
- */
+
 
 // Bibliotecas
 // package src;
@@ -566,6 +562,4 @@ public class CRUD {
         }
         /* Para abrir no navegador usar https://open.spotify.com/track/ + código da música*/
     }
-
-
 }

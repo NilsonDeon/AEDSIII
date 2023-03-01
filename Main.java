@@ -8,6 +8,8 @@ import java.util.InputMismatchException;
 // import src.*;
 // import src.ordenacoes.*;
 
+
+
 class Main {
 
     /**
@@ -17,8 +19,9 @@ class Main {
      */
     public static void main (String args[]) throws Exception {
 
-       IO io = new IO();
-       CRUD crud = new CRUD();
+        ComumSort sort = new ComumSort();
+        IO io = new IO();
+        CRUD crud = new CRUD();
 
        String intro = "\n        Trabalho Pratico 01 - TP01         " +
                       "\n    Algoritmos e Estruturas de Dados III   " + 
@@ -54,7 +57,7 @@ class Main {
                    case 4 : crud.read();         break;
                    case 5 : crud.update();       break;
                    case 6 : crud.delete();       break;
-                   case 7 : /*sort.orderBy(); */ break;
+                   case 7 : sort.distribuicao(); break;
                    case 8 : crud.abrirMusica();  break;
                    default: mostrarErro();       break;
                }
@@ -63,6 +66,7 @@ class Main {
                io.readLine();
            }
        } while (opcao != 1);
+
    }
 
     /**
