@@ -11,6 +11,13 @@ import java.util.InputMismatchException;
 import java.awt.Desktop;
 import java.net.URI;
 
+
+/** TESTE */
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+import java.io.IOException;
+
+
 public class CRUD {
 
     private static final String arquivoCSV = "dados/Spotify.csv";
@@ -628,6 +635,61 @@ public class CRUD {
         } finally {
             if (dbFile != null) dbFile.close();
             return find;
+        }
+    }
+
+    
+
+    public void lerArquivosTemporarios () throws Exception {
+
+        RandomAccessFile arqTemp = null;
+        
+        FileWriter fileWriter = null;
+        BufferedWriter bufferedWriter = null;
+
+        try {
+
+            for (int i = 0; i < 4; i++) {
+                arqTemp = new RandomAccessFile("arqTemp" + i + ".db", "r");
+                fileWriter = new FileWriter("arqTempString" + i + ".txt");
+                bufferedWriter = new BufferedWriter(fileWriter);
+                
+                arqTemp.seek(0);
+
+                while(arqTemp.length() != arqTemp.getFilePointer()) {
+                    Musica musica = new Musica();
+                    boolean lapide = arqTemp.readBoolean();
+                    int tamRegistro = arqTemp.readInt();
+                    byte[] registro = new byte[tamRegistro];
+                    arqTemp.read(registro);
+                    musica.fromByteArray(registro);
+                    fileWriter.write(musica + "\n");
+                }
+            }
+
+            for (int i = 0; i < 4; i++) {
+                arqTemp = new RandomAccessFile("newTemp" + i + ".db", "r");
+                fileWriter = new FileWriter("newTempString" + i + ".txt");
+                bufferedWriter = new BufferedWriter(fileWriter);
+
+                arqTemp.seek(0);
+
+                while(arqTemp.length() != arqTemp.getFilePointer()) {
+                    Musica musica = new Musica();
+                    boolean lapide = arqTemp.readBoolean();
+                    int tamRegistro = arqTemp.readInt();
+                    byte[] registro = new byte[tamRegistro];
+                    arqTemp.read(registro);
+                    musica.fromByteArray(registro);
+                    fileWriter.write(musica + "\n");
+                }
+            }
+
+        } catch (Exception e) {
+
+        } finally {
+            if (arqTemp != null) arqTemp.close();
+            if (fileWriter != null) fileWriter.close(); 
         }
     }
 

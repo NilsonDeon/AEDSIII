@@ -57,8 +57,9 @@ class Main {
                    case 4 : crud.read();         break;
                    case 5 : crud.update();       break;
                    case 6 : crud.delete();       break;
-                   case 7 : sort.distribuicao(); break;
-                   case 8 : crud.abrirMusica();  break;
+                   case 7 : sort.ordenar();      break;
+                   case 8 : crud.mostrar();      break;
+                   case 9 : crud.lerArquivosTemporarios(); break;
                    default: mostrarErro();       break;
                }
            } catch (InputMismatchException e) {
