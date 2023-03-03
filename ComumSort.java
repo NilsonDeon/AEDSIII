@@ -1,11 +1,14 @@
+// bibliotecas
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 
-
-public class ComumSort{
+/**
+ * ComumSort - Classe responsavel por realizar a Intercalcao Balanceada Comum.
+ */
+public class ComumSort {
 
     private static final String registroDB = "Registro.db";
     private static final int NUM_REGISTROS = 1500;

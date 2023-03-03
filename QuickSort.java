@@ -1,14 +1,21 @@
+/**
+ * Classe QuickSort responsavel por realizar a ordenacao em memoria principal
+ * de um array de Musicas.
+ */
 public class QuickSort {
 
     private static int MAX_TAM;
- 
+
+    /**
+     * Construtor padrao da Classe QuickSort.
+     */
     public QuickSort (int tam) {
         MAX_TAM = tam;
     }
 
    /**
-    * quicksort - metodo de ordenacao por divisao da Lista de objetos Musica
-    * pelo atributo nome.
+    * Metodo de ordenacao por divisao dos registros Musica pelo atributo
+    * ID.
     * @param musicas - array de musicas a ser ordenado.
     * @param esq - posicao da lista dividido mais 'a esquerda
     * @param dir - posicao da lista dividido mais 'a direita
@@ -18,8 +25,8 @@ public class QuickSort {
         Musica pivo = musicas[(dir+esq)/2].clone();
  
         while (i <= j) {
-            while (pivo.id < musicas[i].id){ i++; }    // SINAL TROCADO
-            while (musicas[j].id < pivo.id){ j--; }    // < COM >
+            while (pivo.id < musicas[i].id){ i++; }
+            while (musicas[j].id < pivo.id){ j--; }
             if (i <= j) {
                 swap(musicas, i, j);
                 i++;
@@ -30,17 +37,17 @@ public class QuickSort {
         if (i < dir) quicksort(musicas, i, dir);
     }
  
-    /* 
-     * quicksort - metodo para chamar de forma mais elegante o metodo de
-     * de ordenacao quicksort.
+    /**
+     * Metodo para chamar de forma mais elegante o metodo de ordenacao 
+     * quicksort.
+     * @param musicas - array de musicas a ser ordenado.
      */
-     public void quicksort(Musica[] musicas) {
-         quicksort(musicas, 0, MAX_TAM-1);
-     }
+    public void quicksort(Musica[] musicas) {
+        quicksort(musicas, 0, MAX_TAM-1);
+    }
  
     /**
-     * swap - metodo para trocar duas posicoes em um array de objetos do tipo 
-     * Musica.
+     * Metodo para trocar duas posicoes em um array de objetos do tipo Musica.
      * @param i - posicao de um elemento a ser trocado.
      * @param j - posicao do outro elemento que sera' trocado com o anterior.
      */
@@ -50,5 +57,4 @@ public class QuickSort {
        musicas[j] = musicas[i].clone();
        musicas[i] = tmp.clone();
     }
- 
 }

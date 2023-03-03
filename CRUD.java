@@ -11,13 +11,10 @@ import java.util.InputMismatchException;
 import java.awt.Desktop;
 import java.net.URI;
 
-
-/** TESTE */
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.IOException;
-
-
+/**
+ * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
+ * - popular a base de dados, cadastrar, pesquisar, atualizar, deletar.
+ */
 public class CRUD {
 
     private static final String arquivoCSV = "dados/Spotify.csv";

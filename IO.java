@@ -1,7 +1,4 @@
-
-
 // Bibliotecas
-//package src;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +7,11 @@ import java.io.UnsupportedEncodingException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 
+
+/**
+ * CRUD - Classe responsavel por tratar a leitura de dados do teclado dos tipos:
+ * String e Inteiro.
+ */
 public class IO {
 
    private static BufferedReader in = new BufferedReader(new InputStreamReader(System.in, Charset.forName("UTF-8")));

@@ -4,11 +4,8 @@
  * @version 1.0 02/2023
  */
 
+// bibliotecas
 import java.util.InputMismatchException;
-// import src.*;
-// import src.ordenacoes.*;
-
-
 
 class Main {
 
