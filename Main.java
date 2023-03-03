@@ -59,7 +59,6 @@ class Main {
                    case 6 : crud.delete();       break;
                    case 7 : sort.ordenar();      break;
                    case 8 : crud.mostrar();      break;
-                   case 9 : crud.lerArquivosTemporarios(); break;
                    default: mostrarErro();       break;
                }
            } catch (InputMismatchException e) {

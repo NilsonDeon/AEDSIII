@@ -14,13 +14,12 @@ public class QuickSort {
     * @param dir - posicao da lista dividido mais 'a direita
     */
     public void quicksort (Musica[] musicas, int esq, int dir) {
-        System.out.println(musicas[0].nome);
         int i = esq, j = dir;
         Musica pivo = musicas[(dir+esq)/2].clone();
  
         while (i <= j) {
-            while (pivo.id > musicas[i].id){ i++; }
-            while (musicas[j].id > pivo.id){ j--; }
+            while (pivo.id < musicas[i].id){ i++; }    // SINAL TROCADO
+            while (musicas[j].id < pivo.id){ j--; }    // < COM >
             if (i <= j) {
                 swap(musicas, i, j);
                 i++;

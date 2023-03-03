@@ -357,7 +357,6 @@ public class CRUD {
         }
     }
 
-
     /**
      * Metodo privado para atualizar uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
@@ -436,7 +435,7 @@ public class CRUD {
 
                             find = true;
                             System.out.println("\nMusica [" + newMusica.id + "]: \"" +
-                                            musica.nome + "\" " +
+                                            newMusica.nome + "\" " +
                                             "atualizada com sucesso!");
                         }
 
@@ -466,7 +465,6 @@ public class CRUD {
             return find;
         }
     }
-
 
     /**
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
@@ -639,7 +637,7 @@ public class CRUD {
     }
 
     
-
+    // APENAS PARA TESTE
     public void lerArquivosTemporarios () throws Exception {
 
         RandomAccessFile arqTemp = null;
@@ -649,30 +647,15 @@ public class CRUD {
 
         try {
 
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 2; i++) {
                 arqTemp = new RandomAccessFile("arqTemp" + i + ".db", "r");
                 fileWriter = new FileWriter("arqTempString" + i + ".txt");
                 bufferedWriter = new BufferedWriter(fileWriter);
                 
                 arqTemp.seek(0);
 
-                while(arqTemp.length() != arqTemp.getFilePointer()) {
-                    Musica musica = new Musica();
-                    boolean lapide = arqTemp.readBoolean();
-                    int tamRegistro = arqTemp.readInt();
-                    byte[] registro = new byte[tamRegistro];
-                    arqTemp.read(registro);
-                    musica.fromByteArray(registro);
-                    fileWriter.write(musica + "\n");
-                }
-            }
-
-            for (int i = 0; i < 4; i++) {
-                arqTemp = new RandomAccessFile("newTemp" + i + ".db", "r");
-                fileWriter = new FileWriter("newTempString" + i + ".txt");
-                bufferedWriter = new BufferedWriter(fileWriter);
-
-                arqTemp.seek(0);
+                int id = arqTemp.readInt();
+                System.out.println("id = " + id);
 
                 while(arqTemp.length() != arqTemp.getFilePointer()) {
                     Musica musica = new Musica();
@@ -682,9 +665,9 @@ public class CRUD {
                     arqTemp.read(registro);
                     musica.fromByteArray(registro);
                     fileWriter.write(musica + "\n");
+                    System.out.println(musica);
                 }
             }
-
         } catch (Exception e) {
 
         } finally {
