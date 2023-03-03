@@ -74,7 +74,7 @@ public class Musica {
         artistas = atributos[1];
         nomeAlbum = atributos[2];
         lerImagens(atributos[3]);
-        lerPais(atributos[4]);
+        pais = atributos[4].toCharArray();
         lerDataLancamento(atributos[5]);
         dancabilidade = Integer.parseInt(atributos[6]);
         duracao = Integer.parseInt(atributos[7]);
@@ -165,8 +165,8 @@ public class Musica {
         pais = new char[2];
         pais[0] = pais[1] = ' ';
 
-        for(int i = 0; i < siglaPais.length() && i < 2; i++) {
-            pais[i] = siglaPais.charAt(i);
+        for (int i = 0; i < siglaPais.length() && i < 2; i++) {
+            pais[i] = siglaPais.charAt(0);
         }
     }
 
@@ -284,12 +284,12 @@ public class Musica {
         IO io = new IO();
         int opcao = -1;
 
-        String menu = "\n 0 - Nome            1 - Artistas" +
-                      "\n 2 - Nome do Album   3 - Imagens da capa" +
-                      "\n 4 - País            5 - Data Lançamento" +
-                      "\n 6 - Dançabilidade   7 - Duração" + 
-                      "\n 8 - Vivacidade      9 - Popularidade" +
-                      "\n10 - Uri"; 
+        String menu = "\n 1 - Nome            2 - Artistas" +
+                      "\n 3 - Nome do Album   4 - Imagens da capa" +
+                      "\n 5 - País            6 - Data Lançamento" +
+                      "\n 7 - Dançabilidade   8 - Duração" + 
+                      "\n 9 - Vivacidade     10 - Popularidade" +
+                      "\n11 - Uri"; 
 
         do {
             try {
@@ -297,74 +297,74 @@ public class Musica {
                 opcao = io.readInt("\nEscolha qual atributo deseja alterar: ");
 
                 switch (opcao) {
-                    case 0:
+                    case 1:
                         System.out.println("\nNome atual: " + this.nome);
                         String newNome = io.readLine("Digite o novo nome: ");
                         this.nome = newNome;
                         break;
-                    case 1:
+                    case 2:
                         System.out.println("\nArtistas atuais: " + this.artistas);
                         String newArtista = io.readLine("Digite o(s) novo(s) artista(s): ");
                         this.artistas = newArtista;
                         break;
-                    case 2:
+                    case 3:
                         System.out.println("\nNome do album atual: " + this.nomeAlbum);
                         String newAlbum = io.readLine("Digite o novo nome do album: ");
                         this.nomeAlbum = newAlbum;
                         break;
-                    case 3:
+                    case 4:
                         System.out.println("\nImagens atuais da capa:");
                         System.out.print(mostrarImagens());
                         System.out.println("");
                         lerImagens();
                         break;
-                    case 4:
+                    case 5:
                         System.out.println("\nPaís de lançamento atual: " + this.pais);
                         String newPais = io.readLine("Digite o novo país de origem [--]: ");
                         this.pais[0] = newPais.charAt(0);
                         this.pais[1] = newPais.charAt(1);
                         break;
-                    case 5:
+                    case 6:
                         System.out.println("\nData de lançamento atual: " + mostrarDataLancamento());
                         String newData = io.readLine("Digite a nova data de lançamento: ");
                         lerDataLancamento (newData);
                         break;
-                    case 6:
+                    case 7:
                         System.out.println("\nDançabilidade atual: " + this.dancabilidade);
                         int newDancabilidade = io.readInt("Digite o novo valor de dançabilidade: ");
                         this.dancabilidade = newDancabilidade;
                         break;
-                    case 7:
+                    case 8:
                         System.out.println("\nDuração atual: " + this.duracao);
                         int newDuracao = io.readInt("Digite a nova duração: ");
                         this.duracao = newDuracao;
                         break;
-                    case 8:
+                    case 9:
                         System.out.println("\nVivacidade atual: " + this.vivacidade);
                         int newVivacidade = io.readInt("Digite a nova vivacidade: ");
                         this.vivacidade = newVivacidade;
                         break;
-                    case 9:
+                    case 10:
                         System.out.println("\nPopularidade atual: " + this.popularidade);
                         int newPopularidade = io.readInt("Digite a nova popularidade: ");
                         this.popularidade = newPopularidade;
                         break;
-                    case 10:
+                    case 11:
                         System.out.println("\nLink da música atual: " + this.uri);
                         String newUri = io.readLine("Digite o novo link: ");
                         this.nome = newUri;
                         break;
                     default: 
                         System.out.println("\nERRO: Por favor, digite uma opção valida"+
-                                   "de 0 a 10.");
+                                   "de 1 a 11.");
                         break;
                 }
             } catch (InputMismatchException e) {
                 System.out.println("\nERRO: Por favor, digite uma opção valida"+
-                                   "de 0 a 10.");
+                                   "de 1 a 11.");
                 io.readLine();
             }
-        } while (opcao < 0 || opcao > 10);
+        } while (opcao < 1 || opcao > 11);
     }
 
       /**
@@ -399,17 +399,11 @@ public class Musica {
                 dos.writeUTF(imagens[i]);
             }
 
+            String strPais = new String(pais);
+            dos.writeUTF(strPais);
 
-/*
-            dos.writeShort(pais.length);
-            
-            System.out.println("pais.length = " + pais.length);
-
-            dos.writeChar(pais[0]);
-            dos.writeChar(pais[1]);
-*/
             long dataEmMilissegundos = dataLancamento.getTime();
-            dos.writeLong(dataEmMilissegundos);
+            dos.writeLong(dataEmMilissegundos);           
 
             dos.writeInt(dancabilidade);
             dos.writeInt(duracao);
@@ -458,14 +452,9 @@ public class Musica {
                 aux.writeUTF(imagens[i]);
             }
 
-/*
-            dos.writeShort(pais.length);
+            String strPais = new String(pais);
+            aux.writeUTF(strPais);
 
-            System.out.println("pais.length = " + pais.length);
-
-            dos.writeChar(pais[0]);
-            dos.writeChar(pais[1]);
-*/
             long dataEmMilissegundos = dataLancamento.getTime();
             aux.writeLong(dataEmMilissegundos);
 
@@ -541,7 +530,7 @@ public class Musica {
 
             lapide = false;
             id = dis.readInt();
-            
+
             short tamNome = dis.readShort();
             nome = dis.readUTF();
 
@@ -558,13 +547,11 @@ public class Musica {
                 imagens[i] = dis.readUTF();
             }
 
-/*
-            dis.readShort();
-
+            String strPais = dis.readUTF();
             pais = new char[2];
-            pais[0] = dis.readChar();
-            pais[1] = dis.readChar();
-*/
+            pais[0] = strPais.charAt(0);
+            pais[1] = strPais.charAt(1);
+
             long dataEmMilissegundos = dis.readLong();
             dataLancamento = new Date(dataEmMilissegundos);
 

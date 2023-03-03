@@ -25,15 +25,11 @@ public class ComumSort{
 
         boolean paridade = true;
         int numIntercalacao = 1;
+        int numArquivos = 0;
 
         distribuicao();
-
-        // CONCERTAR O WHILE!!!!!!!!!!!!!!!!!
-        while (numIntercalacao < 3) {
-            System.out.println("paridade = " + paridade);
-            System.out.println("numIntercalacao = " + numIntercalacao);
-            intercalacao(numIntercalacao, paridade);
-
+        while (numArquivos != 1) {
+            numArquivos = intercalacao(numIntercalacao, paridade);
             paridade = !paridade;
             numIntercalacao++;
         }
@@ -54,6 +50,8 @@ public class ComumSort{
             File file = new File("arqTemp" + i + ".db");
             file.delete();
         }
+
+        System.out.println("\nArquivo \"" + registroDB + "\" ordenado com sucesso!");
     }
 
     /**
@@ -143,8 +141,8 @@ public class ComumSort{
                                 temp.write(bytes);
 
                             }catch(Exception e) {
-                                System.out.println("\nERRO: Ocorreu um erro na leitura do " +
-                                "arquivo \"" + "arqTemp\"" + k + " -> " + e +"\n");
+                                System.out.println("\nERRO: Ocorreu um erro na escrita do " +
+                                "arquivo \"" + "arqTemp\"" + k + ".db -> " + e +"\n");
                             }finally{
                                 temp.close();
                             }
@@ -170,9 +168,10 @@ public class ComumSort{
      * sendo feita (primeira, segunda, terceira, ...)
      * @param paridade - indicador para saber se e' uma intercalacao par ou
      * impar, implicando em qual arquivo sera' leitura e qual, escrita
+     * @return numArquivos - numero de arquivos que foram criados.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public void intercalacao (int numIntercalacao, boolean paridade) throws IOException {
+    public int intercalacao (int numIntercalacao, boolean paridade) throws IOException {
 
         RandomAccessFile arqTemp0 = null;
         RandomAccessFile arqTemp1 = null;
@@ -181,9 +180,9 @@ public class ComumSort{
         RandomAccessFile newTemp = null;
 
         File file;
+        int numArquivos = 0;
 
         try {
-
             int ultimoId, k, aux;
 
             // Abrir arquivos temporarios
@@ -375,6 +374,9 @@ public class ComumSort{
                                 byte[] bytes = menorMusica.toByteArray();
                                 newTemp.write(bytes);
 
+                                // Contabilizar numero de arquivos criados
+                                numArquivos = k+1;
+
                             } else {
                                 quatroArquivosCompletos = true;
                             }
@@ -386,15 +388,20 @@ public class ComumSort{
                 }
 
             } else {
-               System.out.println("\nERRO: Primeiros arquivos temporarios estao vazios\n");
+               System.out.println("\nERRO: Arquivos temporarios estao vazios\n");
             }
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Primeiros arquivos temporarios nao encontrados\n");
+                System.out.println("\nERRO: Arquivos temporarios nao encontrados\n");
         } finally {
             if (arqTemp0 != null) arqTemp0.close();
             if (arqTemp1 != null) arqTemp1.close();
             if (arqTemp2 != null) arqTemp2.close();
             if (arqTemp3 != null) arqTemp3.close();
+
+            // Corrigir valor, do contador do numero de arquivos criados
+            if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
+
+            return numArquivos;
        } 
     }
 

@@ -22,9 +22,7 @@ public class CRUD {
 
     private static final String arquivoCSV = "dados/Spotify.csv";
     private static final String registroDB = "Registro.db";
-    
-//    private static final boolean registroValido = false;
-//    private static final boolean registroInvalido = true;
+    private static IO io = new IO();
 
     public CRUD () {}
     
@@ -135,7 +133,6 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
     public boolean read () throws Exception {
-        IO io = new IO();
         int idProcurado = 0;
 
        do {
@@ -158,7 +155,6 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
     public boolean delete () throws Exception {
-        IO io = new IO();
         int idProcurado = 0;
 
        do {
@@ -181,7 +177,6 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
     public boolean update () throws Exception {
-        IO io = new IO();
         int idProcurado = 0;
 
        do {
@@ -239,7 +234,7 @@ public class CRUD {
 
                         if (idProcurado == musica.id) {
                             find = true;
-                            System.out.println(musica); 
+                            System.out.println(musica);
                         }
 
                     // Se nao for, pular o registro e reposicionar ponteiro
@@ -341,7 +336,7 @@ public class CRUD {
 
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") não está cadastrada!"); 
+                                    ") não está cadastrada!");
                 }
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -472,7 +467,6 @@ public class CRUD {
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
     */
     public void abrirMusica() throws Exception {
-        IO io = new IO();
         int idProcurado = 0;
 
        do {
