@@ -1,7 +1,4 @@
-
-
 // Bibliotecas
-// package src;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -608,8 +605,8 @@ public class CRUD {
                         byte[] registro = new byte[tamRegistro];
                         dbFile.read(registro);
                         musica.fromByteArray(registro);
-                        System.out.println("Lapide       : " + musica.lapide);
-                        System.out.println(musica);
+if (musica != null) System.out.println("musica.id = " + musica.id);
+                            else System.out.println(musica);
                 }
 
                 if (find == false) {
@@ -659,8 +656,8 @@ public class CRUD {
                     arqTemp.read(registro);
                     musica.fromByteArray(registro);
                     fileWriter.write(musica + "\n");
-                    System.out.println(musica);
-                }
+                            if (musica != null) System.out.println("musica.id = " + musica.id);
+                            else System.out.println(musica);                }
             }
         } catch (Exception e) {
 

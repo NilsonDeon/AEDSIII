@@ -1,5 +1,6 @@
 // bibliotecas
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -31,7 +32,7 @@ public class ComumSort {
         int numArquivos = 0;
 
         distribuicao();
-        while (numArquivos != 1) {
+        while (numArquivos != 1) {           
             numArquivos = intercalacao(numIntercalacao, paridade);
             paridade = !paridade;
             numIntercalacao++;
@@ -80,14 +81,14 @@ public class ComumSort {
                 long posicaoAtual = dbFile.getFilePointer();
 
                 // Criar os 4 primeiros arquivos temporarios
-                for (int i = 0; i < NUM_CAMINHOS*2; i++) {
+                for (int i = 0; i < NUM_CAMINHOS; i++) {
                    try {
                         arqTemp = new RandomAccessFile("arqTemp"+ i +".db", "rw");
 
                         // Ao terminar a ordenacao, SEMPRE o arquivo ordenado
                         // sera' o primeiro a ser criado, ou seja, "arqTemp0.db"
                         // ou "arqTemp4.db". Entao, deve-se ja salvar o ultimoID
-                        if (i == 0 || i == 4) {
+                        if (i == 0) {
                             Musica auxMus = new Musica();
                             byte[] salvarID = auxMus.intToByteArray(ultimoId);
                             arqTemp.write(salvarID);
@@ -131,8 +132,10 @@ public class ComumSort {
                         }
 
                         // Ordenar os registros em memoria principal
-                        QuickSort quick = new QuickSort(posArray);
-                        quick.quicksort(musicas);
+                        if (posArray > 0) {
+                            QuickSort quick = new QuickSort(posArray);
+                            quick.quicksort(musicas);
+                        }
 
                         // Salvar no novo arquivo de modo os registros ordenados
                         for (int i = 0; i < posArray; i++) {
@@ -182,7 +185,6 @@ public class ComumSort {
         RandomAccessFile arqTemp3 = null;
         RandomAccessFile newTemp = null;
 
-        File file;
         int numArquivos = 0;
 
         try {
@@ -197,11 +199,13 @@ public class ComumSort {
                 arqTemp2 = new RandomAccessFile ("arqTemp2.db", "r");
                 arqTemp3 = new RandomAccessFile ("arqTemp3.db", "r");
 
-                // Para evitar sobrescrever, deletar arquivo antigo
-                file = new File ("arqTemp4.db"); file.delete();
-                file = new File ("arqTemp5.db"); file.delete();
-                file = new File ("arqTemp6.db"); file.delete();
-                file = new File ("arqTemp7.db"); file.delete();
+                // Para evitar sobrescrever, apagar conteudo do arquivo
+                for (int i = 0; i < NUM_CAMINHOS; i++) {
+                    File file = new File ("arqTemp" + (i+NUM_CAMINHOS) +".db");
+                    FileOutputStream fos = new FileOutputStream(file, false);
+                    fos.write(new byte[0]);
+                    fos.close();
+                }
 
                 // Garantir, mais na frente, criacao dos arquivos certos para 
                 // a escrita
@@ -213,12 +217,17 @@ public class ComumSort {
                 arqTemp1 = new RandomAccessFile ("arqTemp5.db", "r");
                 arqTemp2 = new RandomAccessFile ("arqTemp6.db", "r");
                 arqTemp3 = new RandomAccessFile ("arqTemp7.db", "r");
+                
+                // Para evitar sobrescrever, deletar arquivo antigo
+                for (int i = 0; i < NUM_CAMINHOS; i++) {
+                    File file = new File ("arqTemp" + i +".db");
+                    FileOutputStream fos = new FileOutputStream(file, false);
+                    fos.write(new byte[0]);
+                    fos.close();
+                }
 
-                file = new File ("arqTemp0.db"); file.delete();
-                file = new File ("arqTemp1.db"); file.delete();
-                file = new File ("arqTemp2.db"); file.delete();
-                file = new File ("arqTemp3.db"); file.delete();
-
+                // Garantir, mais na frente, criacao dos arquivos certos para 
+                // a escrita
                 k = 0;
                 aux = 0;
             }
@@ -228,8 +237,8 @@ public class ComumSort {
             long tamArq2 = arqTemp2.length();
             long tamArq3 = arqTemp3.length();
 
-            // Testar se todos os arquivos existem
-            if (tamArq0 > 0 && tamArq1 > 0 && tamArq2 > 0 && tamArq3 > 0) {
+            // Testar se os arquivos existem
+            if (tamArq0 > 0 || tamArq1 > 0 || tamArq2 > 0 || tamArq3 > 0) {
 
                 // Controle se intercalacao acabou
                 boolean quatroArquivosCompletos = false;
@@ -266,7 +275,7 @@ public class ComumSort {
                 Musica mus2 = new Musica();
                 Musica mus3 = new Musica();
 
-                Musica menorMusica = null;
+                Musica maiorMusica = null;
 
                 // Escrever ultimoID no primeiro arquivo
                 newTemp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
@@ -275,11 +284,13 @@ public class ComumSort {
                 newTemp.write(salvarID);
                 if (newTemp != null) newTemp.close();
 
+                IO io = new IO();
 
-                while (tamArq0 != posAtual0 && tamArq1 != posAtual0 && 
-                       tamArq2 != posAtual0 && tamArq3 != posAtual0) {
+                while (tamArq0 != posAtual0 || tamArq1 != posAtual1 || 
+                       tamArq2 != posAtual2 || tamArq3 != posAtual3) {
 
-                    while(k < (NUM_CAMINHOS + aux)){
+                    int j = k;
+                    while(j < (NUM_CAMINHOS + aux)){
 
                         // Settar variaveis de controle
                         carregamentoInicial = true;
@@ -287,10 +298,19 @@ public class ComumSort {
                         cont0 = cont1 = cont2 = cont3 = 0;
                         arq0_OK = arq1_OK = arq2_OK = arq3_OK = true;
 
+                        // Resetar musicas
+                        mus0 = new Musica();
+                        mus1 = new Musica();
+                        mus2 = new Musica();
+                        mus3 = new Musica();
+                        maiorMusica = null;
+                        
                         while (quatroArquivosCompletos == false) {
                             
                             // Testar se deve passar para proxima musica do arquivo
-                            if (menorMusica == mus0 || carregamentoInicial) {
+                            // Ou a menor musica == ultima musica lida do arquivo
+                            // Ou esta' carregando pela primeira vez
+                            if (maiorMusica == mus0 || carregamentoInicial) {
 
                                 // Testar se todos os arquivos estao validos para serem lidos
                                 if (testarSeTemRegistro(posAtual0, tamArq0, cont0, numIntercalacao) == true) {                                   
@@ -309,7 +329,7 @@ public class ComumSort {
                                 }
                             }
 
-                            if (menorMusica == mus1 || carregamentoInicial) {
+                            if (maiorMusica == mus1 || carregamentoInicial) {
 
                                 // Testar se todos os arquivos estao validos para serem lidos
                                 if (testarSeTemRegistro(posAtual1, tamArq1, cont1, numIntercalacao) == true) {
@@ -328,7 +348,7 @@ public class ComumSort {
                                 }
                             }
 
-                            if (menorMusica == mus2 || carregamentoInicial) {
+                            if (maiorMusica == mus2 || carregamentoInicial) {
 
                                 // Testar se todos os arquivos estao validos para serem lidos
                                 if (testarSeTemRegistro(posAtual2, tamArq2, cont2, numIntercalacao) == true) {
@@ -347,7 +367,7 @@ public class ComumSort {
                                 }
                             }
 
-                            if (menorMusica == mus3 || carregamentoInicial) {
+                            if (maiorMusica == mus3 || carregamentoInicial) {
 
                                 // Testar se todos os arquivos estao validos para serem lidos
                                 if (testarSeTemRegistro(posAtual3, tamArq3, cont3, numIntercalacao) == true) {
@@ -367,18 +387,18 @@ public class ComumSort {
                             }
 
                             carregamentoInicial = false;
-                            menorMusica = getMaiorId(mus0, mus1, mus2, mus3, arq0_OK, arq1_OK, arq2_OK, arq3_OK);
+                            maiorMusica = getMaiorId(mus0, mus1, mus2, mus3, arq0_OK, arq1_OK, arq2_OK, arq3_OK);
 
-                            if (menorMusica != null) {
+                            if (maiorMusica != null) {
 
                                 // Escrever menor musica
-                                newTemp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
+                                newTemp = new RandomAccessFile ("arqTemp" + j + ".db", "rw");
                                 newTemp.seek(newTemp.length());
-                                byte[] bytes = menorMusica.toByteArray();
+                                byte[] bytes = maiorMusica.toByteArray();
                                 newTemp.write(bytes);
 
                                 // Contabilizar numero de arquivos criados
-                                numArquivos = k+1;
+                                numArquivos = Math.max(numArquivos, j+1);
 
                             } else {
                                 quatroArquivosCompletos = true;
@@ -386,7 +406,7 @@ public class ComumSort {
                         }
 
                         if (newTemp != null) newTemp.close();
-                        k++;
+                        j++;
                     }
                 }
 
@@ -515,7 +535,7 @@ public class ComumSort {
      * foram executadas
      */
     private boolean testarSeTemRegistro(long posAtual, long tamanhoRegistro, int cont, int numIntercalacao) {
-        return (posAtual < tamanhoRegistro) && (cont < Math.pow(NUM_REGISTROS, numIntercalacao));
+        return (posAtual < tamanhoRegistro) && (cont < (NUM_REGISTROS * Math.pow(NUM_CAMINHOS, numIntercalacao-1)));
     }
 
 }
