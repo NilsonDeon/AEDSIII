@@ -12,13 +12,32 @@ import java.util.Arrays;
 public class ComumSort {
 
     private static final String registroDB = "Registro.db";
-    private static final int NUM_REGISTROS = 1500;
-    private static final int NUM_CAMINHOS = 4;
+    private static int NUM_REGISTROS;
+    private static int NUM_CAMINHOS;
 
     /**
      * Construtor padrao da classe ComumSort.
      */
-    public ComumSort(){}
+    public ComumSort(){
+        this(1500, 4);
+    }
+
+    /**
+     * Construtor padrao da classe ComumSort.
+     * @param m - numero de registros por bloco a ser ordenado em memoria
+     * primaria.
+     * @param n - numero de caminhos, correspondendo a quantos arquivos os
+     * registros serao divididos.
+     */
+    public ComumSort(int m, int n){
+        if (m > 0 && n > 2) {
+            NUM_REGISTROS = m;
+            NUM_CAMINHOS = n;
+        } else {
+            NUM_REGISTROS = 1500;
+            NUM_CAMINHOS = 4;
+        }
+    }
 
     /**
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
@@ -313,7 +332,7 @@ public class ComumSort {
                             if (maiorMusica == mus0 || carregamentoInicial) {
 
                                 // Testar se todos os arquivos estao validos para serem lidos
-                                if (testarSeTemRegistro(posAtual0, tamArq0, cont0, numIntercalacao) == true) {                                   
+                                if (testarSeTemRegistro(posAtual0, tamArq0, cont0, numIntercalacao) == true) {            
                                     boolean lapide0 = arqTemp0.readBoolean();
                                     int tamRegistro0 = arqTemp0.readInt();
 
