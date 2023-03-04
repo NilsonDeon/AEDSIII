@@ -23,7 +23,7 @@ public class ComumSort {
     }
 
     /**
-     * Construtor padrao da classe ComumSort.
+     * Construtor da classe ComumSort com passagem de parametros.
      * @param m - numero de registros por bloco a ser ordenado em memoria
      * primaria.
      * @param n - numero de caminhos, correspondendo a quantos arquivos os
