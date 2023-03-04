@@ -7,29 +7,30 @@ import java.io.RandomAccessFile;
 import java.util.Arrays;
 
 /**
- * ComumSort - Classe responsavel por realizar a Intercalcao Balanceada ComumSort.
+ * TamanhoVariavelSort - Classe responsavel por realizar a Intercalcao
+ * Balanceada com Tamanho Variavel.
  */
-public class ComumSort {
+public class TamanhoVariavelSort {
 
     private static final String registroDB = "Registro.db";
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
 
     /**
-     * Construtor padrao da classe ComumSort.
+     * Construtor padrao da classe TamanhoVariavelSort.
      */
-    public ComumSort(){
+    public TamanhoVariavelSort(){
         this(1500, 4);
     }
 
     /**
-     * Construtor da classe ComumSort com passagem de parametros.
+     * Construtor da classe TamanhoVariavelSort com passagem de parametros.
      * @param m - numero de registros por bloco a ser ordenado em memoria
      * primaria.
      * @param n - numero de caminhos, correspondendo a quantos arquivos os
      * registros serao divididos.
      */
-    public ComumSort(int m, int n){
+    public TamanhoVariavelSort(int m, int n){
         if (m > 0 && n > 2) {
             NUM_REGISTROS = m;
             NUM_CAMINHOS = n;

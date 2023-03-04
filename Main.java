@@ -16,7 +16,7 @@ class Main {
      */
     public static void main (String args[]) throws Exception {
 
-        ComumSort sort = new ComumSort();
+        OrdenacaoExterna sort = new OrdenacaoExterna();
         IO io = new IO();
         CRUD crud = new CRUD();
 
@@ -48,15 +48,15 @@ class Main {
                opcao = io.readInt("\nDigite uma opção: ");
 
                switch (opcao) {
-                   case 1 :                      break;
-                   case 2 : crud.carregarCSV();  break;
-                   case 3 : crud.create();       break;
-                   case 4 : crud.read();         break;
-                   case 5 : crud.update();       break;
-                   case 6 : crud.delete();       break;
-                   case 7 : sort.ordenar();      break;
-                   case 8 : crud.mostrar();      break;
-                   default: mostrarErro();       break;
+                   case 1 :                        break;
+                   case 2 : crud.carregarCSV();    break;
+                   case 3 : crud.create();         break;
+                   case 4 : crud.read();           break;
+                   case 5 : crud.update();         break;
+                   case 6 : crud.delete();         break;
+                   case 7 : sort.ordenarArquivo(); break;
+                   case 8 : crud.mostrar();        break;
+                   default: mostrarErro();         break;
                }
            } catch (InputMismatchException e) {
                mostrarErro();
