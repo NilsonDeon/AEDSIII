@@ -33,7 +33,7 @@ public class OrdenacaoExterna {
                System.out.println("\nERRO: Por favor, digite uma opção valida de 1 a 3.");
                io.readLine();
            }
-       } while (opcao != 1);
+       } while (opcao < 1 || opcao > 3);
 
     }
 }

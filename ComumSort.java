@@ -64,43 +64,49 @@ public class ComumSort {
         int numIntercalacao = 1;
         int numArquivos = 0;
 
-        distribuicao();
-        while (numArquivos != 1) {           
-            numArquivos = intercalacao(numIntercalacao, paridade);
-            paridade = !paridade;
-            numIntercalacao++;
+        boolean ok = distribuicao();
+        if (ok) {
+            while (numArquivos != 1) {           
+                numArquivos = intercalacao(numIntercalacao, paridade);
+                paridade = !paridade;
+                numIntercalacao++;
+            }
+
+            // Apagar antigo "Registros.db"
+            File antigoDB = new File("Registro.db");
+            antigoDB.delete();
+
+            // Renomear arquivo novo
+            File novoArquivo = new File("Registro.db");
+            File antigoArquivo = null;
+            if (paridade == true) antigoArquivo = new File("arqTemp0.db");
+            else antigoArquivo = new File("arqTemp" + NUM_CAMINHOS + ".db");
+            antigoArquivo.renameTo(novoArquivo);
+
+            // Apagar arquivos temporarios
+            for (int i = 0; i < NUM_CAMINHOS*2; i++) {
+                File file = new File("arqTemp" + i + ".db");
+                file.delete();
+            }
+
+            System.out.println("\nArquivo \"" + registroDB + "\" ordenado com sucesso!");
         }
-
-        // Apagar antigo "Registros.db"
-        File antigoDB = new File("Registro.db");
-        antigoDB.delete();
-
-        // Renomear arquivo novo
-        File novoArquivo = new File("Registro.db");
-        File antigoArquivo = null;
-        if (paridade == true) antigoArquivo = new File("arqTemp0.db");
-        else antigoArquivo = new File("arqTemp" + NUM_CAMINHOS + ".db");
-        antigoArquivo.renameTo(novoArquivo);
-
-        // Apagar arquivos temporarios
-        for (int i = 0; i < NUM_CAMINHOS*2; i++) {
-            File file = new File("arqTemp" + i + ".db");
-            file.delete();
-        }
-
-        System.out.println("\nArquivo \"" + registroDB + "\" ordenado com sucesso!");
     }
 
     /**
      * Metodo privado da ordenacao, representando a primeira fase da Ordenacao
      * Externa para distribuir o arquivo principal em NUM_CAMINHOS * arquivos, 
      * contendo cada um NUM_REGISTROS * registros.
+     * @return true, se distribuicao ocorreu corretamente; false, caso 
+     * contrario.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    private void distribuicao() throws IOException {
+    private boolean distribuicao() throws IOException {
 
         RandomAccessFile arqTemp = null;
         RandomAccessFile dbFile = null;
+
+        boolean distribuicaoOK = true;
 
         try {
             dbFile = new RandomAccessFile (registroDB, "r");
@@ -190,14 +196,17 @@ public class ComumSort {
                 }
 
             } else {
+            distribuicaoOK = false;
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
             }
        } catch (FileNotFoundException e) {
                 System.out.println("\nERRO: Registro nao encontrado!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
+                distribuicaoOK = false;
        } finally {
             if (dbFile != null) dbFile.close();
+            return distribuicaoOK;
        }
     }
 
@@ -351,7 +360,7 @@ public class ComumSort {
 
                             if (maiorMusica != null) {
 
-                                // Escrever menor musica
+                                // Escrever maior musica
                                 newTemp = new RandomAccessFile ("arqTemp" + j + ".db", "rw");
                                 newTemp.seek(newTemp.length());
                                 byte[] bytes = maiorMusica.toByteArray();
