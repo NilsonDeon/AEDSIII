@@ -15,6 +15,13 @@ public class ComumSort {
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
 
+    private Musica musicas[];
+    private int contador[];
+    private RandomAccessFile arqTemp[];
+    private long tamArq[];
+    private long posAtual[];
+    private boolean arqOK[];
+
     /**
      * Construtor padrao da classe ComumSort.
      */
@@ -37,6 +44,13 @@ public class ComumSort {
             NUM_REGISTROS = 1500;
             NUM_CAMINHOS = 4;
         }
+
+        musicas = new Musica [NUM_CAMINHOS];
+        contador = new int [NUM_CAMINHOS];
+        arqTemp = new RandomAccessFile [NUM_CAMINHOS];
+        tamArq = new long [NUM_CAMINHOS];
+        posAtual = new long [NUM_CAMINHOS];
+        arqOK = new boolean[NUM_CAMINHOS];
     }
 
     /**
@@ -99,7 +113,7 @@ public class ComumSort {
                 int ultimoId = dbFile.readInt();
                 long posicaoAtual = dbFile.getFilePointer();
 
-                // Criar os 4 primeiros arquivos temporarios
+                // Criar os primeiros arquivos temporarios
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
                    try {
                         arqTemp = new RandomAccessFile("arqTemp"+ i +".db", "rw");
@@ -198,12 +212,7 @@ public class ComumSort {
      */
     public int intercalacao (int numIntercalacao, boolean paridade) throws IOException {
 
-        RandomAccessFile arqTemp0 = null;
-        RandomAccessFile arqTemp1 = null;
-        RandomAccessFile arqTemp2 = null;
-        RandomAccessFile arqTemp3 = null;
         RandomAccessFile newTemp = null;
-
         int numArquivos = 0;
 
         try {
@@ -213,10 +222,10 @@ public class ComumSort {
             // A paridade ira' controlar qual registro sera' lido e em qual
             // sera' gravado
             if (paridade == true) {
-                arqTemp0 = new RandomAccessFile ("arqTemp0.db", "r");
-                arqTemp1 = new RandomAccessFile ("arqTemp1.db", "r");
-                arqTemp2 = new RandomAccessFile ("arqTemp2.db", "r");
-                arqTemp3 = new RandomAccessFile ("arqTemp3.db", "r");
+                for (int i = 0; i < NUM_CAMINHOS; i++) {
+                    arqTemp[i] = new RandomAccessFile ("arqTemp" + i + ".db", "r");
+                    tamArq[i] = arqTemp[i].length();
+                }
 
                 // Para evitar sobrescrever, apagar conteudo do arquivo
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
@@ -232,10 +241,10 @@ public class ComumSort {
                 aux = NUM_CAMINHOS;
 
             } else {
-                arqTemp0 = new RandomAccessFile ("arqTemp4.db", "r");
-                arqTemp1 = new RandomAccessFile ("arqTemp5.db", "r");
-                arqTemp2 = new RandomAccessFile ("arqTemp6.db", "r");
-                arqTemp3 = new RandomAccessFile ("arqTemp7.db", "r");
+                for (int i = 0; i < NUM_CAMINHOS; i++) {
+                    arqTemp[i] = new RandomAccessFile ("arqTemp" + (i+NUM_CAMINHOS) + ".db", "r");
+                    tamArq[i] = arqTemp[i].length();
+                }
                 
                 // Para evitar sobrescrever, deletar arquivo antigo
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
@@ -251,49 +260,37 @@ public class ComumSort {
                 aux = 0;
             }
 
-            long tamArq0 = arqTemp0.length();
-            long tamArq1 = arqTemp1.length();
-            long tamArq2 = arqTemp2.length();
-            long tamArq3 = arqTemp3.length();
-
             // Testar se os arquivos existem
-            if (tamArq0 > 0 || tamArq1 > 0 || tamArq2 > 0 || tamArq3 > 0) {
+            if (arquivosExistirem()) {
 
                 // Controle se intercalacao acabou
-                boolean quatroArquivosCompletos = false;
+                boolean todosArquivosCompletos = false;
                 boolean intercalacaoCompleta = false;
-
-                // Posicionar e salvar ponteiros
-                // Ler o ultimoID escrito no arquivo
-                arqTemp0.seek(0); ultimoId = arqTemp0.readInt();
-                arqTemp1.seek(0);
-                arqTemp2.seek(0);
-                arqTemp3.seek(0);
-                long posAtual0 = arqTemp0.getFilePointer();
-                long posAtual1 = arqTemp1.getFilePointer();
-                long posAtual2 = arqTemp2.getFilePointer();
-                long posAtual3 = arqTemp3.getFilePointer();
-
-                // Variaveis de controle para cada arquivo
-                // Contador para indicar quantos registros ja foram lidos
-                int cont0 = 0;
-                int cont1 = 0;
-                int cont2 = 0;
-                int cont3 = 0;
-                // Booleano para indicar se o arquivo ainda esta' valido
-                boolean arq0_OK = true;
-                boolean arq1_OK = true;
-                boolean arq2_OK = true;
-                boolean arq3_OK = true;
 
                 // Garantir que a primeira leitura passe por todos os arquivos
                 boolean carregamentoInicial = true;
 
-                Musica mus0 = new Musica();
-                Musica mus1 = new Musica();
-                Musica mus2 = new Musica();
-                Musica mus3 = new Musica();
+                // Settar variaves de controle dos arquivos
+                for (int i = 0; i < NUM_CAMINHOS; i++) {
 
+                    // Posicionar e salvar ponteiros
+                    arqTemp[i].seek(0);
+                    posAtual[i] = arqTemp[i].getFilePointer();
+
+                    // Contador para indicar quantos registros ja foram lidos
+                    contador[i] = 0;
+
+                    // Booleano para indicar se o arquivo ainda esta' valido
+                    arqOK[i] = true;
+
+                    // Array para salvar musicas que virao para memoria principal
+                    musicas[i] = new Musica();
+                }
+
+                // Ler o ultimoID escrito no arquivo
+                ultimoId = arqTemp[0].readInt();
+
+                // Settar maiorMuica
                 Musica maiorMusica = null;
 
                 // Escrever ultimoID no primeiro arquivo
@@ -303,108 +300,54 @@ public class ComumSort {
                 newTemp.write(salvarID);
                 if (newTemp != null) newTemp.close();
 
-                while (tamArq0 != posAtual0 || tamArq1 != posAtual1 || 
-                       tamArq2 != posAtual2 || tamArq3 != posAtual3) {
+                while (tiverArquivoParaLer()) {
 
                     int j = k;
                     while(j < (NUM_CAMINHOS + aux)){
 
                         // Settar variaveis de controle
                         carregamentoInicial = true;
-                        quatroArquivosCompletos = false;
-                        cont0 = cont1 = cont2 = cont3 = 0;
-                        arq0_OK = arq1_OK = arq2_OK = arq3_OK = true;
+                        todosArquivosCompletos = false;
+                        setContador();
+                        setArqOK();
 
                         // Resetar musicas
-                        mus0 = new Musica();
-                        mus1 = new Musica();
-                        mus2 = new Musica();
-                        mus3 = new Musica();
+                        setMusicas();
                         maiorMusica = null;
                         
-                        while (quatroArquivosCompletos == false) {
+                        while (todosArquivosCompletos == false) {
                             
                             // Testar se deve passar para proxima musica do arquivo
                             // Ou a menor musica == ultima musica lida do arquivo
                             // Ou esta' carregando pela primeira vez
-                            if (maiorMusica == mus0 || carregamentoInicial) {
+                            for (int i = 0; i < NUM_CAMINHOS; i++) {
+                                if(maiorMusica == musicas[i] || carregamentoInicial) {
 
-                                // Testar se todos os arquivos estao validos para serem lidos
-                                if (testarSeTemRegistro(posAtual0, tamArq0, cont0, numIntercalacao) == true) {            
-                                    boolean lapide0 = arqTemp0.readBoolean();
-                                    int tamRegistro0 = arqTemp0.readInt();
+                                    // Testar se todos os arquivos estao validos para serem lidos
+                                    if(testarSeTemRegistro(posAtual[i], tamArq[i], contador[i], numIntercalacao) == true) {
 
-                                    byte[] registro0 = new byte[tamRegistro0];
-                                    arqTemp0.read(registro0);
-                                    mus0.fromByteArray(registro0);
+                                        // Ler atributos iniciais do registro
+                                        boolean lapide = arqTemp[i].readBoolean();
+                                        int tamRegistro = arqTemp[i].readInt();
 
-                                    posAtual0 = arqTemp0.getFilePointer();
-                                    cont0++;
+                                        // Ler e salvar registro no array
+                                        byte[] registro = new byte[tamRegistro];
+                                        arqTemp[i].read(registro);
+                                        musicas[i].fromByteArray(registro);
 
-                                } else {
-                                    arq0_OK = false;
-                                }
-                            }
+                                        // Ajustar variaveis
+                                        posAtual[i] = arqTemp[i].getFilePointer();
+                                        contador[i]++;
+                                    } else {
 
-                            if (maiorMusica == mus1 || carregamentoInicial) {
-
-                                // Testar se todos os arquivos estao validos para serem lidos
-                                if (testarSeTemRegistro(posAtual1, tamArq1, cont1, numIntercalacao) == true) {
-                                    boolean lapide1 = arqTemp1.readBoolean();
-                                    int tamRegistro1 = arqTemp1.readInt();
-
-                                    byte[] registro1 = new byte[tamRegistro1];
-                                    arqTemp1.read(registro1);
-                                    mus1.fromByteArray(registro1);
-
-                                    posAtual1 = arqTemp1.getFilePointer();
-                                    cont1++;
-
-                                } else {
-                                    arq1_OK = false;
-                                }
-                            }
-
-                            if (maiorMusica == mus2 || carregamentoInicial) {
-
-                                // Testar se todos os arquivos estao validos para serem lidos
-                                if (testarSeTemRegistro(posAtual2, tamArq2, cont2, numIntercalacao) == true) {
-                                    boolean lapide2 = arqTemp2.readBoolean();
-                                    int tamRegistro2 = arqTemp2.readInt();
-
-                                    byte[] registro2 = new byte[tamRegistro2];
-                                    arqTemp2.read(registro2);
-                                    mus2.fromByteArray(registro2);
-
-                                    posAtual2 = arqTemp2.getFilePointer();
-                                    cont2++;
-
-                                } else {
-                                    arq2_OK = false;
-                                }
-                            }
-
-                            if (maiorMusica == mus3 || carregamentoInicial) {
-
-                                // Testar se todos os arquivos estao validos para serem lidos
-                                if (testarSeTemRegistro(posAtual3, tamArq3, cont3, numIntercalacao) == true) {
-                                    boolean lapide3 = arqTemp3.readBoolean();
-                                    int tamRegistro3 = arqTemp3.readInt();
-
-                                    byte[] registro3 = new byte[tamRegistro3];
-                                    arqTemp3.read(registro3);
-                                    mus3.fromByteArray(registro3);
-
-                                    posAtual3 = arqTemp3.getFilePointer();
-                                    cont3++;
-
-                                } else {
-                                    arq3_OK = false;
+                                        // Marcar aqruivo como invalido
+                                        arqOK[i] = false;
+                                    }
                                 }
                             }
 
                             carregamentoInicial = false;
-                            maiorMusica = getMaiorId(mus0, mus1, mus2, mus3, arq0_OK, arq1_OK, arq2_OK, arq3_OK);
+                            maiorMusica = getMaiorId();
 
                             if (maiorMusica != null) {
 
@@ -418,7 +361,9 @@ public class ComumSort {
                                 numArquivos = Math.max(numArquivos, j+1);
 
                             } else {
-                                quatroArquivosCompletos = true;
+
+                                // Quebrar o loop
+                                todosArquivosCompletos = true;
                             }
                         }
 
@@ -433,10 +378,9 @@ public class ComumSort {
         } catch (FileNotFoundException e) {
                 System.out.println("\nERRO: Arquivos temporarios nao encontrados\n");
         } finally {
-            if (arqTemp0 != null) arqTemp0.close();
-            if (arqTemp1 != null) arqTemp1.close();
-            if (arqTemp2 != null) arqTemp2.close();
-            if (arqTemp3 != null) arqTemp3.close();
+            for (int i = 0; i < NUM_CAMINHOS; i++){
+                if (arqTemp[i] != null) arqTemp[i].close();
+            }
 
             // Corrigir valor, do contador do numero de arquivos criados
             if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
@@ -446,99 +390,83 @@ public class ComumSort {
     }
 
     /**
-     * Metodo para obter a música com o maior ID entre 4 músicas.
-     * @param mus0 - primeira musica a se comparar
-     * @param mus1 - segunda musica a se comparar
-     * @param mus2 - terceira musica a se comparar
-     * @param mus3 - quarta musica a se comparar
-     * @return maiorMusica
+     * Metodo para obter a Musica de maior ID.
+     * @return maiorMusica pelo ID.
      */
-    private Musica getMaiorId (Musica mus0, Musica mus1, Musica mus2, Musica mus3) {
-        Musica maiorMusica = mus0;
-        if (mus1.id > maiorMusica.id) {
-            maiorMusica = mus1;
+    private Musica getMaiorId() {
+        Musica maiorMusica = null;
+
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+
+            // Testar se arquivo e' valido
+            if (arqOK[i] == true) {
+
+                // Se maiorMusica nao for == null, comparar ID.
+                if (maiorMusica != null) {
+                    maiorMusica = (maiorMusica.id > musicas[i].id) ? maiorMusica : musicas[i];
+                } else {
+                    maiorMusica = musicas[i];
+                }
+            }
         }
-        if (mus2.id > maiorMusica.id) {
-            maiorMusica = mus2;
-        }
-        if (mus3.id > maiorMusica.id) {
-            maiorMusica = mus3;
-        }
+
         return maiorMusica;
     }
 
     /**
-     * Metodo para obter a música com o maior ID entre 3 músicas.
-     * @param mus0 - primeira musica a se comparar
-     * @param mus1 - segunda musica a se comparar
-     * @param mus2 - terceira musica a se comparar
-     * @return maiorMusica
+     * Metodo para testar se ainda tem arquivo para ser lido.
+     * @return true, se tiver; false, caso contrario.
      */
-    private Musica getMaiorId (Musica mus0, Musica mus1, Musica mus2) {
-        Musica maiorMusica = mus0;
-        if (mus1.id > maiorMusica.id) {
-            maiorMusica = mus1;
+    private boolean tiverArquivoParaLer() {
+        boolean resp = false;
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+            resp = resp || (tamArq[i] != posAtual[i]);
         }
-        if (mus2.id > maiorMusica.id) {
-            maiorMusica = mus2;
-        }
-        return maiorMusica;
+
+        return resp;
     }
 
     /**
-     * Metodo para obter a música com o maior ID entre 2 músicas.
-     * @param mus0 - primeira musica a se comparar
-     * @param mus1 - segunda musica a se comparar
-     * @return maiorMusica
+     * Metodo para testar os arquivos a serem lidos existem.
+     * @return true, se existirem; false, caso contrario.
      */
-    private Musica getMaiorId (Musica mus0, Musica mus1) {
-        return mus0.id > mus1.id ? mus0 : mus1;
+    private boolean arquivosExistirem() {
+        boolean resp = true;
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+            resp = resp || (tamArq[i] > 0);
+        }
+
+        return resp;
     }
 
     /**
-     * Metodo para obter a música com o maior ID entre 4 músicas. Porem, a
-     * depender dos valores booleanos para saber quais musicas se comparar.
-     * @param mus0 - primeira musica a se comparar
-     * @param mus1 - segunda musica a se comparar
-     * @param mus2 - terceira musica a se comparar
-     * @param mus3 - quarta musica a se comparar
-     * @param arq0_OK - indicador se primeira musica e' valida
-     * @param arq0_OK - indicador se segunda musica e' valida
-     * @param arq0_OK - indicador se terceira musica e' valida
-     * @param arq0_OK - indicador se quarta musica e' valida
-     * @return maiorMusica se houver; null, caso nao tenha registro valido
+     * Metodo para settar array de contadores para zero.
      */
-    private Musica getMaiorId (Musica mus0, Musica mus1, Musica mus2, Musica mus3,
-                            boolean arq0_OK, boolean arq1_OK, boolean arq2_OK, boolean arq3_OK) {
-
-        boolean[] combinacoes = {arq0_OK, arq1_OK, arq2_OK, arq3_OK};
-        
-        Musica musica = new Musica();
-
-        // De acordo com as musicas validas, obter o maior ID
-        switch (Arrays.toString(combinacoes)) {
-
-            case "[true, true, true, true]":    musica = getMaiorId(mus0, mus1, mus2, mus3); break;
-            case "[true, true, true, false]":   musica = getMaiorId(mus0, mus1, mus2);       break;
-            case "[true, true, false, true]":   musica = getMaiorId(mus0, mus1, mus3);       break;
-            case "[true, true, false, false]":  musica = getMaiorId(mus0, mus1);             break;
-            case "[true, false, true, true]":   musica = getMaiorId(mus0, mus2, mus3);       break;
-            case "[true, false, true, false]":  musica = getMaiorId(mus0, mus2);             break;
-            case "[true, false, false, true]":  musica = getMaiorId(mus0, mus3);             break;
-            case "[true, false, false, false]": musica = mus0;                               break;
-            case "[false, true, true, true]":   musica = getMaiorId(mus1, mus2, mus3);       break;
-            case "[false, true, true, false]":  musica = getMaiorId(mus1, mus2);             break;
-            case "[false, true, false, true]":  musica = getMaiorId(mus1, mus3);             break;
-            case "[false, true, false, false]": musica = mus1;                               break;
-            case "[false, false, true, true]":  musica = getMaiorId(mus2, mus3);             break;
-            case "[false, false, true, false]": musica = mus2;                               break;
-            case "[false, false, false, true]": musica = mus3;                               break;
-            case "[false, false, false, false]":musica = null;                               break;
+    private void setContador() {
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+            contador[i] = 0;
         }
-
-        return musica;
     }
 
+    /**
+     * Metodo para settar array de verificadores de arquivo para true.
+     */
+    private void setArqOK() {
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+            arqOK[i] = true;
+        }
+    }
+
+    /**
+     * Metodo para settar array de Musicas para new Musica().
+     */
+    private void setMusicas() {
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+            musicas[i] = new Musica();
+        }        
+
+    }
+    
     /**
      * Metodo para testar se registro ainda deve ser lido
      * Para isso, testa-se se o ponteiro chegou ao final do arquivo
