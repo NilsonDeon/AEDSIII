@@ -79,7 +79,7 @@ public class ComumSort {
         File novoArquivo = new File("Registro.db");
         File antigoArquivo = null;
         if (paridade == true) antigoArquivo = new File("arqTemp0.db");
-        else antigoArquivo = new File("arqTemp4.db");
+        else antigoArquivo = new File("arqTemp" + NUM_CAMINHOS + ".db");
         antigoArquivo.renameTo(novoArquivo);
 
         // Apagar arquivos temporarios
@@ -119,8 +119,8 @@ public class ComumSort {
                         arqTemp = new RandomAccessFile("arqTemp"+ i +".db", "rw");
 
                         // Ao terminar a ordenacao, SEMPRE o arquivo ordenado
-                        // sera' o primeiro a ser criado, ou seja, "arqTemp0.db"
-                        // ou "arqTemp4.db". Entao, deve-se ja salvar o ultimoID
+                        // sera' o primeiro a ser criado, ou seja, "arqTemp0.db".
+                        // Entao, deve-se ja salvar o ultimoID
                         if (i == 0) {
                             Musica auxMus = new Musica();
                             byte[] salvarID = auxMus.intToByteArray(ultimoId);
