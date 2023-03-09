@@ -17,8 +17,8 @@ import java.net.URI;
  */
 public class CRUD {
 
-    private static final String arquivoCSV = "scr/resources/Spotify.csv";
-    private static final String registroDB = "scr/dataBase/Registro.db";
+    private static final String arquivoCSV = "dados/Spotify.csv";
+    private static final String registroDB = "Registro.db";
 
     private static IO io = new IO();
 

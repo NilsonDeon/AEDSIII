@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public class TamanhoVariavelSort {
 
-    private static final String registroDB = "scr/dataBase/Registro.db";
+    private static final String registroDB = "Registro.db";
 
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
