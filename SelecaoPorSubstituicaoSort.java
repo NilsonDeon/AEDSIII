@@ -12,7 +12,8 @@ import java.util.Arrays;
  */
 public class SelecaoPorSubstituicaoSort {
 
-    private static final String registroDB = "Registro.db";
+    private static final String registroDB = "scr/dataBase/Registro.db";
+    
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
 
@@ -77,11 +78,11 @@ public class SelecaoPorSubstituicaoSort {
             }
 
             // Apagar antigo "Registros.db"
-            File antigoDB = new File("Registro.db");
+            File antigoDB = new File(registroDB);
             antigoDB.delete();
 
             // Renomear arquivo novo
-            File novoArquivo = new File("Registro.db");
+            File novoArquivo = new File(registroDB);
             File antigoArquivo = null;
             if (paridade == true) antigoArquivo = new File("arqTemp0.db");
             else antigoArquivo = new File("arqTemp" + NUM_CAMINHOS + ".db");

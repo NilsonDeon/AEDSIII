@@ -71,7 +71,7 @@ public class Musica {
         nomeAlbum = atributos[2];
         lerImagens(atributos[3]);
         pais = atributos[4].toCharArray();
-        lerDataLancamento(atributos[5]);
+        lerDataLancamentoUS(atributos[5]);
         dancabilidade = Integer.parseInt(atributos[6]);
         duracao = Integer.parseInt(atributos[7]);
         vivacidade = Integer.parseInt(atributos[8]);
@@ -188,11 +188,11 @@ public class Musica {
 
     /**
      * Metodo para preencher o atributo dataLancamento, passando a data como
-     * uma string.
+     * uma string no formato yyyy-MM-dd
      * @param strDate - string, contendo a data de lancamento.
      * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    private void lerDataLancamento (String strDate) throws Exception {
+    private void lerDataLancamentoUS (String strDate) throws Exception {
      
         Locale US = new Locale("US");
         DateFormat df;
@@ -218,7 +218,40 @@ public class Musica {
             df = new SimpleDateFormat("yyyy", US);
             dataLancamento = df.parse(strDate);  
         }
+    }
 
+    /**
+     * Metodo para preencher o atributo dataLancamento, passando a data como
+     * uma string no formato dd-MM-yyyy
+     * @param strDate - string, contendo a data de lancamento.
+     * @throws Exception Se ocorrer algum erro ao manipular data.
+     */
+    private void lerDataLancamentoBR (String strDate) throws Exception {
+     
+        Locale US = new Locale("US");
+        DateFormat df;
+
+        try {
+            if (strDate.length() == 10) {
+                df = new SimpleDateFormat("dd-MM-yyyy", US);
+            } else if (strDate.length() == 7) {
+                df = new SimpleDateFormat("MM-yyyy", US);
+            } else {
+                df = new SimpleDateFormat("yyyy", US);
+            }
+            dataLancamento = df.parse(strDate);
+
+        } catch (ParseException e) {
+            System.out.print("ERRO: Data invalida (" + strDate + ")\n");
+            strDate = "0001";
+            df = new SimpleDateFormat("yyyy", US);
+            dataLancamento = df.parse(strDate);
+        } catch (IllegalArgumentException e) {
+            System.out.print("ERRO: Data invalida (" + strDate + ")\n");
+            strDate = "0001";
+            df = new SimpleDateFormat("yyyy", US);
+            dataLancamento = df.parse(strDate);  
+        }
     }
 
     /**
@@ -253,8 +286,8 @@ public class Musica {
             String strPais = io.readLine ("\nSigla pais [--]: ");
             lerPais(strPais);
 
-            String strDate = io.readLine("\nData Lancamento [YYYY-MM-DD]: ");
-            lerDataLancamento(strDate);
+            String strDate = io.readLine("\nData Lancamento [DD-MM-AAAA]: ");
+            lerDataLancamentoBR(strDate);
 
             dancabilidade = io.readInt ("\nDancabilidade: ");
 
@@ -329,7 +362,7 @@ public class Musica {
                     case 6:
                         System.out.println("\nData de lancamento atual: " + mostrarDataLancamento());
                         String newData = io.readLine("Digite a nova data de lancamento: ");
-                        lerDataLancamento (newData);
+                        lerDataLancamentoBR(newData);
                         break;
                     case 7:
                         System.out.println("\nDancabilidade atual: " + this.dancabilidade);
@@ -354,7 +387,7 @@ public class Musica {
                     case 11:
                         System.out.println("\nLink da musica atual: " + this.uri);
                         String newUri = io.readLine("Digite o novo link: ");
-                        this.nome = newUri;
+                        this.uri = newUri;
                         break;
                     case 12:
                         updated = false;

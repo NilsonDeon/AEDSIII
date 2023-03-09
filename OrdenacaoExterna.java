@@ -18,7 +18,7 @@ public class OrdenacaoExterna {
                      "\n|------------------------------------------|" +
                      "\n| 1 - Comum                                |" +
                      "\n| 2 - Blocos de Tamanho Variavel           |" +
-                     "\n| 3 - Selecao por substituicao             |" +
+                     "\n| 3 - Selecao por Substituicao             |" +
                      "\n| 4 - Voltar                               |" +
                      "\n+------------------------------------------+";        
 

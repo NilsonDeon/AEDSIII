@@ -17,8 +17,9 @@ import java.net.URI;
  */
 public class CRUD {
 
-    private static final String arquivoCSV = "dados/Spotify.csv";
-    private static final String registroDB = "Registro.db";
+    private static final String arquivoCSV = "scr/resources/Spotify.csv";
+    private static final String registroDB = "scr/dataBase/Registro.db";
+
     private static IO io = new IO();
 
     public CRUD () {}
@@ -51,13 +52,13 @@ public class CRUD {
                 int opcao = io.readInt("\nDigite uma opcao: ");
                 if (opcao != 1) {
                     continuar = false;
-                    System.out.println("\n\"" + registroDB + "\" mantido com sucesso!");
+                    System.out.println("\nArquivo \"" + registroDB + "\" mantido com sucesso!");
                 }
             }
 
             if (continuar == true) {
                 // Apagar antigo "Registros.db"
-                File antigoDB = new File("Registro.db");
+                File antigoDB = new File(registroDB);
                 antigoDB.delete();
                 dbFile = new RandomAccessFile (registroDB, "rw");
 
