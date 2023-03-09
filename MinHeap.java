@@ -25,8 +25,8 @@ public class MinHeap {
         }
 
         this.size = 0;
-        this.heap = new Musica[capacity];
-        this.prioridade = new int[capacity];
+        this.heap = new Musica[this.capacity];
+        this.prioridade = new int[this.capacity];
         
     }
 
