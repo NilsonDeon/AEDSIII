@@ -299,8 +299,8 @@ public class ComumSort {
                 // Ler o ultimoID escrito no arquivo
                 ultimoId = arqTemp[0].readInt();
 
-                // Settar maiorMuica
-                Musica maiorMusica = null;
+                // Settar menorMuica
+                Musica menorMusica = null;
 
                 // Escrever ultimoID no primeiro arquivo
                 newTemp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
@@ -322,7 +322,7 @@ public class ComumSort {
 
                         // Resetar musicas
                         setMusicas();
-                        maiorMusica = null;
+                        menorMusica = null;
                         
                         while (todosArquivosCompletos == false) {
                             
@@ -330,7 +330,7 @@ public class ComumSort {
                             // Ou a menor musica == ultima musica lida do arquivo
                             // Ou esta' carregando pela primeira vez
                             for (int i = 0; i < NUM_CAMINHOS; i++) {
-                                if(maiorMusica == musicas[i] || carregamentoInicial) {
+                                if(menorMusica == musicas[i] || carregamentoInicial) {
 
                                     // Testar se todos os arquivos estao validos para serem lidos
                                     if(testarSeTemRegistro(posAtual[i], tamArq[i], contador[i], numIntercalacao) == true) {
@@ -356,14 +356,14 @@ public class ComumSort {
                             }
 
                             carregamentoInicial = false;
-                            maiorMusica = getMaiorId();
+                            menorMusica = getMenorId();
 
-                            if (maiorMusica != null) {
+                            if (menorMusica != null) {
 
-                                // Escrever maior musica
+                                // Escrever menor musica
                                 newTemp = new RandomAccessFile ("arqTemp" + j + ".db", "rw");
                                 newTemp.seek(newTemp.length());
-                                byte[] bytes = maiorMusica.toByteArray();
+                                byte[] bytes = menorMusica.toByteArray();
                                 newTemp.write(bytes);
 
                                 // Contabilizar numero de arquivos criados
@@ -399,27 +399,27 @@ public class ComumSort {
     }
 
     /**
-     * Metodo para obter a Musica de maior ID.
-     * @return maiorMusica pelo ID.
+     * Metodo para obter a Musica de menor ID.
+     * @return menorMusica pelo ID.
      */
-    private Musica getMaiorId() {
-        Musica maiorMusica = null;
+    private Musica getMenorId() {
+        Musica menorMusica = null;
 
         for (int i = 0; i < NUM_CAMINHOS; i++) {
 
             // Testar se arquivo e' valido
             if (arqOK[i] == true) {
 
-                // Se maiorMusica nao for == null, comparar ID.
-                if (maiorMusica != null) {
-                    maiorMusica = (maiorMusica.id > musicas[i].id) ? maiorMusica : musicas[i];
+                // Se menorMusica nao for == null, comparar ID.
+                if (menorMusica != null) {
+                    menorMusica = (menorMusica.id < musicas[i].id) ? menorMusica : musicas[i];
                 } else {
-                    maiorMusica = musicas[i];
+                    menorMusica = musicas[i];
                 }
             }
         }
 
-        return maiorMusica;
+        return menorMusica;
     }
 
     /**

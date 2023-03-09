@@ -114,13 +114,13 @@ public class Musica {
                "\nArtistas       : " + artistas +
                "\nNome Album     : " + nomeAlbum +
                "\nImagens da capa: " + mostrarImagens() +
-               "\nPaís           : " + pais[0] + pais[1] +
-               "\nData Lançamento: " + mostrarDataLancamento() +
-               "\nDançabilidade  : " + dancabilidade +
-               "\nDuração        : " + duracao +
+               "\nPais           : " + pais[0] + pais[1] +
+               "\nData Lancamento: " + mostrarDataLancamento() +
+               "\nDancabilidade  : " + dancabilidade +
+               "\nDuracao        : " + duracao +
                "\nVivacidade     : " + vivacidade +
                "\nPopularidade   : " + popularidade + 
-               "\nLink da música : " + uri;
+               "\nLink da musica : " + uri;
     }
 
     /**
@@ -250,21 +250,21 @@ public class Musica {
 
             lerImagens();
 
-            String strPais = io.readLine ("\nSigla país [--]: ");
+            String strPais = io.readLine ("\nSigla pais [--]: ");
             lerPais(strPais);
 
-            String strDate = io.readLine("\nData Lançamento [YYYY-MM-DD]: ");
+            String strDate = io.readLine("\nData Lancamento [YYYY-MM-DD]: ");
             lerDataLancamento(strDate);
 
             dancabilidade = io.readInt ("\nDancabilidade: ");
 
-            duracao = io.readInt ("\nDuração: ");
+            duracao = io.readInt ("\nDuracao: ");
 
             vivacidade = io.readInt ("\nVivacidade: ");
  
             popularidade = io.readInt ("\nPopularidade: ");
 
-            uri = io.readLine("\nLink da música: ");
+            uri = io.readLine("\nLink da musica: ");
 
         } catch (Exception e) {
             System.out.println("\nERRO: Informacoes invalidas!\n\n");
@@ -273,19 +273,25 @@ public class Musica {
 
     /**
      * Metodo privado para atualizar algum atributo do objeto.
+     * @return true, se atualizado; false, caso contrario.
      * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    protected void atualizar() throws Exception {
+    protected boolean atualizar() throws Exception {
 
-        IO io = new IO();
-        int opcao = -1;
+       IO io = new IO();
+       int opcao = -1;
+       boolean updated = true;
 
-        String menu = "\n 1 - Nome            2 - Artistas" +
-                      "\n 3 - Nome do Album   4 - Imagens da capa" +
-                      "\n 5 - País            6 - Data Lançamento" +
-                      "\n 7 - Dançabilidade   8 - Duração" + 
-                      "\n 9 - Vivacidade     10 - Popularidade" +
-                      "\n11 - Uri"; 
+       String menu = "\n+------------------------------------------+" +
+                     "\n|             MENU ATUALIZACAO             |" +
+                     "\n|------------------------------------------|" +
+                     "\n|  1 - Nome            2 - Artistas        |" +
+                     "\n|  3 - Nome do Album   4 - Imagens da capa |" +
+                     "\n|  5 - Pais            6 - Data Lancamento |" +
+                     "\n|  7 - Dancabilidade   8 - Duracao         |" +
+                     "\n|  9 - Vivacidade     10 - Popularidade    |" +
+                     "\n| 11 - Uri            12 - Voltar          |" +
+                     "\n+------------------------------------------+";
 
         do {
             try {
@@ -315,24 +321,24 @@ public class Musica {
                         lerImagens();
                         break;
                     case 5:
-                        System.out.println("\nPaís de lançamento atual: " + this.pais);
-                        String newPais = io.readLine("Digite o novo país de origem [--]: ");
+                        System.out.println("\nPais de lancamento atual: " + this.pais[0] + this.pais[1]);
+                        String newPais = io.readLine("Digite o novo pais de origem [--]: ");
                         this.pais[0] = newPais.charAt(0);
                         this.pais[1] = newPais.charAt(1);
                         break;
                     case 6:
-                        System.out.println("\nData de lançamento atual: " + mostrarDataLancamento());
-                        String newData = io.readLine("Digite a nova data de lançamento: ");
+                        System.out.println("\nData de lancamento atual: " + mostrarDataLancamento());
+                        String newData = io.readLine("Digite a nova data de lancamento: ");
                         lerDataLancamento (newData);
                         break;
                     case 7:
-                        System.out.println("\nDançabilidade atual: " + this.dancabilidade);
-                        int newDancabilidade = io.readInt("Digite o novo valor de dançabilidade: ");
+                        System.out.println("\nDancabilidade atual: " + this.dancabilidade);
+                        int newDancabilidade = io.readInt("Digite o novo valor de dancabilidade: ");
                         this.dancabilidade = newDancabilidade;
                         break;
                     case 8:
-                        System.out.println("\nDuração atual: " + this.duracao);
-                        int newDuracao = io.readInt("Digite a nova duração: ");
+                        System.out.println("\nDuracao atual: " + this.duracao);
+                        int newDuracao = io.readInt("Digite a nova duracao: ");
                         this.duracao = newDuracao;
                         break;
                     case 9:
@@ -346,21 +352,26 @@ public class Musica {
                         this.popularidade = newPopularidade;
                         break;
                     case 11:
-                        System.out.println("\nLink da música atual: " + this.uri);
+                        System.out.println("\nLink da musica atual: " + this.uri);
                         String newUri = io.readLine("Digite o novo link: ");
                         this.nome = newUri;
                         break;
+                    case 12:
+                        updated = false;
+                        break;
                     default: 
-                        System.out.println("\nERRO: Por favor, digite uma opção valida"+
-                                   "de 1 a 11.");
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida"+
+                                   "de 1 a 12.");
                         break;
                 }
             } catch (InputMismatchException e) {
-                System.out.println("\nERRO: Por favor, digite uma opção valida"+
-                                   "de 1 a 11.");
+                System.out.println("\nERRO: Por favor, digite uma opcao valida"+
+                                   "de 1 a 12.");
                 io.readLine();
             }
-        } while (opcao < 1 || opcao > 11);
+        } while (opcao < 1 || opcao > 12);
+
+        return updated;
     }
 
       /**
@@ -395,8 +406,8 @@ public class Musica {
                 dos.writeUTF(imagens[i]);
             }
 
-            String strPais = new String(pais);
-            dos.writeUTF(strPais);
+            dos.writeChar(pais[0]);
+            dos.writeChar(pais[1]);
 
             long dataEmMilissegundos = dataLancamento.getTime();
             dos.writeLong(dataEmMilissegundos);           
@@ -448,8 +459,8 @@ public class Musica {
                 aux.writeUTF(imagens[i]);
             }
 
-            String strPais = new String(pais);
-            aux.writeUTF(strPais);
+            aux.writeChar(pais[0]);
+            aux.writeChar(pais[1]);
 
             long dataEmMilissegundos = dataLancamento.getTime();
             aux.writeLong(dataEmMilissegundos);
@@ -543,10 +554,9 @@ public class Musica {
                 imagens[i] = dis.readUTF();
             }
 
-            String strPais = dis.readUTF();
             pais = new char[2];
-            pais[0] = strPais.charAt(0);
-            pais[1] = strPais.charAt(1);
+            pais[0] = dis.readChar();
+            pais[1] = dis.readChar();
 
             long dataEmMilissegundos = dis.readLong();
             dataLancamento = new Date(dataEmMilissegundos);

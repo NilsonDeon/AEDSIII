@@ -25,8 +25,8 @@ public class QuickSort {
         Musica pivo = musicas[(dir+esq)/2].clone();
  
         while (i <= j) {
-            while (pivo.id < musicas[i].id){ i++; }
-            while (musicas[j].id < pivo.id){ j--; }
+            while (pivo.id > musicas[i].id){ i++; }
+            while (musicas[j].id > pivo.id){ j--; }
             if (i <= j) {
                 swap(musicas, i, j);
                 i++;

@@ -13,27 +13,32 @@ public class OrdenacaoExterna {
 
         int opcao = -1;
 
-        String menu = "\n Intercalação balanceada:" +
-                      "\n 1 - Comum" +
-                      "\n 2 - Blocos de Tamanho Variável" +
-                      "\n 3 - Seleção por substituição";
+       String menu = "\n+------------------------------------------+" +
+                     "\n|        MENU INTECALACAO BALANCEADA       |" +
+                     "\n|------------------------------------------|" +
+                     "\n| 1 - Comum                                |" +
+                     "\n| 2 - Blocos de Tamanho Variavel           |" +
+                     "\n| 3 - Selecao por substituicao             |" +
+                     "\n| 4 - Voltar                               |" +
+                     "\n+------------------------------------------+";        
 
        do {
            try {
                System.out.println(menu);
-               opcao = io.readInt("\nDigite uma ordenação desejada: ");
+               opcao = io.readInt("\nDigite a ordenacao desejada: ");
 
                switch (opcao) {
                    case 1 : sort1.ordenar(); break;
                    case 2 : sort2.ordenar(); break;
                    case 3 : sort3.ordenar(); break;
-                   default: System.out.println("\nERRO: Por favor, digite uma opção valida de 1 a 3."); break;
+                   case 4 : break;
+                   default: System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4."); break;
                }
            } catch (InputMismatchException e) {
-               System.out.println("\nERRO: Por favor, digite uma opção valida de 1 a 3.");
+               System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
                io.readLine();
            }
-       } while (opcao < 1 || opcao > 3);
+       } while (opcao < 1 || opcao > 4);
 
     }
 }

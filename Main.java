@@ -23,11 +23,11 @@ class Main {
        String intro = "\n        Trabalho Pratico 01 - TP01         " +
                       "\n    Algoritmos e Estruturas de Dados III   " + 
                       "\n       Gabriel Vargas e Nilson Deon        " +
-                      "\n     Base de dados: Músicas do Spotify     " +
-                      "\n                  02/2023                  ";
+                      "\n     Base de dados: Musicas do Spotify     " +
+                      "\n                  03/2023                  ";
 
        String menu = "\n+------------------------------------------+" +
-                     "\n|                   MENU                   |" +
+                     "\n|              MENU PRINCIPAL              |" +
                      "\n|------------------------------------------|" +
                      "\n| 1 - Sair                                 |" +
                      "\n| 2 - Carregar dados iniciais              |" +
@@ -36,7 +36,7 @@ class Main {
                      "\n| 5 - Atualizar                            |" +
                      "\n| 6 - Deletar                              |" +
                      "\n| 7 - Ordenar                              |" +
-                     "\n| 8 - Abrir música no Spotify              |" +
+                     "\n| 8 - Abrir musica no Spotify              |" +
                      "\n+------------------------------------------+";
        int opcao = -1;
 
@@ -45,7 +45,7 @@ class Main {
        do {
            try {
                System.out.println(menu);
-               opcao = io.readInt("\nDigite uma opção: ");
+               opcao = io.readInt("\nDigite uma opcao: ");
 
                switch (opcao) {
                    case 1 :                        break;
@@ -71,7 +71,7 @@ class Main {
      * valida.
      */
     public static void mostrarErro() {
-        System.out.println("\nERRO: Por favor, digite uma opção válida de " + 
+        System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
                            "1 a 8.");
     }
 }

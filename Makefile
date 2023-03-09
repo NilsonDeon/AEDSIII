@@ -3,7 +3,7 @@
 # Data: 02/2023
 
 # Arquivos de origem
-SOURCES := IO.java Musica.java QuickSort.java ComumSort.java TamanhoVariavelSort.java SelecaoPorSubstituicao.java OrdenacaoExterna.java CRUD.java Main.java 
+SOURCES := IO.java Musica.java QuickSort.java ComumSort.java TamanhoVariavelSort.java MinHeap.java SelecaoPorSubstituicao.java OrdenacaoExterna.java CRUD.java Main.java 
 
 # Compilar
 all: $(SOURCES:.java=.class)
@@ -18,4 +18,3 @@ run: clean Main.class
 # Limpar
 clean:
 	rm -f *.class
-	rm -f *.db

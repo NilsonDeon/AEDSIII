@@ -36,33 +36,58 @@ public class CRUD {
             csvFile = new BufferedReader (new FileReader (arquivoCSV));
             dbFile = new RandomAccessFile (registroDB, "rw");
 
-            Musica musica = new Musica();
-            byte[] newId;
-
-            int ultimoId = 0;
-
-            // Reservar espaco no cabecalho do arquivo para o inteiro ultimo ID
-            dbFile.seek(0);
-            newId = musica.intToByteArray(ultimoId);
-            dbFile.write(newId);
-
-            // Ler CSV, criar array de bytes e salva-lo em arquivo
-            String linhaLida;
-            while ((linhaLida = csvFile.readLine()) != null) {
-                ultimoId++;
-                musica = new Musica (linhaLida, ultimoId);
-                byte[] byteArray = musica.toByteArray();
-                dbFile.write(byteArray); 
+            boolean continuar = true;
+            if (dbFile.length() > 0) {
+                // Perguntar somente uma ver e apagar se digitar 1
+                // Entrada invalida ou igual a 2, manter arquivo
+                String menu = "\n+------------------------------------------+" +
+                              "\n|        Banco de dados ja populado!       |" +
+                              "\n|         Deseja resetar o arquivo?        |" +
+                              "\n|------------------------------------------|" +
+                              "\n|         1 - SIM          2 - NAO         |" +
+                              "\n+------------------------------------------+";                
+                
+                System.out.println(menu);
+                int opcao = io.readInt("\nDigite uma opcao: ");
+                if (opcao != 1) {
+                    continuar = false;
+                    System.out.println("\n\"" + registroDB + "\" mantido com sucesso!");
+                }
             }
 
-            // Atualizar ultimo ID no cabecalho do arquivo
-            dbFile.seek(0);
-            newId = musica.intToByteArray(ultimoId);
-            dbFile.write(newId);
+            if (continuar == true) {
+                // Apagar antigo "Registros.db"
+                File antigoDB = new File("Registro.db");
+                antigoDB.delete();
+                dbFile = new RandomAccessFile (registroDB, "rw");
 
-            System.out.println("\nArquivo \"" + registroDB + 
-                               "\" criado com sucesso!");
+                Musica musica = new Musica();
+                byte[] newId;
 
+                int ultimoId = 0;
+
+                // Reservar espaco no cabecalho do arquivo para o inteiro ultimo ID
+                dbFile.seek(0);
+                newId = musica.intToByteArray(ultimoId);
+                dbFile.write(newId);
+
+                // Ler CSV, criar array de bytes e salva-lo em arquivo
+                String linhaLida;
+                while ((linhaLida = csvFile.readLine()) != null) {
+                    ultimoId++;
+                    musica = new Musica (linhaLida, ultimoId);
+                    byte[] byteArray = musica.toByteArray();
+                    dbFile.write(byteArray); 
+                }
+
+                // Atualizar ultimo ID no cabecalho do arquivo
+                dbFile.seek(0);
+                newId = musica.intToByteArray(ultimoId);
+                dbFile.write(newId);
+
+                System.out.println("\nArquivo \"" + registroDB + 
+                                "\" criado com sucesso!");
+            }
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: O arquivo \""+ arquivoCSV + 
                                "\"não encontrado!\n");
@@ -108,9 +133,10 @@ public class CRUD {
                 dbFile.seek(finalRegistro);
                 byte[] byteArray = musica.toByteArray();
                 dbFile.write(byteArray);
-
-                System.out.println("\nMusica \"" + musica.nome + 
-                                "\" cadastrada com sucesso!");
+                
+                System.out.println("\nMusica [" + musica.id + "]: \"" +
+                                            musica.nome + "\" " +
+                                            "cadastrada com sucesso!");
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
@@ -245,7 +271,7 @@ public class CRUD {
 
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") não está cadastrada!"); 
+                                    ") não esta cadastrada!"); 
                 }
 
 
@@ -333,7 +359,7 @@ public class CRUD {
 
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") não está cadastrada!");
+                                    ") não esta cadastrada!");
                 }
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -357,6 +383,7 @@ public class CRUD {
     private boolean update (int idProcurado) throws Exception {
         RandomAccessFile dbFile = null;
         boolean find = false;
+        boolean atualizado = false;
 
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
@@ -393,7 +420,7 @@ public class CRUD {
 
                             // Ler e criar novo Objeto musica
                             Musica newMusica = musica.clone();
-                            newMusica.atualizar();
+                            atualizado  = newMusica.atualizar();
                             byte[] newRegistro = newMusica.toByteArray();
 
                             if (newRegistro.length <= registro.length) {
@@ -425,10 +452,12 @@ public class CRUD {
                                 dbFile.write(newRegistro);
                             }
 
+                            if (atualizado == true) {
+                                System.out.println("\nMusica [" + newMusica.id + "]: \"" +
+                                                newMusica.nome + "\" " +
+                                                "atualizada com sucesso!");
+                            }
                             find = true;
-                            System.out.println("\nMusica [" + newMusica.id + "]: \"" +
-                                            newMusica.nome + "\" " +
-                                            "atualizada com sucesso!");
                         }
 
                     // Se nao for, pular o registro e reposicionar ponteiro    
@@ -442,7 +471,7 @@ public class CRUD {
 
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") não está cadastrada!"); 
+                                    ") não esta cadastrada!"); 
                 }
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -454,7 +483,7 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
         } finally {
             if (dbFile != null) dbFile.close();
-            return find;
+            return atualizado;
         }
     }
 
@@ -535,7 +564,7 @@ public class CRUD {
 
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") nao está cadastrada!");
+                                    ") nao esta cadastrada!");
                     throw new Exception("ID não encontrado");
                 }
 
@@ -605,13 +634,8 @@ public class CRUD {
                         byte[] registro = new byte[tamRegistro];
                         dbFile.read(registro);
                         musica.fromByteArray(registro);
-if (musica != null) System.out.println("musica.id = " + musica.id);
+                        if (musica != null) System.out.println("musica.id = " + musica.id);
                             else System.out.println(musica);
-                }
-
-                if (find == false) {
-                    System.out.println("\nMusica de ID (" + 
-                                    ") não está cadastrada!"); 
                 }
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -638,7 +662,7 @@ if (musica != null) System.out.println("musica.id = " + musica.id);
 
         try {
 
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 1; i++) {
                 arqTemp = new RandomAccessFile("arqTemp" + i + ".db", "r");
                 fileWriter = new FileWriter("arqTempString" + i + ".txt");
                 bufferedWriter = new BufferedWriter(fileWriter);

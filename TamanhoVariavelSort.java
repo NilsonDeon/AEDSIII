@@ -17,7 +17,6 @@ public class TamanhoVariavelSort {
     private static int NUM_CAMINHOS;
 
     private Musica musicas[];
-    private int contador[];
     private RandomAccessFile arqTemp[];
     private long tamArq[];
     private long posAtual[];
@@ -47,7 +46,6 @@ public class TamanhoVariavelSort {
         }
 
         musicas = new Musica [NUM_CAMINHOS];
-        contador = new int [NUM_CAMINHOS];
         arqTemp = new RandomAccessFile [NUM_CAMINHOS];
         tamArq = new long [NUM_CAMINHOS];
         posAtual = new long [NUM_CAMINHOS];
@@ -288,9 +286,6 @@ public class TamanhoVariavelSort {
                     arqTemp[i].seek(0);
                     posAtual[i] = arqTemp[i].getFilePointer();
 
-                    // Contador para indicar quantos registros ja foram lidos
-                    contador[i] = 0;
-
                     // Booleano para indicar se o arquivo ainda esta' valido
                     arqOK[i] = true;
 
@@ -301,8 +296,8 @@ public class TamanhoVariavelSort {
                 // Ler o ultimoID escrito no arquivo
                 ultimoId = arqTemp[0].readInt();
 
-                // Settar maiorMuica
-                Musica maiorMusica = null;
+                // Settar menorMuica
+                Musica menorMusica = null;
 
                 // Escrever ultimoID no primeiro arquivo
                 newTemp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
@@ -319,12 +314,11 @@ public class TamanhoVariavelSort {
                         // Settar variaveis de controle
                         carregamentoInicial = true;
                         todosArquivosCompletos = false;
-                        setContador();
                         setArqOK();
 
                         // Resetar musicas
                         setMusicas();
-                        maiorMusica = null;
+                        menorMusica = null;
                         
                         while (todosArquivosCompletos == false) {
                             
@@ -332,7 +326,7 @@ public class TamanhoVariavelSort {
                             // Ou a menor musica == ultima musica lida do arquivo
                             // Ou esta' carregando pela primeira vez
                             for (int i = 0; i < NUM_CAMINHOS; i++) {
-                                if(maiorMusica == musicas[i] || carregamentoInicial) {
+                                if(menorMusica == musicas[i] || carregamentoInicial) {
 
                                     // Testar se chegou ao fim do arquivo
                                     if (posAtual[i] < tamArq[i]) {
@@ -345,30 +339,20 @@ public class TamanhoVariavelSort {
                                         byte[] registro = new byte[tamRegistro];
                                         arqTemp[i].read(registro);
 
-                                        if (registroAindaOrdenado(contador[i], numIntercalacao)) {
-
-                                            // Salvar no array diretamente
-                                            musicas[i].fromByteArray(registro);
-
-                                            // Ajustar variaveis
-                                            posAtual[i] = arqTemp[i].getFilePointer();
-                                            contador[i]++;
-
-                                        } else if (arqOK[i] == true) {
+                                        if (arqOK[i] == true) {
 
                                             // Salvar registro em varivavel temporaria
                                             Musica musicaTmp = new Musica();
                                             musicaTmp.fromByteArray(registro);
 
                                             // Comparar e ver se ainda esta' ordenado
-                                            if (musicaTmp.id <= musicas[i].id) {
+                                            if (musicaTmp.id >= musicas[i].id || carregamentoInicial) {
 
                                                 // Atualizar musica no array
                                                 musicas[i] = musicaTmp;
 
                                                 // Ajustar variaveis
                                                 posAtual[i] = arqTemp[i].getFilePointer();
-                                                contador[i]++;
                                             } else {
 
                                                 // Como leu registro desordenado, voltar ponteiro
@@ -387,14 +371,14 @@ public class TamanhoVariavelSort {
                             }
 
                             carregamentoInicial = false;
-                            maiorMusica = getMaiorId();
+                            menorMusica = getMenorId();
 
-                            if (maiorMusica != null) {
+                            if (menorMusica != null) {
 
-                                // Escrever maior musica
+                                // Escrever menor musica
                                 newTemp = new RandomAccessFile ("arqTemp" + j + ".db", "rw");
                                 newTemp.seek(newTemp.length());
-                                byte[] bytes = maiorMusica.toByteArray();
+                                byte[] bytes = menorMusica.toByteArray();
                                 newTemp.write(bytes);
 
                                 // Contabilizar numero de arquivos criados
@@ -430,27 +414,27 @@ public class TamanhoVariavelSort {
     }
 
     /**
-     * Metodo para obter a Musica de maior ID.
-     * @return maiorMusica pelo ID.
+     * Metodo para obter a Musica de menor ID.
+     * @return menorMusica pelo ID.
      */
-    private Musica getMaiorId() {
-        Musica maiorMusica = null;
+    private Musica getMenorId() {
+        Musica menorMusica = null;
 
         for (int i = 0; i < NUM_CAMINHOS; i++) {
 
             // Testar se arquivo e' valido
             if (arqOK[i] == true) {
 
-                // Se maiorMusica nao for == null, comparar ID.
-                if (maiorMusica != null) {
-                    maiorMusica = (maiorMusica.id > musicas[i].id) ? maiorMusica : musicas[i];
+                // Se menorMusica nao for == null, comparar ID.
+                if (menorMusica != null) {
+                    menorMusica = (menorMusica.id < musicas[i].id) ? menorMusica : musicas[i];
                 } else {
-                    maiorMusica = musicas[i];
+                    menorMusica = musicas[i];
                 }
             }
         }
 
-        return maiorMusica;
+        return menorMusica;
     }
 
     /**
@@ -480,15 +464,6 @@ public class TamanhoVariavelSort {
     }
 
     /**
-     * Metodo para settar array de contadores para zero.
-     */
-    private void setContador() {
-        for (int i = 0; i < NUM_CAMINHOS; i++) {
-            contador[i] = 0;
-        }
-    }
-
-    /**
      * Metodo para settar array de verificadores de arquivo para true.
      */
     private void setArqOK() {
@@ -506,18 +481,4 @@ public class TamanhoVariavelSort {
         }        
 
     }
-    
-    /**
-     * Metodo para testar se registro ainda deve ser lido
-     * Se o contador esta' menor que o numero de registros que pode
-     * ser lido. Este aumenta exponencialmente a cada intercalacao que se passa
-     * @param cont - contador de quantos registros foram lidos do arquivo dentro
-     * daquele caminho
-     * @param numIntercalacoes - contador para o numero de intercalacoes que ja
-     * foram executadas
-     */
-    private boolean registroAindaOrdenado(int cont, int numIntercalacao) {
-        return (cont < (NUM_REGISTROS * Math.pow(NUM_CAMINHOS, numIntercalacao-1)));
-    }
-
 }
