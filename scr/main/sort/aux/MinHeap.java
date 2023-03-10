@@ -215,42 +215,4 @@ public class MinHeap {
     public boolean hasElement() {
         return !isEmpty();
     }
-
-
-    // TESTE (CHAT GPT)
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        int level = 0;
-        int levelElements = 1;
-        int totalElements = 0;
-
-        while (totalElements < size) {
-            for (int i = 0; i < levelElements && totalElements < size; i++) {
-                Musica current = heap[totalElements];
-                int p = prioridade[totalElements];
-                String id = current != null ? p+"-"+current.id : "---";
-                sb.append(String.format("%4s", id));
-                totalElements++;
-                if (i < levelElements - 1) {
-                    sb.append("   ");
-                }
-            }
-            sb.append("\n");
-
-            if (totalElements == size) {
-                break;
-            }
-
-            // Imprimir espaços em branco para a indentação
-            for (int i = 0; i < level; i++) {
-                sb.append("       ");
-            }
-
-            level++;
-            levelElements *= 2;
-        }
-
-        return sb.toString();
-    }
-
 }
