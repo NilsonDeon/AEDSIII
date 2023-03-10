@@ -1,5 +1,4 @@
 // Bibliotecas
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,8 +16,15 @@ public class IO {
    private static BufferedReader in = new BufferedReader(new InputStreamReader(System.in, Charset.forName("UTF-8")));
    private static String charset = "UTF-8";
 
+   /**
+    * Construtor padrao da classe IO.
+    */
    public IO () {}
 
+   /**
+    * Metodo para ler um inteiro do teclado.
+    * @return - numero digitado, se entrada for valida; 0, caso contrario.
+    */
    public int readInt(){
       int i = 0;
       String string = "";
@@ -31,6 +37,12 @@ public class IO {
       return i;
    }
 
+   /**
+    * Metodo para ler um inteiro do teclado.
+    * @param str - string de uma mensagem a ser exibida na tela antes da 
+    * leitura.
+    * @return - numero digitado, se entrada for valida; 0, caso contrario.
+    */
    public int readInt(String str){
       try {
          PrintStream out = new PrintStream(System.out, true, charset);
@@ -41,6 +53,11 @@ public class IO {
       return readInt();
    }
 
+   /**
+    * Metodo para ler uma linha do teclado.
+    * @return - linha digitada, se entrada for valida; string vazia, caso
+    * contrario.
+    */
    public String readLine(){
       String s = "";
       char tmp;
@@ -57,11 +74,20 @@ public class IO {
       return s;
    }
 
+   /**
+    * Metodo para ler uma linha do teclado.
+    * @param str - string de uma mensagem a ser exibida na tela antes da 
+    * leitura.
+    * @return - linha digitada, se entrada for valida; string vazia, caso
+    * contrario.
+    */
    public String readLine(String str){
       try {
          PrintStream out = new PrintStream(System.out, true, charset);
          out.print(str);
-      }catch(UnsupportedEncodingException e){ System.out.println("Erro: charset invalido"); }
+      }catch(UnsupportedEncodingException e){ 
+         System.out.println("Erro: charset invalido");
+      }
       return readLine();
    }
 }
