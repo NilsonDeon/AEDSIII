@@ -237,7 +237,7 @@ public class CRUD {
                 int tamRegistro;
 
 
-                // Obter tamanho do arquivo == ultimo ID adicionado
+                // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
                 int ultimoId = dbFile.readInt();
@@ -309,7 +309,7 @@ public class CRUD {
                 boolean lapide;
                 int tamRegistro;
 
-                // Obter tamanho do arquivo == ultimo ID adicionado
+                // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
                 int tamArquivo = dbFile.readInt();
@@ -396,7 +396,7 @@ public class CRUD {
                 boolean lapide;
                 int tamRegistro;
 
-                // Obter tamanho do arquivo == ultimo ID adicionado
+                // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
                 int tamArquivo = dbFile.readInt();
@@ -514,9 +514,9 @@ public class CRUD {
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo ou ID nao
-     * seja encontrado
+     * for encontrado
      */
-    public void abrirMusica(int idProcurado) throws Exception{
+    public void abrirMusica (int idProcurado) throws Exception{
 
         RandomAccessFile dbFile = null;
         boolean find = false;
@@ -530,17 +530,17 @@ public class CRUD {
                 boolean lapide;
                 int tamRegistro;
 
-                // Obter tamanho do arquivo == ultimo ID adicionado
+                // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
-                int tamArquivo = dbFile.readInt();
-
+                int ultimoId = dbFile.readInt();
 
                 while (dbFile.length() != posicaoAtual && find == false) {
                     
                     musica = new Musica();
 
-                    // Ler informacoes do registro   
+                    // Ler informacoes do registro
+                    long posicaoInicio = dbFile.getFilePointer();
                     lapide = dbFile.readBoolean();
                     tamRegistro = dbFile.readInt();
 
@@ -566,7 +566,6 @@ public class CRUD {
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
                                     ") nao esta cadastrada!");
-                    throw new Exception("ID não encontrado");
                 }
 
             } else {
@@ -579,117 +578,34 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
         } finally {
             if (dbFile != null) dbFile.close();
-            URI uri = new URI(musica.uri);
-            pesquisar(uri);
+
+            if (find == true) {
+                pesquisar(musica.uri);
+            }
         }
 
     }
 
     /**
-     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
-     * @param uri link da musica.
-     */
-    private void pesquisar(URI uri){
+    * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
+    * @param uri link da musica.
+    */
+    private void pesquisar(String uri) {
         try {
-            Desktop.getDesktop().browse(uri);
+            // Tratamento da string URI para ser adaptavel ao link
+            // Pegar terceiro elemento correspondente ao trackID da musica
+            String[] parts = uri.split(":");
+            String trackId = parts[2];
+
+            // Obter uri da musica
+            String url = "https://open.spotify.com/track/" + trackId;
+
+            // Se valido, abrir na web a musica
+            ProcessBuilder pb = new ProcessBuilder("xdg-open", url);
+            pb.start();
         } catch (Exception e) {
-            System.out.println("Erro ao abrir o link: " + e.getMessage());
-        }
-        /* Para abrir no navegador usar https://open.spotify.com/track/ + código da música*/
-    }
-
-    /**
-     * Metodo privado para atualizar uma musica a partir do seu ID.
-     * @return true, se a música foi excluida; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
-     */
-    public boolean mostrar () throws Exception {
-        RandomAccessFile dbFile = null;
-        boolean find = false;
-
-        try {
-            dbFile = new RandomAccessFile (registroDB, "rw");
-
-            if (dbFile.length() > 0) {
-
-                Musica musica = null;
-                Musica aux = new Musica();
-                boolean lapide;
-                int tamRegistro;
-
-                // Obter tamanho do arquivo == ultimo ID adicionado
-                dbFile.seek(0);
-                long posicaoAtual = dbFile.getFilePointer();
-                int tamArquivo = dbFile.readInt();
-                int ultimoId = tamArquivo;
-
-                while (dbFile.length() != dbFile.getFilePointer() && find == false) {
-                    
-                    musica = new Musica();
-
-                    // Ler informacoes do registro
-                    posicaoAtual = dbFile.getFilePointer();
-                    lapide = dbFile.readBoolean();
-                    tamRegistro = dbFile.readInt();
-
-                        byte[] registro = new byte[tamRegistro];
-                        dbFile.read(registro);
-                        musica.fromByteArray(registro);
-                        if (musica != null) System.out.println("musica.id = " + musica.id);
-                            else System.out.println(musica);
-                }
-            } else {
-                System.out.println("\nERRO: Registro vazio!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-            }
-
-        } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
-            return find;
+            System.out.print("\nERRO: Link incorreto. Tente atualizar o URI!");
+            System.out.print("\nModelo: \"spotify:track:(INSERIR TRACK ID)\"\n");
         }
     }
-
-    
-    // APENAS PARA TESTE
-    public void lerArquivosTemporarios () throws Exception {
-
-        RandomAccessFile arqTemp = null;
-        
-        FileWriter fileWriter = null;
-        BufferedWriter bufferedWriter = null;
-
-        try {
-
-            for (int i = 0; i < 1; i++) {
-                arqTemp = new RandomAccessFile("arqTemp" + i + ".db", "r");
-                fileWriter = new FileWriter("arqTempString" + i + ".txt");
-                bufferedWriter = new BufferedWriter(fileWriter);
-                
-                arqTemp.seek(0);
-
-                int id = arqTemp.readInt();
-                System.out.println("id = " + id);
-
-                while(arqTemp.length() != arqTemp.getFilePointer()) {
-                    Musica musica = new Musica();
-                    boolean lapide = arqTemp.readBoolean();
-                    int tamRegistro = arqTemp.readInt();
-                    byte[] registro = new byte[tamRegistro];
-                    arqTemp.read(registro);
-                    musica.fromByteArray(registro);
-                    fileWriter.write(musica + "\n");
-                            if (musica != null) System.out.println("musica.id = " + musica.id);
-                            else System.out.println(musica);                }
-            }
-        } catch (Exception e) {
-
-        } finally {
-            if (arqTemp != null) arqTemp.close();
-            if (fileWriter != null) fileWriter.close(); 
-        }
-    }
-
 }
