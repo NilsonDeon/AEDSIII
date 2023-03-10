@@ -1,7 +1,7 @@
 /**
  * Main - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
- * @version 1.0 02/2023
+ * @version 1.0 03/2023
  */
 
 // bibliotecas
@@ -55,7 +55,7 @@ class Main {
                    case 5 : crud.update();         break;
                    case 6 : crud.delete();         break;
                    case 7 : sort.ordenarArquivo(); break;
-                   case 8 : crud.mostrar();        break;
+                   case 8 : crud.abrirMusica();    break;
                    default: mostrarErro();         break;
                }
            } catch (InputMismatchException e) {
