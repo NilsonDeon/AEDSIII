@@ -8,8 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.InputMismatchException;
-import java.awt.Desktop;
-import java.net.URI;
 
 /**
  * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
