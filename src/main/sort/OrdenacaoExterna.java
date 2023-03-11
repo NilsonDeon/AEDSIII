@@ -1,5 +1,10 @@
+package sort;
+
+
 // bibliotecas
 import java.util.InputMismatchException;
+
+import app.IO;
 
 public class OrdenacaoExterna {
 

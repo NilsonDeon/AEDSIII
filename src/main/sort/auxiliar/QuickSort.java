@@ -1,3 +1,7 @@
+package sort.auxiliar;
+
+import app.Musica;
+
 /**
  * Classe QuickSort responsavel por realizar a ordenacao em memoria principal
  * de um array de Musicas.

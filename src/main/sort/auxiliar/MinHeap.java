@@ -1,3 +1,7 @@
+package sort.auxiliar;
+
+import app.Musica;
+
 public class MinHeap {
 
     protected Musica[] heap;

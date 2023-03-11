@@ -1,19 +1,24 @@
+package sort;
+
 // bibliotecas
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
+
+import sort.auxiliar.QuickSort;
+import app.Musica;
 
 /**
- * SelecaoPorSubstituicaoSort - Classe responsavel por realizar a Intercalcao 
- * Balanceada com Selecao por Substituicao
+ * TamanhoVariavelSort - Classe responsavel por realizar a Intercalcao 
+ * Balanceada com Tamanho Variavel.
  */
-public class SelecaoPorSubstituicaoSort {
+public class TamanhoVariavelSort {
 
     private static final String registroDB = "Registro.db";
-    
+
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
 
@@ -23,23 +28,21 @@ public class SelecaoPorSubstituicaoSort {
     private long posAtual[];
     private boolean arqOK[];
 
-    private MinHeap minHeap;
-
     /**
-     * Construtor padrao da classe SelecaoPorSubstituicaoSort.
+     * Construtor padrao da classe TamanhoVariavelSort.
      */
-    public SelecaoPorSubstituicaoSort(){
+    public TamanhoVariavelSort(){
         this(1500, 4);
     }
 
     /**
-     * Construtor da classe SelecaoPorSubstituicaoSort com passagem de parametros.
+     * Construtor da classe TamanhoVariavelSort com passagem de parametros.
      * @param m - numero de registros por bloco a ser ordenado em memoria
      * primaria.
      * @param n - numero de caminhos, correspondendo a quantos arquivos os
      * registros serao divididos.
      */
-    public SelecaoPorSubstituicaoSort(int m, int n){
+    public TamanhoVariavelSort(int m, int n){
         if (m > 0 && n > 2) {
             NUM_REGISTROS = m;
             NUM_CAMINHOS = n;
@@ -53,17 +56,14 @@ public class SelecaoPorSubstituicaoSort {
         tamArq = new long [NUM_CAMINHOS];
         posAtual = new long [NUM_CAMINHOS];
         arqOK = new boolean[NUM_CAMINHOS];
-
-        minHeap = new MinHeap(NUM_REGISTROS);
     }
 
     /**
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
      * sao chamadas.
-     * @throws Exception Caso haja erro de leitura ou escrita com os arquivos.
-     * @throws Exception Caso haja erro de insercao ou remocao no heap.
+     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public void ordenar()  throws Exception {
+    public void ordenar() throws IOException {
 
         boolean paridade = true;
         int numIntercalacao = 1;
@@ -104,10 +104,9 @@ public class SelecaoPorSubstituicaoSort {
      * contendo cada um NUM_REGISTROS * registros.
      * @return true, se distribuicao ocorreu corretamente; false, caso 
      * contrario.
-     * @throws Exception Caso haja erro de leitura ou escrita com os arquivos.
-     * @throws Exception Caso haja erro de insercao ou remocao no heap.
+     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    private boolean distribuicao() throws Exception {
+    private boolean distribuicao() throws IOException {
 
 
         RandomAccessFile arqTemp = null;
@@ -147,98 +146,45 @@ public class SelecaoPorSubstituicaoSort {
                     }
                 }
 
-                int posHeap = 0;
+                Musica[] musicas;
 
-                // Popular o heap inicial com os NUM_REGISTROS
-                while (dbFile.length() != posicaoAtual && posHeap < NUM_REGISTROS) {
-                    boolean lapide = dbFile.readBoolean();
-                    int tamRegistro = dbFile.readInt();
-
-                    // Ler e salvar apenas se nao tiver lapide
-                    if (lapide == false){
-                        byte[] registro = new byte[tamRegistro];
-                        dbFile.read(registro);
-
-                        // Salvar musica
-                        Musica musica = new Musica();
-                        musica.fromByteArray(registro);
-
-                        // Inserir no heap
-                        // True, indicando que e' carga inical
-                        minHeap.inserir(musica, true);
-                        posHeap++;
-                    } else {
-                        posicaoAtual = dbFile.getFilePointer();
-                        long proximaPosicao = posicaoAtual + (long)tamRegistro;
-                        dbFile.seek(proximaPosicao);
-                    }
-                    posicaoAtual = dbFile.getFilePointer();
-                }
-
-                // Enquanto tiver arquivo ou heap tiver musica ou elemento no heap
-                while (dbFile.length() != posicaoAtual || minHeap.hasElement()) {
+                while (dbFile.length() != posicaoAtual) {
 
                     // Percorrer cada um dos caminhos de arquivo
                     for(int k = 0; k < NUM_CAMINHOS; k++){
-
-                        // Obter a prioridade do heap[0]
-                        int prioridadeAtual  = minHeap.getMenorPrioridade();
+                        int posArray = 0;
+                        musicas = new Musica[NUM_REGISTROS];
 
                         // Condicao de parada sera' fim de arquivo ou
-                        // mudanca de prioridade
-                        while (dbFile.length() != posicaoAtual &&
-                               (prioridadeAtual % NUM_CAMINHOS) == k) {
-                            
-                            Musica menorMusica = minHeap.remover();
-                            byte[] bytes = menorMusica.toByteArray();
-
-                            // Salvar menor musica no arquivo
-                            RandomAccessFile temp = null;
-                            try{
-                                temp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
-                                temp.seek(temp.length());
-                                temp.write(bytes);
-
-                            }catch(Exception e) {
-                                System.out.println("\nERRO: Ocorreu um erro na escrita do " +
-                                "arquivo \"" + "arqTemp\"" + k + ".db -> " + e +"\n");
-                            }finally{
-                                temp.close();
-                            }
-
-                            // Ler e salvar apenas se nao tiver lapide
+                        // ter trazido para a memoria primaria os NUM_REGISTROS
+                        while (dbFile.length() != posicaoAtual && posArray < NUM_REGISTROS) {
                             boolean lapide = dbFile.readBoolean();
                             int tamRegistro = dbFile.readInt();
+
+                            // Ler e salvar apenas se nao tiver lapide
                             if (lapide == false){
                                 byte[] registro = new byte[tamRegistro];
                                 dbFile.read(registro);
-
-                                // Obter musica
-                                Musica musica = new Musica();
-                                musica.fromByteArray(registro);
-
-                                // Adiciona-la no heap
-                                // False, indicando que nao e' carga inical
-                                minHeap.inserir(musica, false);
-
+                                musicas[posArray] = new Musica();
+                                musicas[posArray].fromByteArray(registro);
+                                posArray++;
                             } else {
                                 posicaoAtual = dbFile.getFilePointer();
                                 long proximaPosicao = posicaoAtual + (long)tamRegistro;
                                 dbFile.seek(proximaPosicao);
                             }
                             posicaoAtual = dbFile.getFilePointer();
-
-                            // Obter prioridade atual
-                            prioridadeAtual = minHeap.getMenorPrioridade();
                         }
 
-                        // Se acabar arquivo para leitura, continuar removendo do heap
-                        while ((prioridadeAtual % NUM_CAMINHOS) == k &&
-                                minHeap.hasElement()) {
-                            Musica menorMusica = minHeap.remover();
-                            byte[] bytes = menorMusica.toByteArray();
+                        // Ordenar os registros em memoria principal
+                        if (posArray > 0) {
+                            QuickSort quick = new QuickSort(posArray);
+                            quick.quicksort(musicas);
+                        }
 
-                            // Salvar menor musica no arquivo
+                        // Salvar no novo arquivo de modo os registros ordenados
+                        for (int i = 0; i < posArray; i++) {
+                            byte[] bytes = musicas[i].toByteArray();
                             RandomAccessFile temp = null;
                             try{
                                 temp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
@@ -253,7 +199,6 @@ public class SelecaoPorSubstituicaoSort {
                             }
                         }
                     }
-
                 }
 
             } else {
@@ -408,7 +353,7 @@ public class SelecaoPorSubstituicaoSort {
 
                                             // Comparar e ver se ainda esta' ordenado
                                             if (musicaTmp.id >= musicas[i].id || carregamentoInicial) {
-                                                
+
                                                 // Atualizar musica no array
                                                 musicas[i] = musicaTmp;
 

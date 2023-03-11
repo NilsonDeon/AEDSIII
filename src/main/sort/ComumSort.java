@@ -1,10 +1,14 @@
+package sort;
+
 // bibliotecas
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
+
+import sort.auxiliar.QuickSort;
+import app.Musica;
 
 /**
  * ComumSort - Classe responsavel por realizar a Intercalcao Balanceada ComumSort.

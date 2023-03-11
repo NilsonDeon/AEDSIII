@@ -1,3 +1,5 @@
+package app;
+
 // Bibliotecas
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,10 +19,10 @@ import java.util.Locale;
  */
 public class Musica {
 
-    protected boolean lapide;      // implementada como boolean, por ser um byte
-    protected int id;
+    public boolean lapide;      // implementada como boolean, por ser um byte
+    public int id;
 
-    protected String nome;         // String de tamanho variavel
+    public String nome;         // String de tamanho variavel
     protected String artistas;
     protected String nomeAlbum;   
     protected String[] imagens;    // Lista de valores com separador " "
@@ -30,7 +32,7 @@ public class Musica {
     protected int duracao;
     protected int vivacidade;
     protected int popularidade;       
-    protected String uri;      
+    public String uri;      
 
 
     /**
@@ -309,7 +311,7 @@ public class Musica {
      * @return true, se atualizado; false, caso contrario.
      * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    protected boolean atualizar() throws Exception {
+    public boolean atualizar() throws Exception {
 
        IO io = new IO();
        int opcao = -1;

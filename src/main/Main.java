@@ -7,6 +7,10 @@
 // bibliotecas
 import java.util.InputMismatchException;
 
+import app.IO;
+import crud.CRUD;
+import sort.OrdenacaoExterna;
+
 class Main {
 
     /**

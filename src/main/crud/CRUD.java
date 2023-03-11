@@ -1,13 +1,18 @@
+package crud;
+
+
 // Bibliotecas
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.InputMismatchException;
+
+import app.IO;
+import app.Musica;
+
 
 /**
  * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
@@ -15,8 +20,8 @@ import java.util.InputMismatchException;
  */
 public class CRUD {
 
-    private static final String arquivoCSV = "dados/Spotify.csv";
-    private static final String registroDB = "Registro.db";
+    private static final String arquivoCSV = "../src/resources/Spotify.csv";
+    private static final String registroDB = "../scr/dataBase/Registro.db";
 
     private static IO io = new IO();
 
