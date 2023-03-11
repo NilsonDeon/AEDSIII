@@ -3,9 +3,11 @@ package crud;
 
 // Bibliotecas
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.InputMismatchException;
@@ -20,8 +22,9 @@ import app.Musica;
  */
 public class CRUD {
 
-    private static final String arquivoCSV = "../src/resources/Spotify.csv";
-    private static final String registroDB = "../scr/dataBase/Registro.db";
+    private static final String arquivoCSV = "src/resources/Spotify.csv";
+    private static final String registroDB = "src/resources/Registro.db";
+    private static final String registroTXT = "src/resources/Registro.txt";
 
     private static IO io = new IO();
 
@@ -609,6 +612,70 @@ public class CRUD {
         } catch (Exception e) {
             System.out.print("\nERRO: Link incorreto. Tente atualizar o URI!");
             System.out.print("\nModelo: \"spotify:track:(INSERIR TRACK ID)\"\n");
+        }
+    }
+
+    /**
+     * Metodo privado para salvar todo banco de dados em arquivo txt.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     */
+    public void saveTXT () throws Exception {
+        RandomAccessFile dbFile = null;
+        BufferedWriter dbFileTXT = null;
+
+        try {
+            dbFileTXT = new BufferedWriter (new FileWriter (registroTXT));
+            dbFile = new RandomAccessFile (registroDB, "r");
+
+            if (dbFile.length() > 0) {
+
+                Musica musica = null;
+                boolean lapide;
+                int tamRegistro;
+
+                // Obter ultimo ID adicionado
+                dbFile.seek(0);
+                long posicaoAtual = dbFile.getFilePointer();
+                int ultimoId = dbFile.readInt();
+
+                while (dbFile.length() != posicaoAtual) {
+                                        
+                    musica = new Musica();
+
+                    // Ler informacoes do registro
+                    lapide = dbFile.readBoolean();
+                    tamRegistro = dbFile.readInt();
+
+                    // Se registro for valido, escrever
+                    if (lapide == false) {
+                        byte[] registro = new byte[tamRegistro];
+                        dbFile.read(registro);
+                        musica.fromByteArray(registro);
+                        dbFileTXT.write(musica + "\n");
+
+                    // Se nao for, pular o registro e reposicionar ponteiro
+                    } else {
+                        posicaoAtual = dbFile.getFilePointer();
+                        long proximaPosicao = posicaoAtual + (long)tamRegistro;
+                        dbFile.seek(proximaPosicao);
+                    }
+                    posicaoAtual = dbFile.getFilePointer();
+                }
+
+                System.out.println("\nArquivo \"" + registroTXT + 
+                                "\" criado com sucesso!");
+
+            } else {
+                System.out.println("\nERRO: Registro vazio!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            }
+
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Registro nao encontrado!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+            if (dbFileTXT != null) dbFileTXT.close();
         }
     }
 }

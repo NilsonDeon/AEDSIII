@@ -40,7 +40,8 @@ class Main {
                      "\n| 5 - Atualizar                            |" +
                      "\n| 6 - Deletar                              |" +
                      "\n| 7 - Ordenar                              |" +
-                     "\n| 8 - Abrir musica no Spotify              |" +
+                     "\n| 8 - Salvar registros em txt              |" +
+                     "\n| 9 - Abrir musica no Spotify              |" +
                      "\n+------------------------------------------+";
        int opcao = -1;
 
@@ -59,7 +60,8 @@ class Main {
                    case 5 : crud.update();         break;
                    case 6 : crud.delete();         break;
                    case 7 : sort.ordenarArquivo(); break;
-                   case 8 : crud.abrirMusica();    break;
+                   case 8 : crud.saveTXT();        break;
+                   case 9 : crud.abrirMusica();    break;
                    default: mostrarErro();         break;
                }
            } catch (InputMismatchException e) {
@@ -76,6 +78,6 @@ class Main {
      */
     public static void mostrarErro() {
         System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
-                           "1 a 8.");
+                           "1 a 9.");
     }
 }

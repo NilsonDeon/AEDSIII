@@ -19,10 +19,10 @@ import java.util.Locale;
  */
 public class Musica {
 
-    public boolean lapide;      // implementada como boolean, por ser um byte
+    public boolean lapide;        // implementada como boolean, por ser um byte
     public int id;
 
-    public String nome;         // String de tamanho variavel
+    public String nome;           // String de tamanho variavel
     protected String artistas;
     protected String nomeAlbum;   
     protected String[] imagens;    // Lista de valores com separador " "

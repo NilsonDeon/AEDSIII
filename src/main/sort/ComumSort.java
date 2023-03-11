@@ -15,7 +15,7 @@ import app.Musica;
  */
 public class ComumSort {
 
-    private static final String registroDB = "Registro.db";
+    private static final String registroDB = "src/resources/Registro.db";
 
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
