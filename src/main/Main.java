@@ -78,6 +78,6 @@ class Main {
      */
     public static void mostrarErro() {
         System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
-                           "1 a 9.");
+                           "1 a 8.");
     }
 }

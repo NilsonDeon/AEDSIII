@@ -22,9 +22,9 @@ import app.Musica;
  */
 public class CRUD {
 
-    private static final String arquivoCSV = "src/resources/Spotify.csv";
-    private static final String registroDB = "src/resources/Registro.db";
-    private static final String registroTXT = "src/resources/Registro.txt";
+    private static final String arquivoCSV = "./src/resources/Spotify.csv";
+    private static final String registroDB = "./src/resources/Registro.db";
+    private static final String registroTXT = "./src/resources/Registro.txt";
 
     private static IO io = new IO();
 
@@ -127,7 +127,7 @@ public class CRUD {
                 Musica musica = new Musica();
                 musica.lerMusica();
                 ultimoId++;
-                musica.id = ultimoId;
+                musica.setId(ultimoId);
                 System.out.println(musica);
 
                 // Atualizar ultimo ID no cabecalho do arquivo
@@ -141,8 +141,8 @@ public class CRUD {
                 byte[] byteArray = musica.toByteArray();
                 dbFile.write(byteArray);
                 
-                System.out.println("\nMusica [" + musica.id + "]: \"" +
-                                            musica.nome + "\" " +
+                System.out.println("\nMusica [" + musica.getId() + "]: \"" +
+                                            musica.getNome() + "\" " +
                                             "cadastrada com sucesso!");
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -262,7 +262,7 @@ public class CRUD {
                         dbFile.read(registro);
                         musica.fromByteArray(registro);
 
-                        if (idProcurado == musica.id) {
+                        if (idProcurado == musica.getId()) {
                             find = true;
                             System.out.println(musica);
                         }
@@ -335,23 +335,23 @@ public class CRUD {
                         dbFile.read(registro);
                         musica.fromByteArray(registro);
 
-                        if (idProcurado == musica.id) {
-                            musica.lapide = true;
+                        if (idProcurado == musica.getId()) {
+                            musica.setLapide(true);
 
                             // Guardar ponteiro atual
                             long posicaoFinal = dbFile.getFilePointer();
 
                             // Apagar logicamente o registro
                             dbFile.seek(posicaoInicio);
-                            byte[] newLapide = aux.booleanToByteArray(musica.lapide);
+                            byte[] newLapide = aux.booleanToByteArray(musica.isLapide());
                             dbFile.write(newLapide);
                             find = true;
 
                             // Retornar ponteiro para final do registro
                             dbFile.seek(posicaoFinal);
                             
-                            System.out.println("\nMusica [" + musica.id + "]: \"" +
-                                            musica.nome + "\" " +
+                            System.out.println("\nMusica [" + musica.getId() + "]: \"" +
+                                            musica.getNome() + "\" " +
                                             "deletada com sucesso!");
                         }
 
@@ -423,7 +423,7 @@ public class CRUD {
                         dbFile.read(registro);
                         musica.fromByteArray(registro);
 
-                        if (idProcurado == musica.id) {
+                        if (idProcurado == musica.getId()) {
 
                             // Ler e criar novo Objeto musica
                             Musica newMusica = musica.clone();
@@ -446,10 +446,10 @@ public class CRUD {
                             } else {
                                 
                                 // Marcar registro como invalido
-                                musica.lapide = true;
+                                musica.setLapide(true);
 
                                 dbFile.seek(posicaoInicio);
-                                byte[] newLapide = aux.booleanToByteArray(musica.lapide);
+                                byte[] newLapide = aux.booleanToByteArray(musica.isLapide());
                                 dbFile.write(newLapide);
 
                                 // Escrever a musica atualizada no final do arquivo
@@ -460,8 +460,8 @@ public class CRUD {
                             }
 
                             if (atualizado == true) {
-                                System.out.println("\nMusica [" + newMusica.id + "]: \"" +
-                                                newMusica.nome + "\" " +
+                                System.out.println("\nMusica [" + newMusica.getId() + "]: \"" +
+                                                newMusica.getNome() + "\" " +
                                                 "atualizada com sucesso!");
                             }
                             find = true;
@@ -556,7 +556,7 @@ public class CRUD {
                         dbFile.read(registro);
                         musica.fromByteArray(registro);
 
-                        if (idProcurado == musica.id) {
+                        if (idProcurado == musica.getId()) {
                             find = true;
                         }
 
@@ -586,17 +586,16 @@ public class CRUD {
             if (dbFile != null) dbFile.close();
 
             if (find == true) {
-                pesquisar(musica.uri);
+                abrirMusica (musica.getUri());
             }
         }
-
     }
 
     /**
     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
     * @param uri link da musica.
     */
-    private void pesquisar(String uri) {
+    private void abrirMusica (String uri) {
         try {
             // Tratamento da string URI para ser adaptavel ao link
             // Pegar terceiro elemento correspondente ao trackID da musica
@@ -624,6 +623,10 @@ public class CRUD {
         BufferedWriter dbFileTXT = null;
 
         try {
+            // Apagar arquivo anterior caso exista
+            File antigoTXT = new File(registroTXT);
+            antigoTXT.delete();
+
             dbFileTXT = new BufferedWriter (new FileWriter (registroTXT));
             dbFile = new RandomAccessFile (registroDB, "r");
 
@@ -678,4 +681,5 @@ public class CRUD {
             if (dbFileTXT != null) dbFileTXT.close();
         }
     }
+
 }

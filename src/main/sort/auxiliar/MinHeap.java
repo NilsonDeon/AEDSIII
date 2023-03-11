@@ -9,6 +9,8 @@ public class MinHeap {
     protected int size;
     protected int capacity;
 
+    protected int atributo;
+
     /**
      * Construtor padrao da classe MinHeap.
      */
@@ -31,19 +33,25 @@ public class MinHeap {
         this.size = 0;
         this.heap = new Musica[this.capacity];
         this.prioridade = new int[this.capacity];
+
+        this.atributo = 1; //default
         
     }
 
     /**
      * Metodo para inserir nova Musica no heap.
+     * @param atributo - atributo para se ordenar.
      * @param musica - a ser inserida.
      * @param cargaInicial - booleano para indicar se e' a carga do heap
      * @throws Exception - Caso o heap estiver cheio.
      */
-    public void inserir (Musica musica, boolean cargaInicial) throws Exception {
+    public void inserir (int atributo, Musica musica, boolean cargaInicial) throws Exception {
         if (isFull()) {
             throw new Exception ("\nERRO: MinHeap.inserir() -> heap cheio!\n");
         }
+
+        // Atualizo atributo
+        this.atributo = atributo;
 
         heap[size] = musica;
         int posAtual = size;
@@ -52,14 +60,42 @@ public class MinHeap {
             // Atualizar a prioridade da nova musica
             if (size > 0) {
 
-                // Se musica for ordenavel ainda, manter igual
-                if (heap[0].id <= musica.id) {
-                    prioridade[size] = prioridade[0];
-
+                // Se musica for ordenavel ainda, manter prioridade igual
                 // Caso contrario, atualizar para proximo valor
-                } else {
-                    prioridade[size] = prioridade[0] + 1;
+                switch (atributo) {
+
+                    // Order by ID
+                    case 1: 
+                        if (heap[0].getId() < musica.getId()) {
+                           prioridade[size] = prioridade[0];
+                        } else {
+                           prioridade[size] = prioridade[0] + 1;
+                        }
+                        break;
+                    
+                    // Order by nome
+                    case 2: 
+                        if (heap[0].getNome().equals(musica.getNome())) {
+                           if (heap[0].getId() < musica.getId()) {
+                              prioridade[size] = prioridade[0];
+                           }
+                        } else {
+                           prioridade[size] = prioridade[0] + 1;
+                        }
+                        break;
+
+                    // Order by data lancamento
+                    case 3: 
+                        if (heap[0].getDataLancamento().equals(musica.getDataLancamento())) {
+                           if (heap[0].getId() < musica.getId()) {
+                              prioridade[size] = prioridade[0];
+                           }
+                        } else {
+                           prioridade[size] = prioridade[0] + 1;
+                        }
+                        break;
                 }
+                
             } else {
 
                 // Primeira insercao
@@ -73,7 +109,7 @@ public class MinHeap {
         size++;
 
         // Reorganiza o heap apos a insercao para pai ser menor que filhos
-        while (posAtual > 0 && comparePrioridade(posAtual, parent(posAtual))) {
+        while (posAtual > 0 && comparePrioridade(atributo, posAtual, parent(posAtual))) {
             swap(posAtual, parent(posAtual));
             posAtual = parent(posAtual);
         }
@@ -82,7 +118,7 @@ public class MinHeap {
 
     /**
      * Metodo para remover Musica do heap.
-     * @return removed - musica de menor ID que foi removida.
+     * @return removed - musica de menor que foi removida.
      * @throws Exception - Caso o heap estiver vazio.
      */
     public Musica remover () throws Exception {
@@ -109,19 +145,38 @@ public class MinHeap {
     }
 
     /**
-     * Metodo para comparar a prioridade de duas musicas a partir de seu id e a
-     * prioridade obtida na hora da insercao.
+     * Metodo para comparar a prioridade de duas musicas a partir de atributo e
+     * da prioridade obtida na hora da insercao.
+     * @param atributo - atributo para se ordenar.
      * @param i - posicao da musica 1.
      * @param j - posicao da musica 2.
      * @return true se 1 < 2; false, caso contrario.
      */
-    private boolean comparePrioridade(int i, int j) {
-        boolean resp;
+    private boolean comparePrioridade(int atributo, int i, int j) {
+        boolean resp = false;
 
         if (prioridade[i] != prioridade[j]) {
             resp = (prioridade[i] < prioridade[j]);
         } else {
-            resp = (heap[i].id <= heap[j].id);
+            switch (atributo) {
+                case 1: 
+                    resp = (heap[i].getId() < heap[j].getId());
+                    break;
+                case 2: 
+                    if (heap[i].getNome().equals(heap[j].getNome())) {
+                        resp = (heap[i].getId() <= heap[j].getId());
+                    } else {
+                        resp = (heap[i].getNome().compareTo(heap[j].getNome()) < 0);
+                    }
+                    break;
+                case 3: 
+                    if (heap[i].getDataLancamento().equals(heap[j].getDataLancamento())) {
+                        resp = (heap[i].getId() <= heap[j].getId());
+                    } else {
+                        resp = (heap[i].getDataLancamento().compareTo(heap[j].getDataLancamento()) < 0);
+                    }
+                    break;
+            }
         }
 
         return resp;
@@ -154,11 +209,11 @@ public class MinHeap {
         int right = rightChild(i);
 
         // Obter a menor musica filha, se existir
-        if (left < size && comparePrioridade(left, smallest)) {
+        if (left < size && comparePrioridade(atributo, left, smallest)) {
             smallest = left;
         }
 
-        if (left < size && comparePrioridade(right, smallest)) {
+        if (left < size && comparePrioridade(atributo, right, smallest)) {
             smallest = right;
         }
 

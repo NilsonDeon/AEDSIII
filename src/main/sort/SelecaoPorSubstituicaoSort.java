@@ -17,7 +17,7 @@ import sort.auxiliar.MinHeap;
  */
 public class SelecaoPorSubstituicaoSort {
 
-    private static final String registroDB = "src/resources/Registro.db";
+    private static final String registroDB = "./src/resources/Registro.db";
     
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
@@ -65,19 +65,19 @@ public class SelecaoPorSubstituicaoSort {
     /**
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
      * sao chamadas.
-     * @throws Exception Caso haja erro de leitura ou escrita com os arquivos.
-     * @throws Exception Caso haja erro de insercao ou remocao no heap.
+     * @param atributo - a ser usado na ordenacao.
+     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public void ordenar()  throws Exception {
+    public void ordenar(int atributo) throws IOException {
 
         boolean paridade = true;
         int numIntercalacao = 1;
         int numArquivos = 0;
 
-        boolean ok = distribuicao();
+        boolean ok = distribuicao(atributo);
         if (ok) {
             while (numArquivos != 1) {           
-                numArquivos = intercalacao(numIntercalacao, paridade);
+                numArquivos = intercalacao(atributo, numIntercalacao, paridade);
                 paridade = !paridade;
                 numIntercalacao++;
             }
@@ -105,14 +105,14 @@ public class SelecaoPorSubstituicaoSort {
 
     /**
      * Metodo privado da ordenacao, representando a primeira fase da Ordenacao
-     * Externa para distribuir o arquivo principal em NUM_CAMINHOS * arquivos, 
-     * contendo cada um NUM_REGISTROS * registros.
+     * Externa para distribuir o arquivo principal em NUM_CAMINHOS * arquivos.
+     * @param atributo - a ser usado na ordenacao.
      * @return true, se distribuicao ocorreu corretamente; false, caso 
      * contrario.
      * @throws Exception Caso haja erro de leitura ou escrita com os arquivos.
      * @throws Exception Caso haja erro de insercao ou remocao no heap.
      */
-    private boolean distribuicao() throws Exception {
+    private boolean distribuicao(int atributo) throws IOException {
 
 
         RandomAccessFile arqTemp = null;
@@ -170,7 +170,7 @@ public class SelecaoPorSubstituicaoSort {
 
                         // Inserir no heap
                         // True, indicando que e' carga inical
-                        minHeap.inserir(musica, true);
+                        minHeap.inserir(atributo, musica, true);
                         posHeap++;
                     } else {
                         posicaoAtual = dbFile.getFilePointer();
@@ -187,7 +187,7 @@ public class SelecaoPorSubstituicaoSort {
                     for(int k = 0; k < NUM_CAMINHOS; k++){
 
                         // Obter a prioridade do heap[0]
-                        int prioridadeAtual  = minHeap.getMenorPrioridade();
+                        int prioridadeAtual = minHeap.getMenorPrioridade();
 
                         // Condicao de parada sera' fim de arquivo ou
                         // mudanca de prioridade
@@ -224,7 +224,7 @@ public class SelecaoPorSubstituicaoSort {
 
                                 // Adiciona-la no heap
                                 // False, indicando que nao e' carga inical
-                                minHeap.inserir(musica, false);
+                                minHeap.inserir(atributo, musica, false);
 
                             } else {
                                 posicaoAtual = dbFile.getFilePointer();
@@ -278,6 +278,7 @@ public class SelecaoPorSubstituicaoSort {
 
     /**
      * Metodo para realizar a intercalacao propriamente dita.
+     * @param atributo - a ser usado na ordenacao.
      * @param numIntercalacao - contador para indicar qual a intercalacao esta'
      * sendo feita (primeira, segunda, terceira, ...)
      * @param paridade - indicador para saber se e' uma intercalacao par ou
@@ -285,7 +286,7 @@ public class SelecaoPorSubstituicaoSort {
      * @return numArquivos - numero de arquivos que foram criados.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public int intercalacao (int numIntercalacao, boolean paridade) throws IOException {
+    public int intercalacao (int atributo, int numIntercalacao, boolean paridade) throws IOException {
 
         RandomAccessFile newTemp = null;
         int numArquivos = 0;
@@ -412,10 +413,10 @@ public class SelecaoPorSubstituicaoSort {
                                             musicaTmp.fromByteArray(registro);
 
                                             // Comparar e ver se ainda esta' ordenado
-                                            if (musicaTmp.id >= musicas[i].id || carregamentoInicial) {
+                                            if (carregamentoInicial || isOrdenado(atributo, musicaTmp, musicas[i])) {
                                                 
                                                 // Atualizar musica no array
-                                                musicas[i] = musicaTmp;
+                                                musicas[i] = musicaTmp.clone();
 
                                                 // Ajustar variaveis
                                                 posAtual[i] = arqTemp[i].getFilePointer();
@@ -437,7 +438,13 @@ public class SelecaoPorSubstituicaoSort {
                             }
 
                             carregamentoInicial = false;
-                            menorMusica = getMenorId();
+
+                            // Ordenar pelo atributo escolhido
+                            switch (atributo) {
+                                case 1: menorMusica = getMenorId();   break;
+                                case 2: menorMusica = getMenorNome(); break;
+                                case 3: menorMusica = getMenorData(); break;
+                            }
 
                             if (menorMusica != null) {
 
@@ -480,6 +487,54 @@ public class SelecaoPorSubstituicaoSort {
     }
 
     /**
+     * Metodo para obter a Musica de menor Data de Lancamento.
+     * @return menorMusica pela Data de Lancamento.
+     */
+    private Musica getMenorData() {
+        Musica menorMusica = null;
+
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+
+            // Testar se arquivo e' valido
+            if (arqOK[i] == true) {
+
+                // Se menorMusica nao for == null, comparar data de lancamento.
+                if (menorMusica != null) {
+                    menorMusica = (menorMusica.getDataLancamento().compareTo(musicas[i].getDataLancamento()) < 0) ? menorMusica : musicas[i];
+                } else {
+                    menorMusica = musicas[i];
+                }
+            }
+        }
+
+        return menorMusica;
+    }
+
+    /**
+     * Metodo para obter a Musica de menor Nome.
+     * @return menorMusica pelo Nome.
+     */
+    private Musica getMenorNome() {
+        Musica menorMusica = null;
+
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+
+            // Testar se arquivo e' valido
+            if (arqOK[i] == true) {
+
+                // Se menorMusica nao for == null, comparar nome.
+                if (menorMusica != null) {
+                    menorMusica = (menorMusica.getNome().compareTo(musicas[i].getNome()) < 0) ? menorMusica : musicas[i];
+                } else {
+                    menorMusica = musicas[i];
+                }
+            }
+        }
+
+        return menorMusica;
+    }
+
+    /**
      * Metodo para obter a Musica de menor ID.
      * @return menorMusica pelo ID.
      */
@@ -493,7 +548,7 @@ public class SelecaoPorSubstituicaoSort {
 
                 // Se menorMusica nao for == null, comparar ID.
                 if (menorMusica != null) {
-                    menorMusica = (menorMusica.id < musicas[i].id) ? menorMusica : musicas[i];
+                    menorMusica = (menorMusica.getId() < musicas[i].getId()) ? menorMusica : musicas[i];
                 } else {
                     menorMusica = musicas[i];
                 }
@@ -521,9 +576,28 @@ public class SelecaoPorSubstituicaoSort {
      * @return true, se existirem; false, caso contrario.
      */
     private boolean arquivosExistirem() {
-        boolean resp = true;
+        boolean resp = false;
         for (int i = 0; i < NUM_CAMINHOS; i++) {
             resp = resp || (tamArq[i] > 0);
+        }
+
+        return resp;
+    }
+
+    /**
+     * Metodo para testar se arquivo esta' ordenado de acordo com atributo.
+     * @param musicaTmp - nova musica lida.
+     * @param musica - musica lida anteriormente.
+     * @param atributo - escohlido.
+     * @return true, se estiver ordenado; false, caso contrario.
+     */
+    private boolean isOrdenado (int atributo, Musica musicaTmp, Musica musica) {
+        boolean resp = false;
+
+        switch (atributo) {
+            case 1: resp = (musicaTmp.getId() >= musica.getId());                                      break;
+            case 2: resp = (musicaTmp.getNome().compareTo(musica.getNome()) >= 0);                     break;
+            case 3: resp = (musicaTmp.getDataLancamento().compareTo(musica.getDataLancamento()) >= 0); break;
         }
 
         return resp;

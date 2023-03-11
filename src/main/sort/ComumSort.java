@@ -15,7 +15,7 @@ import app.Musica;
  */
 public class ComumSort {
 
-    private static final String registroDB = "src/resources/Registro.db";
+    private static final String registroDB = "./src/resources/Registro.db";
 
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
@@ -61,18 +61,19 @@ public class ComumSort {
     /**
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
      * sao chamadas.
+     * @param atributo - a ser usado na ordenacao.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public void ordenar() throws IOException {
+    public void ordenar(int atributo) throws IOException {
 
         boolean paridade = true;
         int numIntercalacao = 1;
         int numArquivos = 0;
 
-        boolean ok = distribuicao();
+        boolean ok = distribuicao(atributo);
         if (ok) {
             while (numArquivos != 1) {           
-                numArquivos = intercalacao(numIntercalacao, paridade);
+                numArquivos = intercalacao(atributo, numIntercalacao, paridade);
                 paridade = !paridade;
                 numIntercalacao++;
             }
@@ -102,11 +103,12 @@ public class ComumSort {
      * Metodo privado da ordenacao, representando a primeira fase da Ordenacao
      * Externa para distribuir o arquivo principal em NUM_CAMINHOS * arquivos, 
      * contendo cada um NUM_REGISTROS * registros.
+     * @param atributo - a ser usado na ordenacao.
      * @return true, se distribuicao ocorreu corretamente; false, caso 
      * contrario.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    private boolean distribuicao() throws IOException {
+    private boolean distribuicao(int atributo) throws IOException {
 
         RandomAccessFile arqTemp = null;
         RandomAccessFile dbFile = null;
@@ -177,7 +179,7 @@ public class ComumSort {
 
                         // Ordenar os registros em memoria principal
                         if (posArray > 0) {
-                            QuickSort quick = new QuickSort(posArray);
+                            QuickSort quick = new QuickSort(posArray, atributo);
                             quick.quicksort(musicas);
                         }
 
@@ -217,6 +219,7 @@ public class ComumSort {
 
     /**
      * Metodo para realizar a intercalacao propriamente dita.
+     * @param atributo - a ser usado na ordenacao.
      * @param numIntercalacao - contador para indicar qual a intercalacao esta'
      * sendo feita (primeira, segunda, terceira, ...)
      * @param paridade - indicador para saber se e' uma intercalacao par ou
@@ -224,7 +227,7 @@ public class ComumSort {
      * @return numArquivos - numero de arquivos que foram criados.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public int intercalacao (int numIntercalacao, boolean paridade) throws IOException {
+    public int intercalacao (int atributo, int numIntercalacao, boolean paridade) throws IOException {
 
         RandomAccessFile newTemp = null;
         int numArquivos = 0;
@@ -361,8 +364,14 @@ public class ComumSort {
                             }
 
                             carregamentoInicial = false;
-                            menorMusica = getMenorId();
 
+                            // Ordenar pelo atributo escolhido
+                            switch (atributo) {
+                                case 1: menorMusica = getMenorId();   break;
+                                case 2: menorMusica = getMenorNome(); break;
+                                case 3: menorMusica = getMenorData(); break;
+                            }
+                            
                             if (menorMusica != null) {
 
                                 // Escrever menor musica
@@ -404,6 +413,54 @@ public class ComumSort {
     }
 
     /**
+     * Metodo para obter a Musica de menor Data de Lancamento.
+     * @return menorMusica pela Data de Lancamento.
+     */
+    private Musica getMenorData() {
+        Musica menorMusica = null;
+
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+
+            // Testar se arquivo e' valido
+            if (arqOK[i] == true) {
+
+                // Se menorMusica nao for == null, comparar data de lancamento.
+                if (menorMusica != null) {
+                    menorMusica = (menorMusica.getDataLancamento().compareTo(musicas[i].getDataLancamento()) < 0) ? menorMusica : musicas[i];
+                } else {
+                    menorMusica = musicas[i];
+                }
+            }
+        }
+
+        return menorMusica;
+    }
+
+    /**
+     * Metodo para obter a Musica de menor Nome.
+     * @return menorMusica pelo Nome.
+     */
+    private Musica getMenorNome() {
+        Musica menorMusica = null;
+
+        for (int i = 0; i < NUM_CAMINHOS; i++) {
+
+            // Testar se arquivo e' valido
+            if (arqOK[i] == true) {
+
+                // Se menorMusica nao for == null, comparar nome.
+                if (menorMusica != null) {
+                    menorMusica = (menorMusica.getNome().compareTo(musicas[i].getNome()) < 0) ? menorMusica : musicas[i];
+                } else {
+                    menorMusica = musicas[i];
+                }
+            }
+        }
+
+        return menorMusica;
+    }
+
+    /**
      * Metodo para obter a Musica de menor ID.
      * @return menorMusica pelo ID.
      */
@@ -417,7 +474,7 @@ public class ComumSort {
 
                 // Se menorMusica nao for == null, comparar ID.
                 if (menorMusica != null) {
-                    menorMusica = (menorMusica.id < musicas[i].id) ? menorMusica : musicas[i];
+                    menorMusica = (menorMusica.getId() < musicas[i].getId()) ? menorMusica : musicas[i];
                 } else {
                     menorMusica = musicas[i];
                 }

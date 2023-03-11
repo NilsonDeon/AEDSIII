@@ -19,21 +19,24 @@ import java.util.Locale;
  */
 public class Musica {
 
-    public boolean lapide;        // implementada como boolean, por ser um byte
-    public int id;
+    // Implementada como boolean, por ser um byte
+    protected boolean lapide;
 
-    public String nome;           // String de tamanho variavel
+    // Identificador unico sequencial
+    protected int id;
+
+    // Atributos presentes no dataBase Spotify.csv
+    protected String nome;
     protected String artistas;
-    protected String nomeAlbum;   
-    protected String[] imagens;    // Lista de valores com separador " "
-    protected char[] pais;         // String tamanho fixo
-    protected Date dataLancamento; // Data
-    protected int dancabilidade;   // Inteiro
-    protected int duracao;
+    protected String nomeAlbum;
+    protected String[] imagens;    
+    protected char[] pais;         // String tamanho fixo == 2
+    protected Date dataLancamento;
+    protected int dancabilidade;
+    protected int duracao;         
     protected int vivacidade;
     protected int popularidade;       
-    public String uri;      
-
+    protected String uri;      
 
     /**
      * Construtor padrao da classe Musica.
@@ -610,4 +613,211 @@ public class Musica {
        }
     }
 
+    /**
+    * Getter para o atributo lapide.
+    * @return o valor atual do atributo lapide.
+    */
+    public boolean isLapide() {
+        return lapide;
+    }
+
+    /**
+    * Setter para o atributo lapide.
+    * @param lapide - o novo valor para o atributo lapide.
+    */
+    public void setLapide(boolean lapide) {
+        this.lapide = lapide;
+    }
+
+    /**
+    * Getter para o atributo id.
+    * @return o valor atual do atributo id.
+    */
+    public int getId() {
+        return id;
+    }
+
+    /**
+    * Setter para o atributo id.
+    * @param id - o novo valor para o atributo id.
+    */
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    /**
+    * Getter para o atributo nome.
+    * @return o valor atual do atributo nome.
+    */
+    public String getNome() {
+        return nome;
+    }
+
+    /**
+    * Setter para o atributo nome.
+    * @param nome - o novo valor para o atributo nome.
+    */
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    /**
+    * Getter para o atributo artistas.
+    * @return o valor atual do atributo artistas.
+    */
+    public String getArtistas() {
+        return artistas;
+    }
+
+    /**
+    * Setter para o atributo artistas.
+    * @param artistas - o novo valor para o atributo artistas.
+    */
+    public void setArtistas(String artistas) {
+        this.artistas = artistas;
+    }
+
+    /**
+    * Getter para o atributo nomeAlbum.
+    * @return o valor atual do atributo nomeAlbum.
+    */
+    public String getNomeAlbum() {
+        return nomeAlbum;
+    }
+
+    /**
+    * Setter para o atributo nomeAlbum.
+    * @param nomeAlbum - o novo valor para o atributo nomeAlbum.
+    */
+    public void setNomeAlbum(String nomeAlbum) {
+        this.nomeAlbum = nomeAlbum;
+    }
+
+    /**
+    * Getter para o atributo imagens.
+    * @return o valor atual do atributo imagens.
+    */
+    public String[] getImagens() {
+        return imagens;
+    }
+
+    /**
+    * Setter para o atributo imagens.
+    * @param imagens - o novo valor para o atributo imagens.
+    */
+    public void setImagens(String[] imagens) {
+        this.imagens = imagens;
+    }
+
+    /**
+    * Getter para o atributo pais.
+    * @return o valor atual do atributo pais.
+    */
+    public char[] getPais() {
+        return pais;
+    }
+
+    /**
+    * Setter para o atributo pais.
+    * @param pais - o novo valor para o atributo pais.
+    */
+    public void setPais(char[] pais) {
+        this.pais = pais;
+    }
+
+    /**
+    * Getter para o atributo dataLancamento.
+    * @return o valor atual do atributo dataLancamento.
+    */
+    public Date getDataLancamento() {
+        return dataLancamento;
+    }
+
+    /**
+    * Setter para o atributo dataLancamento.
+    * @param dataLancamento - o novo valor para o atributo dataLancamento.
+    */
+    public void setDataLancamento(Date dataLancamento) {
+        this.dataLancamento = dataLancamento;
+    }
+
+    /**
+    * Getter para o atributo dancabilidade.
+    * @return o valor atual do atributo dancabilidade.
+    */
+    public int getDancabilidade() {
+        return dancabilidade;
+    }
+
+    /**
+    * Setter para o atributo dancabilidade.
+    * @param dancabilidade um inteiro representando a dancabilidade da música.
+    */
+    public void setDancabilidade(int dancabilidade) {
+        this.dancabilidade = dancabilidade;
+    }
+
+    /**
+    * Getter para o atributo duracao.
+    * @return o valor atual do atributo duracao.
+    */
+    public int getDuracao() {
+        return duracao;
+    }
+
+    /**
+    * Setter para o atributo duracao.
+    * @param duracao um inteiro representando a duração da música.
+    */
+    public void setDuracao(int duracao) {
+        this.duracao = duracao;
+    }
+
+    /**
+    * Getter para o atributo vivacidade.
+    * @return o valor atual do atributo vivacidade.
+    */
+    public int getVivacidade() {
+        return vivacidade;
+    }
+
+    /**
+    * Setter para o atributo vivacidade.
+    * @param vivacidade um inteiro representando a vivacidade da música.
+    */
+    public void setVivacidade(int vivacidade) {
+        this.vivacidade = vivacidade;
+    }
+
+    /**
+    * Getter para o atributo popularidade.
+    * @return o valor atual do atributo popularidade.
+    */
+    public int getPopularidade() {
+        return popularidade;
+    }
+
+    /**
+    * Setter para o atributo popularidade.
+    * @param popularidade um inteiro representando a popularidade da música.
+    */
+    public void setPopularidade(int popularidade) {
+        this.popularidade = popularidade;
+    }
+
+    /**
+    * Getter para o atributo URI.
+    * @return o valor atual do atributo URI.
+    */
+    public String getUri() {
+        return uri;
+    }
+
+    /**
+    * Setter para o atributo URI.
+    * @param uri uma String representando a URI da música.
+    */
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 }
