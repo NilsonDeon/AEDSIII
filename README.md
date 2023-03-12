@@ -1,6 +1,9 @@
-# AEDSIII
+# Trabalho Pratico - AEDSIII
 
-Para compilar e executar o programa, basta o seguinte comando no terminal: make run
+#### Gabriel Vargas Bento de Souza
+#### Nilson Deon Cordeiro Filho
+
+Para compilar e executar o programa, basta o seguinte comando no terminal: "make run"
 
 Link video explicativo: 
 
