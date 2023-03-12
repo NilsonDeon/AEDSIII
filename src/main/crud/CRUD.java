@@ -3,6 +3,8 @@ package crud;
 // Bibliotecas
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -429,7 +431,17 @@ public class CRUD {
                             atualizado  = newMusica.atualizar();
                             byte[] newRegistro = newMusica.toByteArray();
 
-                            if (newRegistro.length <= registro.length) {
+                            // Obter tamanho dos registros
+                            ByteArrayInputStream bais = new ByteArrayInputStream(newRegistro);
+                            DataInputStream dis = new DataInputStream(bais);
+                            dis.readBoolean();
+
+                            // Nao basta usar a funcao length, pois caso ja tenha sido alterado
+                            // o tamanho reservado sera' menor que o efetivamente usado
+                            int newRegistroLength = dis.readInt();
+                            int registroAtualLength = tamRegistro;
+
+                            if (newRegistroLength <= registroAtualLength) {
 
                                 // Guardar ponteiro atual
                                 long posicaoFinal = dbFile.getFilePointer();
