@@ -18,7 +18,8 @@ import sort.auxiliar.MinHeap;
 public class SelecaoPorSubstituicaoSort {
 
     private static final String registroDB = "./src/resources/Registro.db";
-    
+    private static final String arquivoTemp = "./src/resources/arqTemp";
+
     private static int NUM_REGISTROS;
     private static int NUM_CAMINHOS;
 
@@ -87,13 +88,13 @@ public class SelecaoPorSubstituicaoSort {
             // Renomear arquivo novo
             File novoArquivo = new File(registroDB);
             File antigoArquivo = null;
-            if (paridade == true) antigoArquivo = new File("arqTemp0.db");
-            else antigoArquivo = new File("arqTemp" + NUM_CAMINHOS + ".db");
+            if (paridade == true) antigoArquivo = new File(arquivoTemp + "0.db");
+            else antigoArquivo = new File(arquivoTemp + NUM_CAMINHOS + ".db");
             antigoArquivo.renameTo(novoArquivo);
 
             // Apagar arquivos temporarios
             for (int i = 0; i < NUM_CAMINHOS*2; i++) {
-                File file = new File("arqTemp" + i + ".db");
+                File file = new File(arquivoTemp + i + ".db");
                 file.delete();
             }
 
@@ -132,7 +133,7 @@ public class SelecaoPorSubstituicaoSort {
                 // Criar os primeiros arquivos temporarios
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
                    try {
-                        arqTemp = new RandomAccessFile("arqTemp"+ i +".db", "rw");
+                        arqTemp = new RandomAccessFile(arquivoTemp + i +".db", "rw");
 
                         // Ao terminar a ordenacao, SEMPRE o arquivo ordenado
                         // sera' o primeiro a ser criado, ou seja, "arqTemp0.db".
@@ -198,13 +199,13 @@ public class SelecaoPorSubstituicaoSort {
                             // Salvar menor musica no arquivo
                             RandomAccessFile temp = null;
                             try{
-                                temp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
+                                temp = new RandomAccessFile (arquivoTemp + k + ".db", "rw");
                                 temp.seek(temp.length());
                                 temp.write(bytes);
 
                             }catch(Exception e) {
                                 System.out.println("\nERRO: Ocorreu um erro na escrita do " +
-                                "arquivo \"" + "arqTemp\"" + k + ".db -> " + e +"\n");
+                                "arquivo \"" + arquivoTemp + "\"" + k + ".db -> " + e +"\n");
                             }finally{
                                 temp.close();
                             }
@@ -244,13 +245,13 @@ public class SelecaoPorSubstituicaoSort {
                             // Salvar menor musica no arquivo
                             RandomAccessFile temp = null;
                             try{
-                                temp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
+                                temp = new RandomAccessFile (arquivoTemp + k + ".db", "rw");
                                 temp.seek(temp.length());
                                 temp.write(bytes);
 
                             }catch(Exception e) {
                                 System.out.println("\nERRO: Ocorreu um erro na escrita do " +
-                                "arquivo \"" + "arqTemp\"" + k + ".db -> " + e +"\n");
+                                "arquivo \"" + arquivoTemp + "\"" + k + ".db -> " + e +"\n");
                             }finally{
                                 temp.close();
                             }
@@ -295,13 +296,13 @@ public class SelecaoPorSubstituicaoSort {
             // sera' gravado
             if (paridade == true) {
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
-                    arqTemp[i] = new RandomAccessFile ("arqTemp" + i + ".db", "r");
+                    arqTemp[i] = new RandomAccessFile (arquivoTemp + i + ".db", "r");
                     tamArq[i] = arqTemp[i].length();
                 }
 
                 // Para evitar sobrescrever, apagar conteudo do arquivo
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
-                    File file = new File ("arqTemp" + (i+NUM_CAMINHOS) +".db");
+                    File file = new File (arquivoTemp + (i+NUM_CAMINHOS) +".db");
                     FileOutputStream fos = new FileOutputStream(file, false);
                     fos.write(new byte[0]);
                     fos.close();
@@ -314,13 +315,13 @@ public class SelecaoPorSubstituicaoSort {
 
             } else {
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
-                    arqTemp[i] = new RandomAccessFile ("arqTemp" + (i+NUM_CAMINHOS) + ".db", "r");
+                    arqTemp[i] = new RandomAccessFile (arquivoTemp + (i+NUM_CAMINHOS) + ".db", "r");
                     tamArq[i] = arqTemp[i].length();
                 }
                 
                 // Para evitar sobrescrever, deletar arquivo antigo
                 for (int i = 0; i < NUM_CAMINHOS; i++) {
-                    File file = new File ("arqTemp" + i +".db");
+                    File file = new File (arquivoTemp + i +".db");
                     FileOutputStream fos = new FileOutputStream(file, false);
                     fos.write(new byte[0]);
                     fos.close();
@@ -363,7 +364,7 @@ public class SelecaoPorSubstituicaoSort {
                 Musica menorMusica = null;
 
                 // Escrever ultimoID no primeiro arquivo
-                newTemp = new RandomAccessFile ("arqTemp" + k + ".db", "rw");
+                newTemp = new RandomAccessFile (arquivoTemp + k + ".db", "rw");
                 Musica auxMus = new Musica();
                 byte[] salvarID = auxMus.intToByteArray(ultimoId);
                 newTemp.write(salvarID);
@@ -445,7 +446,7 @@ public class SelecaoPorSubstituicaoSort {
                             if (menorMusica != null) {
 
                                 // Escrever menor musica
-                                newTemp = new RandomAccessFile ("arqTemp" + j + ".db", "rw");
+                                newTemp = new RandomAccessFile (arquivoTemp + j + ".db", "rw");
                                 newTemp.seek(newTemp.length());
                                 byte[] bytes = menorMusica.toByteArray();
                                 newTemp.write(bytes);
