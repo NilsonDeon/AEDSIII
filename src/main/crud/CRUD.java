@@ -1,6 +1,5 @@
 package crud;
 
-
 // Bibliotecas
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -595,21 +594,23 @@ public class CRUD {
     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
     * @param uri link da musica.
     */
-    private void abrirMusica (String uri) {
+    private void abrirMusica (String uri) throws IOException {
+        // Tratamento da string URI para ser adaptavel ao link
+        // Pegar terceiro elemento correspondente ao trackID da musica
+        String[] parts = uri.split(":");
+        String trackId = parts[2];
+        
+        // Obter uri da musica
+        String url = "https://open.spotify.com/track/" + trackId;
         try {
-            // Tratamento da string URI para ser adaptavel ao link
-            // Pegar terceiro elemento correspondente ao trackID da musica
-            String[] parts = uri.split(":");
-            String trackId = parts[2];
-
-            // Obter uri da musica
-            String url = "https://open.spotify.com/track/" + trackId;
-
-            // Se valido, abrir na web a musica
+            // Codigo para Linux ou Mac
             ProcessBuilder pb = new ProcessBuilder("xdg-open", url);
             pb.start();
+        } catch (IOException e){
+            // Codigo para windows
+            Runtime.getRuntime().exec("cmd /c start " + url);
         } catch (Exception e) {
-            System.out.print("\nERRO: Link incorreto. Tente atualizar o URI!");
+            System.out.print("\nERRO: " + e + " Link incorreto. Tente atualizar o URI!");
             System.out.print("\nModelo: \"spotify:track:(INSERIR TRACK ID)\"\n");
         }
     }
