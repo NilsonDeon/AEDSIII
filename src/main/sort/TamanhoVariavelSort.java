@@ -67,15 +67,13 @@ public class TamanhoVariavelSort {
     public void ordenar(int atributo) throws IOException {
 
         boolean paridade = true;
-        int numIntercalacao = 1;
         int numArquivos = 0;
 
         boolean ok = distribuicao(atributo);
         if (ok) {
             while (numArquivos != 1) {           
-                numArquivos = intercalacao(atributo, numIntercalacao, paridade);
+                numArquivos = intercalacao(atributo, paridade);
                 paridade = !paridade;
-                numIntercalacao++;
             }
 
             // Apagar antigo "Registros.db"
@@ -219,14 +217,12 @@ public class TamanhoVariavelSort {
     /**
      * Metodo para realizar a intercalacao propriamente dita.
      * @param atributo - a ser usado na ordenacao.
-     * @param numIntercalacao - contador para indicar qual a intercalacao esta'
-     * sendo feita (primeira, segunda, terceira, ...)
      * @param paridade - indicador para saber se e' uma intercalacao par ou
      * impar, implicando em qual arquivo sera' leitura e qual, escrita
      * @return numArquivos - numero de arquivos que foram criados.
      * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public int intercalacao (int atributo, int numIntercalacao, boolean paridade) throws IOException {
+    public int intercalacao (int atributo, boolean paridade) throws IOException {
 
         RandomAccessFile newTemp = null;
         int numArquivos = 0;
