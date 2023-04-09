@@ -208,10 +208,7 @@ public class CRUD {
            }
        } while (idProcurado == 0);
 
-       boolean find = read(idProcurado);
-       hash.read(idProcurado);
-
-       return find;
+       return read(idProcurado);
     }
 
     /**

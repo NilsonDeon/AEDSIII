@@ -58,7 +58,7 @@ public class HashingExtensivel {
         boolean inserido = false;
         Bucket bucket = new Bucket();
 
-        //IO io = new IO();
+        IO io = new IO();
 
         // Calcular hash
         int id = musica.getId();
@@ -71,11 +71,6 @@ public class HashingExtensivel {
         // aumentar profundidade
         while (bucket.isFull(posicao)) {
 
-            
-           // System.out.print("\nbucket full");
-          //  System.out.println("\nposicao: " + posicao);
-          //  io.readLine("\nENTER");
-
             // Testar se pode fazer novo hash sem aumentar diretorio
             if (diretorio.profundidadeGlobal > bucket.profundidadeLocal) {
 
@@ -86,12 +81,12 @@ public class HashingExtensivel {
 
                 // Atualizar diretorio
                 diretorio.atualizarPonteiro(id, finalArquivo, bucket.profundidadeLocal);
-                //  System.out.print("\nbucket full");
-                //io.readLine("\nENTER");
 
                 // Reposicionar buckets
+                diretorio.redistribuir(posicao);
+
+                // Corrigir profundidade
                 bucket.aumentarProfundidade(posicao);
-                diretorio.redistribuir(posHash, posicao);
 
             // Senao, aumentar profundidade
             } else {
@@ -100,10 +95,13 @@ public class HashingExtensivel {
             }
         }
 
-        System.out.println("id: "+ id + "\tposHash: " + posHash + "\tdiretorio.posBucket[" + posHash + "]: " + posicao);
+        // Recalcular hash
+        posHash = hash(id);
+        posicao = diretorio.posBucket[posHash];
 
         // Inserir no bucket
         bucket.inserir(posicao, id, posicaoRegistro);
+        System.out.println("id: " + id);
 
         return inserido;
     }
@@ -138,12 +136,12 @@ public class HashingExtensivel {
             // Obter numero de elementos
             bucket.numElementos = bucketFile.readShort();
 
-            // Procurar id
-            for (int i = 0; i < bucket.numElementos && find == false; i++) {
+            // Percorrer bucket
+            int cont = 0;
+            while(cont < bucket.tamBucket && find == false) {
 
                 int chave = bucketFile.readInt();
                 long endereco = bucketFile.readLong();
-                System.out.println("\nchave: " + chave + "\tendereco: " + endereco);
 
                 // Testar id
                 if (chave == idProcurado) {
@@ -167,6 +165,7 @@ public class HashingExtensivel {
                     }
 
                 }
+                cont++;
             }
             
         } catch (IOException e) {
