@@ -1,7 +1,9 @@
 package hashing;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 
 import app.Musica;
 import app.IO;
@@ -109,6 +111,7 @@ public class HashingExtensivel {
     /**
      * Metodo para procurar e exibir as informacoes de uma musica a partir do 
      * seu ID.
+     * @param idProcurado - id da musica para pesquisar.
      * @return true, se a música foi encontrada; false, caso contrario.
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
@@ -145,7 +148,7 @@ public class HashingExtensivel {
 
                 // Testar id
                 if (chave == idProcurado) {
-                    find = true;
+                    
                     Musica musicaProcurada = new Musica();
                     dbFile.seek(endereco);
 
@@ -161,6 +164,7 @@ public class HashingExtensivel {
                         dbFile.read(registro);
                         musicaProcurada.fromByteArray(registro);
 
+                        find = true;
                         System.out.println(musicaProcurada);
                     }
 
@@ -177,6 +181,190 @@ public class HashingExtensivel {
         }
 
         return find;
+    }
+
+    /**
+     * Metodo para procurar e deletar uma musica a partir do seu ID.
+     * @param idProcurado - id da musica para deletar.
+     * @return true, se a música foi deletada; false, caso contrario.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     */
+    public boolean delete(int idProcurado) throws Exception {
+        boolean find = false;
+
+        RandomAccessFile bucketFile = null;
+        RandomAccessFile dbFile = null;
+
+        try {
+            bucketFile = new RandomAccessFile (bucketDB, "rw");
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            // Calcular hash
+            int posHash = hash(idProcurado);
+
+            // Encontrar bucket desejado
+            long posicao = diretorio.posBucket[posHash];
+            Bucket bucket = new Bucket();
+           
+            // Obter profundidade do bucket
+            bucketFile.seek(posicao);
+            bucket.profundidadeLocal = bucketFile.readInt();
+
+            // Obter numero de elementos
+            bucket.numElementos = bucketFile.readShort();
+
+            // Percorrer bucket
+            int cont = 0;
+            while(cont < bucket.tamBucket && find == false) {
+
+                long posElemento = bucketFile.getFilePointer();
+
+                int chave = bucketFile.readInt();
+                long endereco = bucketFile.readLong();
+
+                // Testar id
+                if (chave == idProcurado) {
+                    find = true;
+                    Musica musicaProcurada = new Musica();
+                    dbFile.seek(endereco);
+
+                    // Ler informacoes do registro
+                    boolean lapide = dbFile.readBoolean();
+                    int tamRegistro = dbFile.readInt();
+
+                    // Testar se registro e' valido
+                    if (lapide == false) {
+
+                        // Deletar musica
+                        bucket.remover(posicao, posElemento);
+                    }
+
+                }
+                cont++;
+            }
+            
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + bucketDB + "\"\n");
+        } finally {
+            if (bucketFile != null) bucketFile.close();
+            if (dbFile != null) dbFile.close();
+        }
+
+        return find;
+    }
+
+    /**
+     * Metodo para procurar e alterar endereco uma musica a partir do seu ID.
+     * @param idProcurado - id da musica para atualizar endereco.
+     * @param newEndereco - novo endereco da musica.
+     * @return true, se a música foi deletada; false, caso contrario.
+     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     */
+    public boolean update(int idProcurado, long newEndereco) throws Exception {
+        boolean find = false;
+
+        RandomAccessFile bucketFile = null;
+        RandomAccessFile dbFile = null;
+
+        try {
+            bucketFile = new RandomAccessFile (bucketDB, "rw");
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            // Calcular hash
+            int posHash = hash(idProcurado);
+
+            // Encontrar bucket desejado
+            long posicao = diretorio.posBucket[posHash];
+            Bucket bucket = new Bucket();
+           
+            // Obter profundidade do bucket
+            bucketFile.seek(posicao);
+            bucket.profundidadeLocal = bucketFile.readInt();
+
+            // Obter numero de elementos
+            bucket.numElementos = bucketFile.readShort();
+
+            // Percorrer bucket
+            int cont = 0;
+            while(cont < bucket.tamBucket && find == false) {
+
+                int chave = bucketFile.readInt();
+
+                long posEndereco = bucketFile.getFilePointer();
+                long endereco = bucketFile.readLong();
+
+                // Testar id
+                if (chave == idProcurado) {
+
+                    // Atualizar endereco da musica
+                    bucketFile.seek(posEndereco);
+                    byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(newEndereco).array();
+                    bucketFile.write(enderecoBytes);
+
+                    find = true;
+                }
+            }
+                cont++;            
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + bucketDB + "\"\n");
+        } finally {
+            if (bucketFile != null) bucketFile.close();
+            if (dbFile != null) dbFile.close();
+        }
+
+        return find;
+    }
+
+    /**
+     * Metodo para refazer hashing, utilizado apos as ordenacoes.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    public void refazerHashing () throws Exception {
+        RandomAccessFile dbFile = null;
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            if (dbFile.length() > 0) {
+
+                Musica musica = null;
+
+                // Ler ultimo ID adicionado
+                dbFile.seek(0);
+                dbFile.readInt();
+                long posicaoAtual = dbFile.getFilePointer();
+
+                while (dbFile.length() != posicaoAtual) {
+                                        
+                    musica = new Musica();
+
+                    // Ler informacoes do registro
+                    boolean lapide = dbFile.readBoolean();
+                    int tamRegistro = dbFile.readInt();
+
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+
+                    // Atualizar endereco da musica
+                    update(musica.getId(), posicaoAtual);                       
+
+                    // Atualizar ponteiro
+                    posicaoAtual = dbFile.getFilePointer();
+                }
+            } else {
+                System.out.println("\nERRO: Registro vazio!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            }
+
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Registro nao encontrado!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+        }
     }
 
 }

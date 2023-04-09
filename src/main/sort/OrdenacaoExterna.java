@@ -1,16 +1,18 @@
 package sort;
 
-
 // bibliotecas
 import java.util.InputMismatchException;
 
 import app.IO;
+import hashing.HashingExtensivel;
 
 public class OrdenacaoExterna {
 
     public void ordenarArquivo () throws Exception {
 
         IO io = new IO();
+        HashingExtensivel hash = new HashingExtensivel();
+
         int opcao = 0;
         int atributo = 0;
         int numCaminhos = 0;
@@ -71,15 +73,18 @@ public class OrdenacaoExterna {
                 switch (opcao) {
                    case 1 :
                         ComumSort sort1 = new ComumSort(numRegistros, numCaminhos);
-                        sort1.ordenar(atributo); 
+                        sort1.ordenar(atributo);
+                        hash.refazerHashing();
                         break;
                    case 2 :
                         TamanhoVariavelSort sort2 = new TamanhoVariavelSort(numRegistros, numCaminhos);
-                        sort2.ordenar(atributo); 
+                        sort2.ordenar(atributo);
+                        hash.refazerHashing();
                         break;                   
                    case 3 :
                         SelecaoPorSubstituicaoSort sort3 = new SelecaoPorSubstituicaoSort(numRegistros, numCaminhos);
-                        sort3.ordenar(atributo); 
+                        sort3.ordenar(atributo);
+                        hash.refazerHashing();
                         break;
                    case 4 : break;
                    default: System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4."); break;

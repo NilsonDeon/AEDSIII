@@ -208,6 +208,9 @@ public class CRUD {
            }
        } while (idProcurado == 0);
 
+        // Pesquisar no hashing extensivel
+        hash.read(idProcurado);
+
        return read(idProcurado);
     }
 
@@ -229,6 +232,9 @@ public class CRUD {
                idProcurado = 0;
            }
        } while (idProcurado == 0);
+
+        // Deletar no hashing extensivel
+        hash.delete(idProcurado);
 
        return delete(idProcurado);
     }
@@ -313,7 +319,6 @@ public class CRUD {
                                     ") não esta cadastrada!"); 
                 }
 
-
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
@@ -323,10 +328,6 @@ public class CRUD {
                 System.out.println("\nERRO: Registro nao encontrado!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
         } finally {
-
-            // Pesquisar no hashing extensivel
-            hash.read(idProcurado);
-
             if (dbFile != null) dbFile.close();
             return find;
         }
@@ -503,6 +504,9 @@ public class CRUD {
                                 dbFile.seek(finalArquivo);
                                 newRegistro = newMusica.toByteArray();
                                 dbFile.write(newRegistro);
+
+                               // Atualizar no hashing extensivel
+                               hash.update(idProcurado, finalArquivo);
                             }
 
                             if (atualizado == true) {
