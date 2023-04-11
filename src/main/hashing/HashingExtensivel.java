@@ -103,7 +103,7 @@ public class HashingExtensivel {
 
         // Inserir no bucket
         bucket.inserir(posicao, id, posicaoRegistro);
-        System.out.println("id: " + id);
+        System.out.println("Inserindo id: " + id);
 
         return inserido;
     }
@@ -304,8 +304,10 @@ public class HashingExtensivel {
 
                     find = true;
                 }
+                cont++;
             }
-                cont++;            
+                 
+
         } catch (IOException e) {
             System.out.println("\nERRO: Ocorreu um erro de escrita no " +
                                "arquivo \"" + bucketDB + "\"\n");
@@ -344,6 +346,7 @@ public class HashingExtensivel {
                     boolean lapide = dbFile.readBoolean();
                     int tamRegistro = dbFile.readInt();
 
+                    // Trazer musica para memoria primaria
                     byte[] registro = new byte[tamRegistro];
                     dbFile.read(registro);
                     musica.fromByteArray(registro);
