@@ -67,7 +67,6 @@ public class ArvoreB {
      */
     private NoB inserir(NoB noB, Musica musica, long newEndereco) throws Exception {
         RandomAccessFile arvoreBFile = null;
-        NoB noInserir = null;
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
@@ -82,14 +81,29 @@ public class ArvoreB {
             // Ler No raiz
             noB.lerNoB(posRaiz);
 
-            // Testar se no folha tem espaco livre para insercao
+            // Testar se No raiz tem espaco livre para insercao e e' folha
             if (noB.temEspacoLivre() && noB.isFolha()) {
                 noB.inserir(posRaiz, newChave, newEndereco);
-                noInserir = noB;
             
             // Se nao couber na folha, deve-se procurar No de insercao
             } else {
+                long posInserir;
+                posInserir = noB.encontrarInsercao(newChave);
+
+                // Se couber no NoB, basta inserir
+                if (noB.temEspacoLivre()) {
+                    noB.inserir(posInserir, newChave, newEndereco);
                 
+                // Senao, deve-se dividir o No
+                } else {
+
+                    // Separar filhos direita e esquerda do No
+                    NoB noEsq = noB.getFilhoEsq();
+                    NoB noDir = noB.getFilhoDir();
+
+                    // Separar elemento do meio para "subir"
+                    
+                }
             }
 
         } catch (IOException e) {
@@ -97,7 +111,7 @@ public class ArvoreB {
                                "arquivo \"" + arvoreBDB + "\"\n");
         } finally {
             if (arvoreBFile != null) arvoreBFile.close();
-            return noInserir;
+            return noB;
         }
     }
 }
