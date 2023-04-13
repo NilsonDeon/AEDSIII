@@ -1,127 +1,103 @@
 package arvoreB;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+
+import app.Musica;
+
 public class ArvoreB {
 
     protected NoB raiz;
-
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
+    /**
+     * Construtor padrao da classe ArvoreB
+     */
     public ArvoreB() {
-        raiz = null;
+        raiz = new NoB();
     }
 
-    public void inserir(int newChave, long newEndereco) {
-        raiz = inserir(raiz, newChave, newEndereco);
+    /**
+     * Metodo para inicializar o arquivo "Arvore.db", inicializando a raiz.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    public void inicializarArvoreB() throws Exception {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Posicionar ponteiro no inicio do arquivo
+            arvoreBFile.seek(0);
+
+            // Escrever posicao da raiz (proximos 8 bytes)
+            long posRaiz = 8;
+            byte[] posRaizBytes = ByteBuffer.allocate(8).putLong(posRaiz).array();
+            arvoreBFile.write(posRaizBytes);
+
+            // Escrever raiz no arquivo
+            raiz.escreverNoB();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            if (arvoreBFile != null) arvoreBFile.close();
+        }
     }
 
-    private NoB inserir(NoB no, int newChave, long newEndereco) {
-        
+    /**
+     * Metodo para inserir uma chave de pesquisa na arvore B.
+     * @param musica - musica a se inserir.
+     * @param newEndereco - endereco da musica no arquivo "Registro.db".
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    public void inserir(Musica musica, long newEndereco) throws Exception {
+        raiz = inserir(raiz, musica, newEndereco);
+    }
+
+    /**
+     * Metodo para inserir uma chave de pesquisa na arvore B.
+     * @param noB - no em analise.
+     * @param musica - musica a se inserir.
+     * @param newEndereco - endereco da musica no arquivo "Registro.db".
+     * @return novo No.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    private NoB inserir(NoB noB, Musica musica, long newEndereco) throws Exception {
+        RandomAccessFile arvoreBFile = null;
         NoB noInserir = null;
 
-        // Se No for null, inserir primeiro elemento na 'arvore (raiz)
-        if (no == null) {
-            //System.out.println("inserir RAIZ");
-            no = new NoB(newChave, newEndereco);
-            noInserir = no;
-        
-        // Se couber no No, basta inserir na raiz
-        } else if (no.temEspacoLivre() && no.isFolha()) {
-            //System.out.println("inserir FOLHA");
-            no.inserir(newChave, newEndereco);
-            noInserir = no;
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-        // Se nao couber, deve-se procurar No de insercao
-        } else {
-            noInserir = no.encontrarInsercao(newChave);
+            // Obter chave de insercao
+            int newChave = musica.getId();
 
-            // Se couber no No, basta inserir
-            if (noInserir.temEspacoLivre()) {
-                noInserir.inserir(newChave, newEndereco);
+            // Localizar a raiz
+            arvoreBFile.seek(0);
+            long posRaiz = arvoreBFile.readLong();
             
-            // Senao, deve-se dividir o No
+            // Ler No raiz
+            noB.lerNoB(posRaiz);
+
+            // Testar se no folha tem espaco livre para insercao
+            if (noB.temEspacoLivre() && noB.isFolha()) {
+                noB.inserir(posRaiz, newChave, newEndereco);
+                noInserir = noB;
+            
+            // Se nao couber na folha, deve-se procurar No de insercao
             } else {
-                // Encontrar um No filho, tal qual seu pai suporte mais um elemento
-                NoB filho = noInserir;
-                NoB pai = noInserir.noPai;
-
-                // Se for raiz cheia
-                if (noInserir.isRaiz()) {
-
-                    // Dividir No cheio
-                    NoB noEsq = noInserir.getFilhoEsq();
-                    NoB noDir = noInserir.getFilhoDir();
-                    
-                    // Separar elemento do meio para subir na arvore
-                    noInserir = noInserir.getMeio();
-                    int chave = noInserir.getChave(0);
-
-                    //System.out.println("\nchave: " + chave + "\n");
-
-                    // Alterar raiz
-                    noInserir.remontarPonteiros(chave, noEsq, noDir);
-                    raiz = noInserir;
-                    /*
-                        System.out.println("\n\n------------------noInserir-------------\n\n");
-                        for(int i = 0; i < noInserir.ordemArvore-1; i++) {
-                            System.out.print(noInserir.chave[i] + " ");
-                        }
-                        System.out.println();
-
-    
-
-                    System.out.println("\nok\n");
-                    */
                 
-                // Senao, inserir no Pai
-                } else if (pai.isFull()) {
-     
-                    // Dividir No cheio
-                    NoB noEsq = noInserir.getFilhoEsq();
-                    NoB noDir = noInserir.getFilhoDir();
-                    
-                    // Separar elemento do meio para subir na arvore
-                    noInserir = noInserir.getMeio();
-                    int chave = noInserir.getChave(0);
-                    long elemento = noInserir.getEndereco(0);
-
-                    // Inserir no pai o elemento do meio
-                    inserir(pai, chave, elemento);
-
-                    // Atualizar os filhos do No que subiu
-                    pai.remontarPonteiros(chave, noEsq, noDir);
-                    noInserir = raiz;
-                }
-
-                // Inserir, de fato, a chave desejada
-                inserir(newChave, newEndereco);
             }
-            
-        }
 
-        return noInserir;
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            if (arvoreBFile != null) arvoreBFile.close();
+            return noInserir;
+        }
     }
-
-    public void mostrar() {
-        if (raiz != null) {
-            System.out.print("RAIZ   : ");
-            for(int i = 0; i < raiz.ordemArvore-1; i++) {
-                System.out.print(String.format("%2d ", raiz.chave[i]));
-            }
-            System.out.println();
-        }
-        for(int i = 0; i < raiz.ordemArvore; i++) {
-            if (raiz.noFilho[i] != null) {
-                System.out.print("FILHO " + i + ": ");
-                for(int j = 0; j < raiz.ordemArvore-1; j++) {
-                    System.out.print(String.format("%2d ", raiz.noFilho[i].chave[j]));
-                }
-                System.out.println();
-            } else {
-                System.out.println("FILHO " + i + ": null");
-            }
-        }
-
-        System.out.println();
-    }
-
 }

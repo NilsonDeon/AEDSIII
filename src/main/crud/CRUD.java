@@ -16,6 +16,7 @@ import java.util.InputMismatchException;
 import app.IO;
 import app.Musica;
 import hashing.HashingExtensivel;
+import arvoreB.ArvoreB;
 
 /**
  * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
@@ -23,16 +24,22 @@ import hashing.HashingExtensivel;
  */
 public class CRUD {
 
+    // Arquivo sequencial
     private static final String arquivoCSV = "./src/resources/Spotify.csv";
     private static final String registroDB = "./src/resources/Registro.db";
     private static final String registroTXT = "./src/resources/Registro.txt";
 
     // Hashing
+    private static HashingExtensivel hash;
     private static final String diretorioDB = "./src/resources/Diretorio.db";
     private static final String bucketDB = "./src/resources/Bucket.db";
 
+    // Arvore B
+    private static ArvoreB arvoreB;
+    private static final String arvoreBDB = "./src/resources/ArvoreB.db";
+
+    // IO
     private static IO io;
-    private static HashingExtensivel hash;
 
     /**
      * Construtor padrao da classe CRUD.
@@ -40,6 +47,7 @@ public class CRUD {
     public CRUD () throws Exception {
         io = new IO();
         hash = new HashingExtensivel();
+        arvoreB = new ArvoreB();
     }
     
     /**
@@ -90,6 +98,11 @@ public class CRUD {
                 antigoDiretorio.delete();
                 hash.inicializarDiretorio();
 
+                // Apagar antiga ArvoreB
+                File antigaArvoreB = new File(arvoreBDB);
+                antigaArvoreB.delete();
+                arvoreB.inicializarArvoreB();
+
                 Musica musica = new Musica();
                 byte[] newId;
 
@@ -112,8 +125,11 @@ public class CRUD {
                     byte[] byteArray = musica.toByteArray();
                     dbFile.write(byteArray);
 
-                    // Salvar utilizando hashing
+                    // Inserir, utilizando hashing
                     hash.inserir(musica, posRegistro);
+
+                    // Inserir, utilizando arvore B
+                    arvoreB.inserir(musica, posRegistro);
                 }
 
                 // Atualizar ultimo ID no cabecalho do arquivo
