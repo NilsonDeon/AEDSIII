@@ -395,6 +395,7 @@ public class NoB {
 
             // Posicionar ponteiro no inicio do arquivo
             arvoreBFile.seek(0);
+            arvoreBFile.readLong();
 
             long posicaoAtual = arvoreBFile.getFilePointer();
             boolean find = false;
@@ -405,10 +406,10 @@ public class NoB {
                 posicaoPai = posicaoAtual;
                 tmp.lerNoB(posicaoAtual);
 
-                for (int i = 0; i < ordemArvore; i++) {
+                for (int i = 0; i < tmp.ordemArvore; i++) {
                     
                     // Encontrar pai procurando a partir do filho
-                    if (noFilho[i] == posFilho) {
+                    if (tmp.noFilho[i] == posFilho) {
                         find = true;
                         i = ordemArvore;
                     }

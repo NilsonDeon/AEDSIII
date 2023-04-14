@@ -164,7 +164,7 @@ public class ArvoreB {
                     long endereco = noMeio.getEndereco(0);
 
                     // Alterar filho da esquerda em arquivo
-                    noB.escreverNoB(posArvore);
+                    noB.escreverNoB(posInserir);
 
                     // Inserir novo filho direita
                     long posDir = noDir.escreverNoB();
@@ -172,8 +172,11 @@ public class ArvoreB {
                     // Incluir chave que subiu no arquivo
                     NoB aux = new NoB();
                     long newPos = aux.encontrarPai(posInserir);
+
+                    System.out.println("\nnewPos: " + newPos);
+
                     aux.lerNoB(newPos);
-                    aux.inserir(posInserir, chave, endereco, posDir);
+                    aux.inserir(newPos, chave, endereco, posDir);
 
                     // Inserir nova chave
                     posInserir = noB.encontrarInsercao(newChave);
