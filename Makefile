@@ -3,7 +3,7 @@
 # Data: 03/2023
 
 # Arquivos de origem
-SOURCES := src/main/app/IO.java src/main/app/Musica.java src/main/hashing/Bucket.java src/main/hashing/Diretorio.java src/main/hashing/HashingExtensivel.java src/main/arvoreB/NoB.java src/main/arvoreB/ArvoreB.java src/main/arvoreB/TesteArvoreB.java src/main/crud/CRUD.java src/main/sort/auxiliar/QuickSort.java src/main/sort/auxiliar/MinHeap.java src/main/sort/ComumSort.java src/main/sort/TamanhoVariavelSort.java src/main/sort/SelecaoPorSubstituicaoSort.java src/main/sort/OrdenacaoExterna.java src/main/Main.java
+SOURCES := src/main/app/IO.java src/main/app/Musica.java src/main/hashing/Bucket.java src/main/hashing/Diretorio.java src/main/hashing/HashingExtensivel.java src/main/arvoreB/NoB.java src/main/arvoreB/ArvoreB.java src/main/crud/CRUD.java src/main/sort/auxiliar/QuickSort.java src/main/sort/auxiliar/MinHeap.java src/main/sort/ComumSort.java src/main/sort/TamanhoVariavelSort.java src/main/sort/SelecaoPorSubstituicaoSort.java src/main/sort/OrdenacaoExterna.java src/main/Main.java
 
 # Compilar
 all: | src/bin $(SOURCES:.java=.class)
@@ -13,8 +13,7 @@ all: | src/bin $(SOURCES:.java=.class)
 
 # Executar
 run: clean all
-# java -cp src/bin Main
-	java -cp src/bin arvoreB.TesteArvoreB
+	java -cp src/bin Main
 
 # Limpar
 clean:

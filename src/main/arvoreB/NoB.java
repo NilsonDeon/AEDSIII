@@ -61,17 +61,36 @@ public class NoB {
     }
 
     /**
+     * Metodo para clonar um NoB.
+     * @return NoB clonado.
+     */
+    public NoB clone() {
+
+        NoB cloneNoB = new NoB();
+
+        cloneNoB.numElementos = this.numElementos;
+        cloneNoB.chave = this.chave;
+        cloneNoB.endereco = this.endereco;
+        cloneNoB.noFilho = this.noFilho;
+
+        return cloneNoB;
+    }
+
+
+    /**
      * Metodo para criar um NoB em arquivo, como fluxo de bytes.
+     * @return fimArquivo - posicao do arquivo que o NoB foi escrito.
      * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void escreverNoB() throws Exception {
+    public long escreverNoB() throws Exception {
         RandomAccessFile arvoreBFile = null;
+        long fimArquivo = -1;
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
             // Posicionar ponteiro no fim do arquivo
-            long fimArquivo = arvoreBFile.length();
+            fimArquivo = arvoreBFile.length();
             arvoreBFile.seek(fimArquivo);
 
             // Escrever numero de elementos no No
@@ -103,6 +122,7 @@ public class NoB {
                                "arquivo \"" + arvoreBDB + "\"\n");
         } finally {
             if (arvoreBFile != null) arvoreBFile.close();
+            return fimArquivo;
         }
     }
 
@@ -181,6 +201,35 @@ public class NoB {
     }
 
     /**
+     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * @param posicaoInserir - posicao de inicio para escrita no arquivo.
+     * @param newChave - nova chave a se inserir.
+     * @param newEndereco - novo endereco a se inserir.
+     * @param filhoDir - endereco do filho da direita.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir) throws Exception {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Inserir o elemento de forma ordenada
+            inserir(newChave, newEndereco, filhoDir);
+
+            // Escrever numero de elementos no No
+            arvoreBFile.seek(posicaoInserir);
+            escreverNoB(posicaoInserir);
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            if (arvoreBFile != null) arvoreBFile.close();
+        }
+    }
+
+    /**
      * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
      * devidos ponteiros.
      * @param newChave - nova chave a se inserir.
@@ -214,6 +263,43 @@ public class NoB {
             System.out.println("\nERRO: No cheio!!");
         }
     }
+
+    /**
+     * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
+     * devidos ponteiros.
+     * @param newChave - nova chave a se inserir.
+     * @param newEndereco - novo endereco a se inserir.
+     * @param filhoDir - endereco do filho 'a direita.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    private void inserir(int newChave, long newEndereco, long filhoDir) {
+        if (temEspacoLivre()) {
+
+            // Localizar local de insercao no No
+            int i;
+            for(i = 0; (i < numElementos) && (chave[i] < newChave); i++);
+
+            // Shift dos elementos para a direita
+            int pos = i;
+            i = numElementos-1;
+            while(i >= pos) {
+                chave[i+1] = chave[i];
+                endereco[i+1] = endereco[i];
+                noFilho[i+1] = noFilho[i];
+                i--;
+            }
+
+            // Inserir efetivamente na posicao ordenada
+            chave[pos] = newChave;
+            endereco[pos] = newEndereco;
+            noFilho[pos+1] = filhoDir;
+            numElementos++;
+
+        } else {
+            System.out.println("\nERRO: No cheio!!");
+        }
+    }
+
 
     /**
      * Metodo para ler NoB em arquivo, a apartir de sua posicao de inicio.
@@ -263,7 +349,7 @@ public class NoB {
      * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
     public long encontrarInsercao (int chave) throws Exception {
-        return encontrarInsercao(this, chave);
+        return encontrarInsercao(this, chave, 8);
     }
 
     /**
@@ -271,25 +357,76 @@ public class NoB {
      * determinado NoB.
      * @param no - NoB em analise.
      * @param chave - chave que sera' inserida.
+     * @param posInserir - posicao para inserir a chave.
      * @return posInserir - endereco de insercao no arquivo.
      * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    private long encontrarInsercao (NoB no, int chave) throws Exception {
-
-        long posInserir;
-       
+    private long encontrarInsercao (NoB no, int chave, long posInserir) throws Exception {
+     
         // Procurar o filho, no qual a chave poderia ficar
         int i;
         for(i = 0; (i < no.numElementos) && (chave > no.chave[i]); i++);
 
         // Se o No nao for folha, continuar recursao
-        posInserir = no.noFilho[i];
         if (no.noFilho[i] != -1) {
+            posInserir = no.noFilho[i];
             no.lerNoB(posInserir);
-            posInserir = encontrarInsercao(no, chave);
+            posInserir = encontrarInsercao(no, chave, posInserir);
         }
 
+        System.out.println("\n==================== posInserir: " + posInserir);
+
         return posInserir;
+    }
+
+    /**
+     * Metodo para encontrar a posicao do pai de um NoB.
+     * @param posFilho - posicao do filho em arquivo
+     * @return posInserir - endereco de insercao no arquivo.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    public long encontrarPai(long posFilho) throws Exception {
+
+        RandomAccessFile arvoreBFile = null;
+        long posicaoPai = -1;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Posicionar ponteiro no inicio do arquivo
+            arvoreBFile.seek(0);
+
+            long posicaoAtual = arvoreBFile.getFilePointer();
+            boolean find = false;
+
+            // Percorrer todo o arquivo
+            while(posicaoAtual != arvoreBFile.length() && find == false) {
+                NoB tmp = new NoB();
+                posicaoPai = posicaoAtual;
+                tmp.lerNoB(posicaoAtual);
+
+                for (int i = 0; i < ordemArvore; i++) {
+                    
+                    // Encontrar pai procurando a partir do filho
+                    if (noFilho[i] == posFilho) {
+                        find = true;
+                        i = ordemArvore;
+                    }
+
+                    // Atualizar ponteiro
+                    posicaoAtual = arvoreBFile.getFilePointer();
+                }
+            }
+
+            if (find == false) posicaoPai = -1;
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            if (arvoreBFile != null) arvoreBFile.close();
+            return posicaoPai;
+        }
     }
 
     /**
@@ -349,6 +486,62 @@ public class NoB {
     }
 
     /**
+     * Metodo para obter o No com a chave do meio do NoB analisado.
+     * @return noMeio - com os elementos maiores que a chave do meio.
+     */
+    public NoB getMeio() {
+        int posMeio = ((ordemArvore-1)/2);
+        NoB noMeio = new NoB(this.chave[posMeio], this.endereco[posMeio]);
+
+        return noMeio;
+    }
+
+    /**
+     * Metodo para obter a chave em uma determinada posicao do NoB.
+     * @param pos - posicao da chave no NoB.
+     * @return chave procurada.
+     */
+    public int getChave(int pos) {
+        int chaveProcurada = -1;
+        if (pos < numElementos) {
+            chaveProcurada = this.chave[pos];
+        }
+
+        return chaveProcurada;
+    }
+
+    /**
+     * Metodo para obter o endereco em uma determinada posicao do NoB.
+     * @param pos - posicao do endereco no NoB.
+     * @return endereco procurado.
+     */
+    public long getEndereco(int pos) {
+        long enderecoProcurado = -1;
+        if (pos < numElementos) {
+            enderecoProcurado = this.endereco[pos];
+        }
+
+        return enderecoProcurado;
+    }
+
+    /**
+     * Metodo para reestruturar os ponteiros para os filhos do NoB alterado.
+     * @param newChave - nova chave no NoB adicionada.
+     * @param posEsq - posicao NoB filho da esquerda no arquivo.
+     * @param posDir - posicao NoB filho da direita no arquivo.
+     */
+    public void remontarPonteiros(int newChave, long posEsq, long posDir) {
+
+        // Localizar chave recem inserida
+        int i;
+        for(i = 0; (i < (ordemArvore-1)/2) && (chave[i] != newChave); i++);
+
+        // Adicionar filhos do novo NoB
+        noFilho[i] = posEsq;
+        noFilho[i+1] = posDir;
+    }
+
+    /**
      * Metodo para indicar se o NoB esta' cheio ou nao.
      * @return true, se estiver cheio; false, caso contrario.
      */
@@ -375,5 +568,22 @@ public class NoB {
         }
 
         return resp;
+    }
+
+    public String toString() {
+
+        String noB = "";
+
+        noB += "(" + String.format("%2d", numElementos) + "): ";
+
+        for(int i = 0; i < ordemArvore-1; i++) {
+            noB += "|" + String.format("%6d", noFilho[i]);
+            noB += "|" + String.format("%3d", chave[i]);
+            noB += "|" + String.format("%6d", endereco[i]);
+        }
+
+        noB += "|" + String.format("%6d", noFilho[ordemArvore-1]) + "|";
+
+        return noB;
     }
 }

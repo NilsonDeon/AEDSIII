@@ -81,7 +81,7 @@ public class NoB {
         int i;
         for(i = 0; (i < (ordemArvore-1)/2) && (chave[i] != newChave); i++);
 
-        //System.out.println("i: " + i);
+        // Adicionar filhos do novo NoB
         noFilho[i] = noEsq;
         noFilho[i+1] = noDir;
 

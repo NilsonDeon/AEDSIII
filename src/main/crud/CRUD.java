@@ -130,6 +130,10 @@ public class CRUD {
 
                     // Inserir, utilizando arvore B
                     arvoreB.inserir(musica, posRegistro);
+
+                    arvoreB.mostrarArquivo();
+                    io.readLine();
+
                 }
 
                 // Atualizar ultimo ID no cabecalho do arquivo
