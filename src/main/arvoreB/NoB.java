@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 public class NoB {
 
     protected static final int ordemArvore = 8;
+    protected static final int tamNoB = 150;
 
     protected short numElementos;
     protected int chave[];
@@ -58,6 +59,36 @@ public class NoB {
         numElementos = 1;
         chave[0] = newChave;
         endereco[0] = newEndereco;
+    }
+
+    /**
+     * Costrutor da classe NoB, utilizando passagem de parametros.
+     * @param newChave - id da chave a ser inserida no No.
+     * @param newEndereco - posicao do id no arquivo "Registro.db".
+     * @param filhoEsq - posicao filho 'a esquerda.
+     * @param filhoDir - posicao filho 'a direita.
+     */
+    public NoB(int newChave, long newEndereco, long filhoEsq, long filhoDir) {
+
+        chave = new int[ordemArvore-1];
+        endereco = new long[ordemArvore-1];
+        noFilho = new long[ordemArvore];
+
+        for(int i = 0; i < ordemArvore-1; i++) {
+            chave[i] = -1;
+            endereco[i] = -1;
+        }
+
+        for(int i = 0; i < ordemArvore; i++) {
+            noFilho[i] = -1;
+        }
+
+        numElementos = 1;
+        chave[0] = newChave;
+        endereco[0] = newEndereco;
+        noFilho[0] = filhoEsq;
+        noFilho[1] = filhoDir;
+
     }
 
     /**
@@ -230,6 +261,35 @@ public class NoB {
     }
 
     /**
+     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * @param posicaoInserir - posicao de inicio para escrita no arquivo.
+     * @param newChave - nova chave a se inserir.
+     * @param newEndereco - novo endereco a se inserir.
+     * @param filhoDir - endereco do filho da direita.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir, long filhoEsq) throws Exception {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Inserir o elemento de forma ordenada
+            inserir(newChave, newEndereco, filhoDir, filhoEsq);
+
+            // Escrever numero de elementos no No
+            arvoreBFile.seek(posicaoInserir);
+            escreverNoB(posicaoInserir);
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            if (arvoreBFile != null) arvoreBFile.close();
+        }
+    }
+
+    /**
      * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
      * devidos ponteiros.
      * @param newChave - nova chave a se inserir.
@@ -300,6 +360,43 @@ public class NoB {
         }
     }
 
+   /**
+     * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
+     * devidos ponteiros.
+     * @param newChave - nova chave a se inserir.
+     * @param newEndereco - novo endereco a se inserir.
+     * @param filhoEsq - endereco do filho 'a esquerda.
+     * @param filhoDir - endereco do filho 'a direita.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
+    private void inserir(int newChave, long newEndereco, long filhoEsq, long filhoDir) {
+        if (temEspacoLivre()) {
+
+            // Localizar local de insercao no No
+            int i;
+            for(i = 0; (i < numElementos) && (chave[i] < newChave); i++);
+
+            // Shift dos elementos para a direita
+            int pos = i;
+            i = numElementos-1;
+            while(i >= pos) {
+                chave[i+1] = chave[i];
+                endereco[i+1] = endereco[i];
+                noFilho[i+1] = noFilho[i];
+                i--;
+            }
+
+            // Inserir efetivamente na posicao ordenada
+            chave[pos] = newChave;
+            endereco[pos] = newEndereco;
+            noFilho[pos] = filhoEsq;
+            noFilho[pos+1] = filhoDir;
+            numElementos++;
+
+        } else {
+            System.out.println("\nERRO: No cheio!!");
+        }
+    }
 
     /**
      * Metodo para ler NoB em arquivo, a apartir de sua posicao de inicio.
@@ -374,7 +471,7 @@ public class NoB {
             posInserir = encontrarInsercao(no, chave, posInserir);
         }
 
-        System.out.println("\n==================== posInserir: " + posInserir);
+        //System.out.println("\n==================== posInserir: " + posInserir);
 
         return posInserir;
     }
@@ -414,9 +511,10 @@ public class NoB {
                         i = ordemArvore;
                     }
 
-                    // Atualizar ponteiro
-                    posicaoAtual = arvoreBFile.getFilePointer();
                 }
+
+                // Atualizar ponteiro
+                posicaoAtual += tamNoB;
             }
 
             if (find == false) posicaoPai = -1;
@@ -443,15 +541,7 @@ public class NoB {
         // Copiar os primeiros elementos do No
         int pos = i;
         while (pos < tamNo) {
-            noEsq.inserir(this.chave[pos], this.endereco[pos]);
-            pos++;
-        }
-
-        // Settar ponteiros
-        pos = i;
-        int k = 0;
-        while (pos <= tamNo) {
-            this.noFilho[pos] = noEsq.noFilho[k++];
+            noEsq.inserir(this.chave[pos], this.endereco[pos], this.noFilho[pos], this.noFilho[pos+1]);
             pos++;
         }
 
@@ -464,23 +554,14 @@ public class NoB {
      * @return NoDir - com os elementos maiores que a chave do meio.
      */
     public NoB getFilhoDir() {
-        int i = (ordemArvore-1)-1;
-        int tamNo = (ordemArvore-1)/2;
+        int i = ordemArvore/2;
         NoB noDir = new NoB();
 
         // Copiar os ultimos elementos do No
         int pos = i;
-        while (pos > tamNo) {
-            noDir.inserir(this.chave[pos], this.endereco[pos]);
-            pos--;
-        }
-
-        // Settar ponteiros
-        pos = i;
-        int k = 0;
-        while (pos >= tamNo) {
-            this.noFilho[pos] = noDir.noFilho[k++];
-            pos--;
+        while (pos < ordemArvore-1) {
+            noDir.inserir(this.chave[pos], this.endereco[pos], this.noFilho[pos], this.noFilho[pos+1]);
+            pos++;
         }
 
         return noDir;

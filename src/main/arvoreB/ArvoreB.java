@@ -77,7 +77,7 @@ public class ArvoreB {
      * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
     public void inserir(Musica musica, long newEndereco) throws Exception {
-        raiz = inserir(raiz, getPosRaiz(), musica, newEndereco);
+        raiz = inserir(raiz, getPosRaiz(), musica, newEndereco, -1, -1);
     }
 
     /**
@@ -86,10 +86,12 @@ public class ArvoreB {
      * @param posArvore - posicao do No na 'arvoreB
      * @param musica - musica a se inserir.
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
+     * @param filhoEsq - posicao filho 'a esquerda que esta' sendo inserido.
+     * @param filhoDir - posicao filho 'a direita que esta' sendo inserido.
      * @return novo No.
      * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    private NoB inserir(NoB noB, long posArvore, Musica musica, long newEndereco) throws Exception {
+    private NoB inserir(NoB noB, long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir) throws Exception {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -98,14 +100,26 @@ public class ArvoreB {
             // Obter chave de insercao
             int newChave = musica.getId();
 
+            // Obter raiz
+            arvoreBFile.seek(0);
+            long posRaiz = arvoreBFile.readLong();
+          //  System.out.println("\nposRaiz: " + posRaiz);
+
             // Localizar e ler NoB
             arvoreBFile.seek(posArvore);
             noB.lerNoB(posArvore);
+
+            //System.out.println("\n\nTHIS:\n\n");
+            //this.mostrarArquivo();
 
             // Testar se No tem espaco livre para insercao e e' folha
             if (noB.temEspacoLivre() && noB.isFolha()) {
                 noB.inserir(posArvore, newChave, newEndereco);
             
+            // Se nao for folha, testar se chave ja pertencia 'a 'arvore
+            } else if (noB.temEspacoLivre() && (filhoEsq != -1 || filhoDir != -1)) {
+                noB.inserir(posArvore, newChave, newEndereco, filhoEsq, filhoDir);
+
             // Se nao couber na folha, deve-se procurar No de insercao
             } else {
                 long posInserir;
@@ -114,12 +128,12 @@ public class ArvoreB {
 
                 // Se couber no NoB, basta inserir
                 if (noB.temEspacoLivre()) {
-                    noB.inserir(posInserir, newChave, newEndereco);
+                    noB.inserir(posInserir, newChave, newEndereco, filhoEsq, filhoDir);
                 
                 // Se for raiz, basta criar novos dois filhos
-                } else if(posInserir == posArvore) {
+                } else if(posInserir == posRaiz) {
 
-                    System.out.println("\nIF");
+                   // System.out.println("\nIF");
 
                     // Separar filhos direita e esquerda do No
                     NoB noEsq = noB.getFilhoEsq();
@@ -141,12 +155,12 @@ public class ArvoreB {
 
                     // Inserir nova chave
                     posInserir = noB.encontrarInsercao(newChave);
-                    inserir(noB, posInserir, musica, newEndereco);
+                    inserir(noB, posInserir, musica, newEndereco, filhoEsq, filhoDir);
                 
                 // Senao, deve-se dividir o No
                 } else {
 
-                    System.out.println("\nELSE");
+                    //System.out.println("\nELSE");
 
                     // Copiar NoB atual
                     NoB tmp = noB.clone();
@@ -163,25 +177,85 @@ public class ArvoreB {
                     int chave = noMeio.getChave(0);
                     long endereco = noMeio.getEndereco(0);
 
-                    // Alterar filho da esquerda em arquivo
-                    noB.escreverNoB(posInserir);
+                    // Testar se No pai esta' com espaco livre
+                    NoB noPai = new NoB();
+                                        //System.out.println("\nposInserir: " + posInserir);
 
-                    // Inserir novo filho direita
-                    long posDir = noDir.escreverNoB();
+                    long newPos = noPai.encontrarPai(posInserir);
+                    //System.out.println("\nnewPos: " + newPos);
+                    noPai.lerNoB(newPos);
+                    
+                    // Se tiver espaco, basta inserir
+                    if (noPai.temEspacoLivre()) {
 
-                    // Incluir chave que subiu no arquivo
-                    NoB aux = new NoB();
-                    long newPos = aux.encontrarPai(posInserir);
+                        // Alterar filho da esquerda em arquivo
+                        noB.escreverNoB(posInserir);
 
-                    System.out.println("\nnewPos: " + newPos);
+                        // Inserir novo filho direita
+                        long posDir = noDir.escreverNoB();
 
-                    aux.lerNoB(newPos);
-                    aux.inserir(newPos, chave, endereco, posDir);
+                        // Incluir chave que subiu no arquivo
+                        noPai.inserir(newPos, chave, endereco, posDir);
 
-                    // Inserir nova chave
-                    posInserir = noB.encontrarInsercao(newChave);
-                    inserir(noB, posInserir, musica, newEndereco);                    
+                        // Inserir nova chave
+                        inserir(musica, newEndereco);
+                    
+                    // Se No pai estiver cheio, deve-se fazer o split no pai
+                    } else {
+                        int chaveSplit = noPai.getChave((noPai.ordemArvore-1)/2);
 
+//========================== CORRIGIR GAMBIARRA: ===================================//
+                        Musica musicaSplit = new Musica();
+                        musicaSplit.setId(chaveSplit);
+//==================================================================================//
+
+                        long enderecoSplit = noPai.getEndereco((noPai.ordemArvore-1)/2);
+
+                        // Testar se No gerado e' raiz
+                        // Se for, deve-se altera-la em arquivo
+                        if(newPos == posRaiz) {
+
+                            // Inserir novo filho 'a direita da pagina cheia
+                            NoB newNoDir = noPai.getFilhoDir();
+                            long posDir = newNoDir.escreverNoB();
+
+                            // Sobrescrever filho esquerdo na raiz antiga
+                            NoB newNoEsq = noPai.getFilhoEsq();
+                            long posEsq = posRaiz;
+                            newNoEsq.escreverNoB(posEsq);
+
+                            // Escrever nova raiz
+                            NoB newRaiz = new NoB(chaveSplit, enderecoSplit, posEsq, posDir);
+                            long posNewRaiz = newRaiz.escreverNoB();
+
+                            // Alterar ponteiro para nova raiz
+                            arvoreBFile.seek(0);
+                            byte[] posRaizBytes = ByteBuffer.allocate(8).putLong(posNewRaiz).array();
+                            arvoreBFile.write(posRaizBytes);
+
+                            // Inserir nova chave
+                            inserir(musica, newEndereco);
+                        
+                        } else {
+
+                            // Inserir novo filho 'a direita da pagina cheia
+                            NoB newNoDir = noPai.getFilhoDir();
+                            long posDir = newNoDir.escreverNoB();
+
+                            // Sobrescrever filho esquerdo no NoB antigo
+                            NoB newNoEsq = noPai.getFilhoEsq();
+                            long posEsq = newPos;
+                            newNoEsq.escreverNoB(posEsq);
+
+                            // Obter posicao do pai
+                            posInserir = noPai.encontrarPai(newPos);
+
+                            // Inserir no pai do pai a chave que sofreu split
+                            inserir(noB, posInserir, musicaSplit, enderecoSplit, posEsq, posDir);
+                        }
+
+                                  
+                    }
                 }
             }
 
