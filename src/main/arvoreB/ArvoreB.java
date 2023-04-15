@@ -252,6 +252,9 @@ public class ArvoreB {
 
                             // Inserir no pai do pai a chave que sofreu split
                             inserir(noB, posInserir, musicaSplit, enderecoSplit, posEsq, posDir);
+
+                            // Inserir nova chave
+                            inserir(musica, newEndereco);
                         }
 
                                   
