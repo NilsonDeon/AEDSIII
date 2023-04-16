@@ -12,11 +12,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.InputMismatchException;
+import java.util.ArrayList;
+import java.util.List;
+import java.text.ParseException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import app.IO;
 import app.Musica;
 import hashing.HashingExtensivel;
 import arvoreB.ArvoreB;
+import listaInvertida.ListaInvertida;
 
 /**
  * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
@@ -38,6 +46,9 @@ public class CRUD {
     private static ArvoreB arvoreB;
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
+    // Lista invertida
+    private static ListaInvertida lista;
+
     // IO
     private static IO io;
 
@@ -48,6 +59,7 @@ public class CRUD {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
+        lista = new ListaInvertida();
     }
     
     /**
@@ -98,10 +110,14 @@ public class CRUD {
                 antigoDiretorio.delete();
                 hash.inicializarDiretorio();
 
-                // Apagar antiga ArvoreB
+                // Apagar antiga "ArvoreB.db"
                 File antigaArvoreB = new File(arvoreBDB);
                 antigaArvoreB.delete();
                 arvoreB.inicializarArvoreB();
+
+                // Apagar antigas listas invertidas
+                lista.delete();
+                lista.inicializarListas();
 
                 Musica musica = new Musica();
                 byte[] newId;
@@ -126,17 +142,22 @@ public class CRUD {
                     dbFile.write(byteArray);
 
                     // Inserir, utilizando hashing
-                    hash.inserir(musica, posRegistro);
+                    //hash.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B
-                    arvoreB.inserir(musica, posRegistro);
+                    //arvoreB.inserir(musica, posRegistro);
+
+                    // Inserir nas listas invertidas
+                    lista.inserir(musica, posRegistro);
                 }
 
+                /*
                 // Mostrar arquivo dar arvore B
                 int totalElementos = arvoreB.contarChaves();
                 System.out.println("Ha' " + totalElementos + " na arvore:\n");
                 arvoreB.mostrarArquivo();
                 io.readLine();
+                */
 
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
@@ -150,7 +171,7 @@ public class CRUD {
             System.out.println("\nERRO: O arquivo \""+ arquivoCSV + 
                                "\"não encontrado!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no" +
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
                                "arquivo \"" + registroDB + "\"\n");
         } finally {
             if (csvFile != null) csvFile.close();
@@ -219,30 +240,187 @@ public class CRUD {
             if (dbFile != null) dbFile.close();
         }
     }
-    
+
+
     /**
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
      * @return true, se a música foi encontrada; false, caso contrario.
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public boolean read () throws Exception {
+
+    public void read () throws Exception {
+        
+        boolean pesquisaFeita = false;
+        int opcao = -1;
+
+        String menu = "\n+------------------------------------------+" +
+                        "\n|               MENU PESQUISA              |" +
+                        "\n|------------------------------------------|" +
+                        "\n| 1 - Id                                   |" +
+                        "\n| 2 - Data de lancamento                   |" +
+                        "\n| 3 - Nome do artista                      |" +
+                        "\n| 4 - Data de lancamento e nome do artista |" +
+                        "\n+------------------------------------------+";
+        
+        do {
+            try{
+                System.out.println(menu);
+                opcao = io.readInt("\nDigite uma opcao: ");
+
+                switch(opcao) {
+                    case 1: procurarId();       break;
+                    case 2: procurarDatas();    break;
+                    case 3: procurarArtistas(); break;
+                    case 4: System.out.println("\nNao implementado ainda!\n"); break;
+                }
+
+            } catch (InputMismatchException e) {
+                System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
+                           "1 a 4.");
+                io.readLine();
+            }       
+        } while(opcao < 1 || opcao > 4);
+    }
+
+    private void procurarId() throws Exception {
         int idProcurado = 0;
+        do{
+            System.out.print("\nDigite o ID procurado: ");
+            try {
+                idProcurado = io.readInt();
+            } catch (InputMismatchException e) {
+                io.readLine();
+                System.out.println("\nERRO: ID invalido!\n");
+            }
+        } while (idProcurado == 0);
 
-       do {
-           System.out.print("\nDigite o ID procurado: ");
-           try {
-               idProcurado = io.readInt();
-           } catch (InputMismatchException e) {
-               io.readLine();
-               System.out.println("\nERRO: ID invalido!\n");
-               idProcurado = 0;
-           }
-       } while (idProcurado == 0);
+        // Procurar sequenciamente
+        read(idProcurado);
 
-        // Pesquisar no hashing extensivel
+        // Procurar no hashing extensivel
         hash.read(idProcurado);
+    }
 
-       return read(idProcurado);
+    private void procurarArtistas() throws Exception {
+
+        // Ler palavras para filtar os artistas
+        System.out.print("\nDigite o artista procurado: ");
+        String texto = io.readLine();
+
+        // Separar o texto em um array de palavras
+        String arrayPalavras[] = texto.split(" ");
+
+        // Procurar posicoes correspondentes
+        List<Long> enderecos = lista.readArtistas(arrayPalavras[0]);
+        List<Long> listaTmp = null;
+
+        for(int i = 1; i < arrayPalavras.length; i++) {
+
+            // Obter intersecao entre as listas
+            listaTmp = lista.readArtistas(arrayPalavras[i]);
+            enderecos.retainAll(listaTmp);
+        }
+
+        // Abrir "Registros.db" e obter artistas procurados
+        RandomAccessFile dbFile = null;
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            for(int i = 0; i < enderecos.size(); i++) {
+
+                // Posicionar ponteiro
+                long posicao = enderecos.get(i).longValue();
+                dbFile.seek(posicao);
+
+                // Ler informacoes do registro
+                boolean lapide = dbFile.readBoolean();
+                int tamRegistro = dbFile.readInt();
+
+                // Ler e criar novo Objeto musica
+                Musica musica = new Musica();
+                byte[] registro = new byte[tamRegistro];
+                dbFile.read(registro);
+                musica.fromByteArray(registro);
+                
+                // Mostrar
+                System.out.println(musica);
+            }
+
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Registro nao encontrado!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+        }        
+        
+    }
+
+    private void procurarDatas() throws Exception {
+
+        // Ler palavras para filtar os artistas
+        System.out.print("\nDigite o ano procurado: ");
+        String strDate = io.readLine();
+
+        // Converter para data
+        Locale US = new Locale("US");
+        DateFormat df;
+        Date dataProcurada;
+        
+        try{
+            df = new SimpleDateFormat("yyyy", US);
+            dataProcurada = df.parse(strDate);
+
+        // Em caso de execao, data sera' 01-01-0001
+        } catch (ParseException e) {
+            System.out.print("ERRO: Data invalida (" + strDate + ")\n");
+            strDate = "0001";
+            df = new SimpleDateFormat("yyyy", US);
+            dataProcurada = df.parse(strDate);
+        } catch (IllegalArgumentException e) {
+            System.out.print("ERRO: Data invalida (" + strDate + ")\n");
+            strDate = "0001";
+            df = new SimpleDateFormat("yyyy", US);
+            dataProcurada = df.parse(strDate);  
+        }        
+        
+
+        // Procurar posicoes correspondentes
+        List<Long> enderecos = lista.readAnosLancamento(dataProcurada);
+
+        // Abrir "Registros.db" e obter datas procurados
+        RandomAccessFile dbFile = null;
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            for(int i = 0; i < enderecos.size(); i++) {
+
+                // Posicionar ponteiro
+                long posicao = enderecos.get(i).longValue();
+                dbFile.seek(posicao);
+
+                // Ler informacoes do registro
+                boolean lapide = dbFile.readBoolean();
+                int tamRegistro = dbFile.readInt();
+
+                // Ler e criar novo Objeto musica
+                Musica musica = new Musica();
+                byte[] registro = new byte[tamRegistro];
+                dbFile.read(registro);
+                musica.fromByteArray(registro);
+                
+                // Mostrar
+                System.out.println(musica);
+            }
+
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Registro nao encontrado!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+        }        
+        
     }
 
     /**
