@@ -37,7 +37,7 @@ public class Diretorio {
      */
     public Diretorio (int profundidadeGlobal) throws Exception {
         if (profundidadeGlobal <= 0) {
-            throw new Exception ("\nERRO: Diretorio(" + profundidadeGlobal + ") -> profundidade global invalida!\n");
+            throw new IllegalArgumentException("Profundidade global inválida");
         }
 
         this.profundidadeGlobal = profundidadeGlobal;
@@ -50,6 +50,7 @@ public class Diretorio {
             pos += tamTotalBucket;
         }
     }
+
 
     /**
      * Metodo para escrever um diretorio em arquivo, como fluxo de bytes.
