@@ -1,5 +1,12 @@
-# AEDSIII
+# Trabalho Pratico - AEDSIII
 
-Para compilar e executar o programa, basta o seguinte comando no terminal:
+#### Gabriel Vargas Bento de Souza
+#### Nilson Deon Cordeiro Filho
 
-make run
+Para compilar e executar o programa, basta o seguinte comando no terminal: "make run"
+
+Link GitHub:https://github.com/NilsonDeon/AEDSIII/tree/dev
+
+Link video explicativo: https://youtu.be/kb8gb98yIVY
+
+O arquivo "TP01_Relatorio.pdf" explica um pouco melhor a dinamica de criacao das classes e dos metodos.

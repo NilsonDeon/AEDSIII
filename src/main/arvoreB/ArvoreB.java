@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
-import app.Musica;
+import app.*;
 
 public class ArvoreB {
 
@@ -103,37 +103,35 @@ public class ArvoreB {
             // Obter raiz
             arvoreBFile.seek(0);
             long posRaiz = arvoreBFile.readLong();
-          //  System.out.println("\nposRaiz: " + posRaiz);
 
             // Localizar e ler NoB
             arvoreBFile.seek(posArvore);
             noB.lerNoB(posArvore);
 
-            //System.out.println("\n\nTHIS:\n\n");
-            //this.mostrarArquivo();
-
             // Testar se No tem espaco livre para insercao e e' folha
             if (noB.temEspacoLivre() && noB.isFolha()) {
                 noB.inserir(posArvore, newChave, newEndereco);
             
-            // Se nao for folha, testar se chave ja pertencia 'a 'arvore
+            // Se nao for folha, testar se chave ja pertencia 'a arvore anteriormente
             } else if (noB.temEspacoLivre() && (filhoEsq != -1 || filhoDir != -1)) {
                 noB.inserir(posArvore, newChave, newEndereco, filhoEsq, filhoDir);
 
             // Se nao couber na folha, deve-se procurar No de insercao
             } else {
-                long posInserir;
-                posInserir = noB.encontrarInsercao(newChave);
-                noB.lerNoB(posInserir);
+                long posInserir = posArvore;
+
+                // Atualizar NoB caso nao esteja fazendo o split recursivo
+                if ((filhoEsq == -1 && filhoDir == -1)) {
+                    posInserir = noB.encontrarInsercao(newChave);
+                    noB.lerNoB(posInserir);
+                }
 
                 // Se couber no NoB, basta inserir
                 if (noB.temEspacoLivre()) {
                     noB.inserir(posInserir, newChave, newEndereco, filhoEsq, filhoDir);
                 
-                // Se for raiz, basta criar novos dois filhos
+                // Se for raiz, basta criar novos dois filhos (split na raiz)
                 } else if(posInserir == posRaiz) {
-
-                   // System.out.println("\nIF");
 
                     // Separar filhos direita e esquerda do No
                     NoB noEsq = noB.getFilhoEsq();
@@ -153,14 +151,20 @@ public class ArvoreB {
                     // Reescrever NoB que sofreu o split
                     noB.escreverNoB(posInserir);
 
+                    // Se estiver inserindo chave completamente nova
+                    if ((filhoEsq == -1 && filhoDir == -1)) {
+                       posInserir = noB.encontrarInsercao(newChave);
+                    
+                    // Senao, significa que nova posicao e' no final de arquivo
+                    } else {
+                        posInserir = posDir;
+                    }
+
                     // Inserir nova chave
-                    posInserir = noB.encontrarInsercao(newChave);
                     inserir(noB, posInserir, musica, newEndereco, filhoEsq, filhoDir);
                 
                 // Senao, deve-se dividir o No
                 } else {
-
-                    //System.out.println("\nELSE");
 
                     // Copiar NoB atual
                     NoB tmp = noB.clone();
@@ -179,10 +183,7 @@ public class ArvoreB {
 
                     // Testar se No pai esta' com espaco livre
                     NoB noPai = new NoB();
-                                        //System.out.println("\nposInserir: " + posInserir);
-
                     long newPos = noPai.encontrarPai(posInserir);
-                    //System.out.println("\nnewPos: " + newPos);
                     noPai.lerNoB(newPos);
                     
                     // Se tiver espaco, basta inserir
@@ -211,7 +212,7 @@ public class ArvoreB {
 
                         long enderecoSplit = noPai.getEndereco((noPai.ordemArvore-1)/2);
 
-                        // Testar se No gerado e' raiz
+                        // Testar se NoB gerado e' raiz
                         // Se for, deve-se altera-la em arquivo
                         if(newPos == posRaiz) {
 
@@ -251,7 +252,7 @@ public class ArvoreB {
                             posInserir = noPai.encontrarPai(newPos);
 
                             // Inserir no pai do pai a chave que sofreu split
-                            inserir(noB, posInserir, musicaSplit, enderecoSplit, posEsq, posDir);
+                            inserir(tmp, posInserir, musicaSplit, enderecoSplit, posEsq, posDir);
 
                             // Inserir nova chave
                             inserir(musica, newEndereco);
@@ -277,14 +278,16 @@ public class ArvoreB {
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            arvoreBFile.readLong();
+            System.out.print("Pos [" + String.format("%8d", 0) + "]: raiz: ");
+            long posRaiz = arvoreBFile.readLong();
             long posAtual = arvoreBFile.getFilePointer();
+            System.out.println("|" + String.format("%8d", posRaiz) + "|");
 
             // Percorrer todo arquivo
             while(posAtual != arvoreBFile.length()) {
                 
                 // Mostrar posicao atual do arquivo
-                System.out.print("Pos [" + String.format("%6d", posAtual) + "]: ");
+                System.out.print("Pos [" + String.format("%8d", posAtual) + "]: ");
 
                 // Ler NoB e mostrar
                 NoB aux = new NoB();
@@ -310,12 +313,12 @@ public class ArvoreB {
 
                 // Ler ultimo ponteiro 'a direita
                 aux.noFilho[aux.ordemArvore-1] = arvoreBFile.readLong();
-
                 posAtual = arvoreBFile.getFilePointer();
 
                 //Printar
                 System.out.println(aux);
             }
+            System.out.println();
             
         } catch (IOException e) {
             System.out.println("\nERRO: Ocorreu um erro de escrita no " +
@@ -324,4 +327,82 @@ public class ArvoreB {
             if (arvoreBFile != null) arvoreBFile.close();
         }
     }
+
+    public int contarChaves() throws Exception {
+        RandomAccessFile arvoreBFile = null;
+        int total = 0;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            long posRaiz = arvoreBFile.readLong();
+            long posAtual = arvoreBFile.getFilePointer();
+
+            // Percorrer todo arquivo
+            while(posAtual != arvoreBFile.length()) {
+                
+
+                // Ler NoB e mostrar
+                NoB aux = new NoB();
+
+                // Posicionar ponteiro na posicao de inicio do No
+                arvoreBFile.seek(posAtual);
+
+                // Ler numero de elementos no No
+                aux.numElementos = arvoreBFile.readShort();
+                total += aux.numElementos;
+
+                // Ler informacoes do No
+                for (int i = 0; i < aux.ordemArvore-1; i++) {
+                    
+                    // Ler ponteiro para filho da esquerda da posicao i
+                    aux.noFilho[i] = arvoreBFile.readLong();
+
+                    // Ler chave na posicao i
+                    aux.chave[i] = arvoreBFile.readInt();
+
+                    // Ler endereco na posicao i para  "Registro.db"
+                    aux.endereco[i] = arvoreBFile.readLong();
+                }
+
+                // Ler ultimo ponteiro 'a direita
+                aux.noFilho[aux.ordemArvore-1] = arvoreBFile.readLong();
+
+                posAtual = arvoreBFile.getFilePointer();
+            }
+            
+        } catch (IOException e) {
+            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
+                               "arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            if (arvoreBFile != null) arvoreBFile.close();
+            return total;
+        }
+    }
+
+    private void caminhar(long pos) throws Exception {
+        if (pos != -1) {
+            NoB no = new NoB();
+            no.lerNoB(pos);
+
+            int i;
+            for(i = 0; i < no.numElementos; i++) {
+                if(no.noFilho[i] != -1) {
+                    caminhar(no.noFilho[i]);
+                }
+                System.out.println(no.chave[i]);
+            }
+
+            if (no.noFilho[i] != -1) {
+                caminhar(no.noFilho[i]);
+            }
+        }
+    }
+
+    public void caminhar() throws Exception {
+        System.out.println("In order:");
+        caminhar(getPosRaiz());
+
+    }
+
 }
