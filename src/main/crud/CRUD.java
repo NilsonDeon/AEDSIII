@@ -268,10 +268,10 @@ public class CRUD {
                 opcao = io.readInt("\nDigite uma opcao: ");
 
                 switch(opcao) {
-                    case 1: procurarId();       break;
-                    case 2: procurarDatas();    break;
-                    case 3: procurarArtistas(); break;
-                    case 4: System.out.println("\nNao implementado ainda!\n"); break;
+                    case 1: procurarId();             break;
+                    case 2: procurarDatas();          break;
+                    case 3: procurarArtistas();       break;
+                    case 4: procurarDatasEArtistas(); break;
                 }
 
             } catch (InputMismatchException e) {
@@ -359,7 +359,7 @@ public class CRUD {
 
     private void procurarDatas() throws Exception {
 
-        // Ler palavras para filtar os artistas
+        // Ler data para filtar as musicas
         System.out.print("\nDigite o ano procurado: ");
         String strDate = io.readLine();
 
@@ -390,6 +390,88 @@ public class CRUD {
         List<Long> enderecos = lista.readAnosLancamento(dataProcurada);
 
         // Abrir "Registros.db" e obter datas procurados
+        RandomAccessFile dbFile = null;
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            for(int i = 0; i < enderecos.size(); i++) {
+
+                // Posicionar ponteiro
+                long posicao = enderecos.get(i).longValue();
+                dbFile.seek(posicao);
+
+                // Ler informacoes do registro
+                boolean lapide = dbFile.readBoolean();
+                int tamRegistro = dbFile.readInt();
+
+                // Ler e criar novo Objeto musica
+                Musica musica = new Musica();
+                byte[] registro = new byte[tamRegistro];
+                dbFile.read(registro);
+                musica.fromByteArray(registro);
+                
+                // Mostrar
+                System.out.println(musica);
+            }
+
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Registro nao encontrado!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+        } finally {
+            if (dbFile != null) dbFile.close();
+        }        
+        
+    }
+
+    private void procurarDatasEArtistas() throws Exception {
+
+        // Ler palavras para filtar os artistas
+        System.out.print("\nDigite o artista procurado: ");
+        String texto = io.readLine();
+        texto = lista.normalizarString(texto);
+
+        // Separar o texto em um array de palavras
+        String arrayPalavras[] = texto.split(" ");
+
+        // Ler data para filtar as musicas
+        System.out.print("\nDigite o ano procurado: ");
+        String strDate = io.readLine();
+
+        // Converter para data
+        Locale US = new Locale("US");
+        DateFormat df;
+        Date dataProcurada;
+        
+        try{
+            df = new SimpleDateFormat("yyyy", US);
+            dataProcurada = df.parse(strDate);
+
+        // Em caso de execao, data sera' 01-01-0001
+        } catch (ParseException e) {
+            System.out.print("ERRO: Data invalida (" + strDate + ")\n");
+            strDate = "0001";
+            df = new SimpleDateFormat("yyyy", US);
+            dataProcurada = df.parse(strDate);
+        } catch (IllegalArgumentException e) {
+            System.out.print("ERRO: Data invalida (" + strDate + ")\n");
+            strDate = "0001";
+            df = new SimpleDateFormat("yyyy", US);
+            dataProcurada = df.parse(strDate);  
+        }
+
+        // Procurar posicoes correspondentes pela data
+        List<Long> enderecos = lista.readAnosLancamento(dataProcurada);
+        List<Long> listaTmp = new ArrayList<>();
+
+        // Comparar pelo artista tambem
+        for(int i = 0; i < arrayPalavras.length; i++) {
+            // Obter intersecao entre as listas
+            listaTmp = lista.readArtistas(arrayPalavras[i]);
+            enderecos.retainAll(listaTmp);
+        }
+
+        // Abrir "Registros.db" e obter musicas
         RandomAccessFile dbFile = null;
 
         try {
