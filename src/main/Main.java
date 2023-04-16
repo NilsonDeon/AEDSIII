@@ -24,11 +24,11 @@ class Main {
         IO io = new IO();
         CRUD crud = new CRUD();
 
-       String intro = "\n        Trabalho Pratico 01 - TP01         " +
+       String intro = "\n        Trabalho Pratico 02 - TP02         " +
                       "\n    Algoritmos e Estruturas de Dados III   " + 
                       "\n       Gabriel Vargas e Nilson Deon        " +
                       "\n     Base de dados: Musicas do Spotify     " +
-                      "\n                  03/2023                  ";
+                      "\n                  04/2023                  ";
 
        String menu = "\n+------------------------------------------+" +
                      "\n|              MENU PRINCIPAL              |" +

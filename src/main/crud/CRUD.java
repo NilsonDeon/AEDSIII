@@ -130,11 +130,13 @@ public class CRUD {
 
                     // Inserir, utilizando arvore B
                     arvoreB.inserir(musica, posRegistro);
-
-                    arvoreB.mostrarArquivo();
-                    io.readLine();
-
                 }
+
+                // Mostrar arquivo dar arvore B
+                int totalElementos = arvoreB.contarChaves();
+                System.out.println("Ha' " + totalElementos + " na arvore:\n");
+                arvoreB.mostrarArquivo();
+                io.readLine();
 
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
@@ -192,7 +194,16 @@ public class CRUD {
 
                 // Inserir no hashing extensivel
                 hash.inserir(musica, finalRegistro);
-                
+
+                // Inserir, utilizando arvore B
+                arvoreB.inserir(musica, finalRegistro);
+
+                // Mostrar arquivo dar arvore B
+                int totalElementos = arvoreB.contarChaves();
+                System.out.println("Ha' " + totalElementos + " na arvore:\n");
+                arvoreB.mostrarArquivo();
+                io.readLine();
+
                 System.out.println("\nMusica [" + musica.getId() + "]: \"" +
                                             musica.getNome() + "\" " +
                                             "cadastrada com sucesso!");

@@ -659,12 +659,12 @@ public class NoB {
         noB += "(" + String.format("%2d", numElementos) + "): ";
 
         for(int i = 0; i < ordemArvore-1; i++) {
-            noB += "|" + String.format("%6d", noFilho[i]);
-            noB += "|" + String.format("%3d", chave[i]);
-            noB += "|" + String.format("%6d", endereco[i]);
+            noB += "|" + String.format("%8d", noFilho[i]);
+            noB += "|" + String.format("%5d", chave[i]);
+            noB += "|" + String.format("%8d", endereco[i]);
         }
 
-        noB += "|" + String.format("%6d", noFilho[ordemArvore-1]) + "|";
+        noB += "|" + String.format("%8d", noFilho[ordemArvore-1]) + "|";
 
         return noB;
     }
