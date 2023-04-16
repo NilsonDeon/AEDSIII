@@ -306,6 +306,7 @@ public class CRUD {
         // Ler palavras para filtar os artistas
         System.out.print("\nDigite o artista procurado: ");
         String texto = io.readLine();
+        texto = lista.normalizarString(texto);
 
         // Separar o texto em um array de palavras
         String arrayPalavras[] = texto.split(" ");

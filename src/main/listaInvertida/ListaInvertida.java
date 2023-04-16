@@ -90,4 +90,8 @@ public class ListaInvertida {
     public List<Long> readAnosLancamento(Date dataBusca) throws Exception {
         return listaAnosLancamento.read(dataBusca);
     }
+
+    public String normalizarString(String texto) {
+        return listaArtistas.normalizarString(texto);
+    } 
 }

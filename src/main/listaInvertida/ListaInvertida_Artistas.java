@@ -76,7 +76,7 @@ public class ListaInvertida_Artistas {
         }
     }
 
-    private String normalizarString(String texto) {
+    protected String normalizarString(String texto) {
 
         // Remover os acentos da string
         String strNormalizada = Normalizer.normalize(texto, Normalizer.Form.NFD)
