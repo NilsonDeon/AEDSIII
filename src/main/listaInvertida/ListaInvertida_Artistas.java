@@ -19,8 +19,18 @@ public class ListaInvertida_Artistas {
     private String arrayArtistas[] = new String[200000];
     private int tamArray = 0;
 
+    /**
+     * Construtor padrao da ListaInvertida_Artistas.
+     */
     public ListaInvertida_Artistas() {}
 
+    /**
+     * Metodo para inserir uma musica na lista invertida a partir de uma 
+     * lista de palavras.
+     * @param musica - a ser inserida.
+     * @param endereco - posicao da musica no "Registro.db".
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public void inserir(Musica musica, long endereco) throws Exception {
 
         String nomeArtistas = musica.getArtistas();
@@ -34,6 +44,14 @@ public class ListaInvertida_Artistas {
         }
     }
 
+    /**
+     * Metodo privado para inserir uma musica na lista invertida a partir de 
+     * uma unica palavra.
+     * @param musica - a ser inserida.
+     * @param newArista
+     * @param endereco - posicao da musica no "Registro.db".
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     private void inserir(Musica musica, String newArtista, long endereco) throws Exception {
 
         // Obter nome do arquivo
@@ -76,6 +94,11 @@ public class ListaInvertida_Artistas {
         }
     }
 
+    /**
+     * Metodo para normalizar a string de busca, substituindo caracteres nao
+     * padronizados, retirando os acentos e os caracteres especiais, alem de
+     * converter as letrar para letra minuscula.
+     */
     protected String normalizarString(String texto) {
 
         // Remover os acentos da string
@@ -97,6 +120,12 @@ public class ListaInvertida_Artistas {
         return strNormalizada;
     }
 
+    /**
+     * Metodo para pesquisar uma musica a partir do artista.
+     * @param chaveBusca - da musica para se pesquisar.
+     * @return Array List com os enderecos das musicas desejadas.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public List<Long> read(String chaveBusca) throws Exception {
 
         List<Long> enderecos = new ArrayList<>();

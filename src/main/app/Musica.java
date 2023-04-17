@@ -263,7 +263,7 @@ public class Musica {
      * Metodo para formatar a data de lancamento, transformando-a em string.
      * @return strDate - data formatada.
      */
-    private String mostrarDataLancamento () {
+    public String mostrarDataLancamento () {
         SimpleDateFormat date = new SimpleDateFormat("dd-MM-yyyy");
         String strDate = date.format(dataLancamento);
         return strDate;

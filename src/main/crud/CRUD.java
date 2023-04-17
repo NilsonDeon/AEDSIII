@@ -142,23 +142,22 @@ public class CRUD {
                     dbFile.write(byteArray);
 
                     // Inserir, utilizando hashing
-                    //hash.inserir(musica, posRegistro);
+                    hash.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B
-                    //arvoreB.inserir(musica, posRegistro);
+                    arvoreB.inserir(musica, posRegistro);
 
                     // Inserir nas listas invertidas
                     lista.inserir(musica, posRegistro);
                 }
 
-                /*
+                
                 // Mostrar arquivo dar arvore B
                 int totalElementos = arvoreB.contarChaves();
                 System.out.println("Ha' " + totalElementos + " na arvore:\n");
                 arvoreB.mostrarArquivo();
                 io.readLine();
-                */
-
+                
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
                 newId = musica.intToByteArray(ultimoId);
@@ -268,15 +267,15 @@ public class CRUD {
                 opcao = io.readInt("\nDigite uma opcao: ");
 
                 switch(opcao) {
-                    case 1: procurarId();             break;
-                    case 2: procurarDatas();          break;
-                    case 3: procurarArtistas();       break;
-                    case 4: procurarDatasEArtistas(); break;
+                    case 1 : procurarId();             break;
+                    case 2 : procurarDatas();          break;
+                    case 3 : procurarArtistas();       break;
+                    case 4 : procurarDatasEArtistas(); break;
+                    default: System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
                 }
 
             } catch (InputMismatchException e) {
-                System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
-                           "1 a 4.");
+                System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
                 io.readLine();
             }       
         } while(opcao < 1 || opcao > 4);
@@ -306,6 +305,7 @@ public class CRUD {
         // Ler palavras para filtar os artistas
         System.out.print("\nDigite o artista procurado: ");
         String texto = io.readLine();
+        String textoBak = texto;
         texto = lista.normalizarString(texto);
 
         // Separar o texto em um array de palavras
@@ -328,10 +328,16 @@ public class CRUD {
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
 
-            for(int i = 0; i < enderecos.size(); i++) {
+            // Se nao encontrar musicas, printar que nao foi encontrado
+            if (enderecos.size() == 0) {
+                System.out.println("\nNao foram encontradas musica para (" + textoBak + ")\n");
+
+            // Se somente tiver uma musica, printar ela
+            } else if (enderecos.size() == 1) {
+                System.out.println("\nApenas uma musica foi encontrada:\n");
 
                 // Posicionar ponteiro
-                long posicao = enderecos.get(i).longValue();
+                long posicao = enderecos.get(0).longValue();
                 dbFile.seek(posicao);
 
                 // Ler informacoes do registro
@@ -344,8 +350,72 @@ public class CRUD {
                 dbFile.read(registro);
                 musica.fromByteArray(registro);
                 
-                // Mostrar
+                // Mostrar musica
                 System.out.println(musica);
+
+            // Se tiver mais de uma, deixar como opcao escolher a desejada
+            } else {
+                System.out.println("\nForam encontradas " + enderecos.size() + " musicas:\n");
+                for(int i = 0; i < enderecos.size(); i++) {
+
+                    // Posicionar ponteiro
+                    long posicao = enderecos.get(i).longValue();
+                    dbFile.seek(posicao);
+
+                    // Ler informacoes do registro
+                    boolean lapide = dbFile.readBoolean();
+                    int tamRegistro = dbFile.readInt();
+
+                    // Ler e criar novo Objeto musica
+                    Musica musica = new Musica();
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+                    
+                    // Mostrar nome e artistas das musicas encontradas
+                    System.out.println(String.format("% 4d - %s", i+1, musica.getNome()));
+                }
+
+                // Perguntar qual musica deseja obter as informacoes
+                int opcao = 0;
+                do {
+                    try{
+                        // Ler musica desejada
+                        opcao = io.readInt("\nSelecione a musica desejada: ");
+
+                        // Posicionar ponteiro
+                        long posicao = enderecos.get(opcao-1).longValue();
+                        dbFile.seek(posicao);
+
+                        // Ler informacoes do registro
+                        boolean lapide = dbFile.readBoolean();
+                        int tamRegistro = dbFile.readInt();
+
+                        // Ler e criar novo Objeto musica
+                        Musica musica = new Musica();
+                        byte[] registro = new byte[tamRegistro];
+                        dbFile.read(registro);
+                        musica.fromByteArray(registro);
+                        
+                        // Mostrar musica desejada
+                        System.out.println(musica);
+                    
+                    // Caso le-se um valor nao numerico
+                    } catch (InputMismatchException e) {
+
+                        // Mostrar erro
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a " + enderecos.size() + "."); 
+                        io.readLine();
+                        opcao = 0;
+                    
+                    // Caso o valor nao pertenca ao array
+                    } catch (Exception e) {
+
+                        // Mostrar erro
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a " + enderecos.size() + "."); 
+                        opcao = 0;
+                    }
+                } while (opcao == 0);
             }
 
         } catch (FileNotFoundException e) {
@@ -362,6 +432,7 @@ public class CRUD {
         // Ler data para filtar as musicas
         System.out.print("\nDigite o ano procurado: ");
         String strDate = io.readLine();
+        String strDateBak = strDate;
 
         // Converter para data
         Locale US = new Locale("US");
@@ -395,10 +466,16 @@ public class CRUD {
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
 
-            for(int i = 0; i < enderecos.size(); i++) {
+            // Se nao encontrar musicas, printar que nao foi encontrado
+            if (enderecos.size() == 0) {
+                System.out.println("\nNao foram encontradas musicas para a data (" + strDateBak + ")\n");
+
+            // Se somente tiver uma musica, printar ela
+            } else if (enderecos.size() == 1) {
+                System.out.println("\nApenas uma musica foi encontrada:\n");
 
                 // Posicionar ponteiro
-                long posicao = enderecos.get(i).longValue();
+                long posicao = enderecos.get(0).longValue();
                 dbFile.seek(posicao);
 
                 // Ler informacoes do registro
@@ -411,8 +488,72 @@ public class CRUD {
                 dbFile.read(registro);
                 musica.fromByteArray(registro);
                 
-                // Mostrar
+                // Mostrar musica
                 System.out.println(musica);
+
+            // Se tiver mais de uma, deixar como opcao escolher a desejada
+            } else {
+                System.out.println("\nForam encontradas " + enderecos.size() + " musicas:\n");
+                for(int i = 0; i < enderecos.size(); i++) {
+
+                    // Posicionar ponteiro
+                    long posicao = enderecos.get(i).longValue();
+                    dbFile.seek(posicao);
+
+                    // Ler informacoes do registro
+                    boolean lapide = dbFile.readBoolean();
+                    int tamRegistro = dbFile.readInt();
+
+                    // Ler e criar novo Objeto musica
+                    Musica musica = new Musica();
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+                    
+                    // Mostrar nome e data de lancamento das musicas encontradas
+                    System.out.println(String.format("% 4d - %s", i+1, musica.getNome()));
+                }
+
+                // Perguntar qual musica deseja obter as informacoes
+                int opcao = 0;
+                do {
+                    try{
+                        // Ler musica desejada
+                        opcao = io.readInt("\nSelecione a musica desejada: ");
+
+                        // Posicionar ponteiro
+                        long posicao = enderecos.get(opcao-1).longValue();
+                        dbFile.seek(posicao);
+
+                        // Ler informacoes do registro
+                        boolean lapide = dbFile.readBoolean();
+                        int tamRegistro = dbFile.readInt();
+
+                        // Ler e criar novo Objeto musica
+                        Musica musica = new Musica();
+                        byte[] registro = new byte[tamRegistro];
+                        dbFile.read(registro);
+                        musica.fromByteArray(registro);
+                        
+                        // Mostrar musica desejada
+                        System.out.println(musica);
+                    
+                    // Caso le-se um valor nao numerico
+                    } catch (InputMismatchException e) {
+
+                        // Mostrar erro
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a " + enderecos.size() + "."); 
+                        io.readLine();
+                        opcao = 0;
+                    
+                    // Caso o valor nao pertenca ao array
+                    } catch (Exception e) {
+
+                        // Mostrar erro
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a " + enderecos.size() + "."); 
+                        opcao = 0;
+                    }
+                } while (opcao == 0);
             }
 
         } catch (FileNotFoundException e) {
@@ -429,6 +570,7 @@ public class CRUD {
         // Ler palavras para filtar os artistas
         System.out.print("\nDigite o artista procurado: ");
         String texto = io.readLine();
+        String textoBak = texto;
         texto = lista.normalizarString(texto);
 
         // Separar o texto em um array de palavras
@@ -437,6 +579,7 @@ public class CRUD {
         // Ler data para filtar as musicas
         System.out.print("\nDigite o ano procurado: ");
         String strDate = io.readLine();
+        String strDateBak = strDate;
 
         // Converter para data
         Locale US = new Locale("US");
@@ -477,10 +620,16 @@ public class CRUD {
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
 
-            for(int i = 0; i < enderecos.size(); i++) {
+            // Se nao encontrar musicas, printar que nao foi encontrado
+            if (enderecos.size() == 0) {
+                System.out.println("\nNao foram encontradas musicas para (" + textoBak + ") na data (" + strDateBak + ")\n");
+
+            // Se somente tiver uma musica, printar ela
+            } else if (enderecos.size() == 1) {
+                System.out.println("\nApenas uma musica foi encontrada:\n");
 
                 // Posicionar ponteiro
-                long posicao = enderecos.get(i).longValue();
+                long posicao = enderecos.get(0).longValue();
                 dbFile.seek(posicao);
 
                 // Ler informacoes do registro
@@ -493,8 +642,72 @@ public class CRUD {
                 dbFile.read(registro);
                 musica.fromByteArray(registro);
                 
-                // Mostrar
+                // Mostrar musica
                 System.out.println(musica);
+
+            // Se tiver mais de uma, deixar como opcao escolher a desejada
+            } else {
+                System.out.println("\nForam encontradas " + enderecos.size() + " musicas:\n");
+                for(int i = 0; i < enderecos.size(); i++) {
+
+                    // Posicionar ponteiro
+                    long posicao = enderecos.get(i).longValue();
+                    dbFile.seek(posicao);
+
+                    // Ler informacoes do registro
+                    boolean lapide = dbFile.readBoolean();
+                    int tamRegistro = dbFile.readInt();
+
+                    // Ler e criar novo Objeto musica
+                    Musica musica = new Musica();
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+                    
+                    // Mostrar nome musicas encontradas
+                    System.out.println(String.format("% 4d - %s", i+1, musica.getNome()));
+                }
+
+                // Perguntar qual musica deseja obter as informacoes
+                int opcao = 0;
+                do {
+                    try{
+                        // Ler musica desejada
+                        opcao = io.readInt("\nSelecione a musica desejada: ");
+
+                        // Posicionar ponteiro
+                        long posicao = enderecos.get(opcao-1).longValue();
+                        dbFile.seek(posicao);
+
+                        // Ler informacoes do registro
+                        boolean lapide = dbFile.readBoolean();
+                        int tamRegistro = dbFile.readInt();
+
+                        // Ler e criar novo Objeto musica
+                        Musica musica = new Musica();
+                        byte[] registro = new byte[tamRegistro];
+                        dbFile.read(registro);
+                        musica.fromByteArray(registro);
+                        
+                        // Mostrar musica desejada
+                        System.out.println(musica);
+                    
+                    // Caso le-se um valor nao numerico
+                    } catch (InputMismatchException e) {
+
+                        // Mostrar erro
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a " + enderecos.size() + "."); 
+                        io.readLine();
+                        opcao = 0;
+                    
+                    // Caso o valor nao pertenca ao array
+                    } catch (Exception e) {
+
+                        // Mostrar erro
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a " + enderecos.size() + "."); 
+                        opcao = 0;
+                    }
+                } while (opcao == 0);
             }
 
         } catch (FileNotFoundException e) {

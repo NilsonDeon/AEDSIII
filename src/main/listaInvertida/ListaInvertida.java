@@ -17,13 +17,25 @@ public class ListaInvertida {
     protected static ListaInvertida_AnoLancamento listaAnosLancamento = new ListaInvertida_AnoLancamento();
     protected static ListaInvertida_Artistas listaArtistas = new ListaInvertida_Artistas();
 
+    /**
+     * Construtor padrao da ListaInvertida.
+     */
     public ListaInvertida() {}
 
+    /**
+     * Metodo para inserir uma musica nas duas invertidas.
+     * @param musica - a ser inserida.
+     * @param endereco - posicao dela no arquivo "Registros.db".
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public void inserir(Musica musica, long endereco) throws Exception {
         listaAnosLancamento.inserir(musica, endereco);
         listaArtistas.inserir(musica, endereco);
     }
 
+    /**
+     * Metodo para criar as pastas para armazenar as listas invertidas.
+     */
     public void inicializarListas() {
         // Obter caminho para a pasta
         String pasta1 = "./src/resources/listaInvertida_AnoLancamento";
@@ -48,6 +60,10 @@ public class ListaInvertida {
         }
     }
 
+    /**
+     * Metodo para deletar as pastas e o conteudo delas, apagando, assim, as
+     * litas invertidas.
+     */
     public void delete() {
 
         // Caminho para a pasta
@@ -83,14 +99,32 @@ public class ListaInvertida {
         }
     }
 
+    /**
+     * Metodo para pesquisar na lista pelos artistas.
+     * @param artistaBusca - texto correspondente ao nome do artista procurado.
+     * @return Array list de enderecos para aqueles nomes.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public List<Long> readArtistas(String artistaBusca) throws Exception {
         return listaArtistas.read(artistaBusca);
     }
 
+    /**
+     * Metodo para pesquisar na lista pela data.
+     * @param dataBusca - cada correspondente 'as musicas procuradas.
+     * @return Array list de enderecos para aqueles nomes.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public List<Long> readAnosLancamento(Date dataBusca) throws Exception {
         return listaAnosLancamento.read(dataBusca);
     }
 
+    /**
+     * Metodo para normalizar a string, apagando caracteres especiais e 
+     * convertendo as letras em minusculo.
+     * @param texto - a ser normalizado.
+     * @return nova string com caracteres corretos para a busca eficiente.
+     */
     public String normalizarString(String texto) {
         return listaArtistas.normalizarString(texto);
     } 

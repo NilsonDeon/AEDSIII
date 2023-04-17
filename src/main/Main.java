@@ -67,6 +67,14 @@ class Main {
            } catch (InputMismatchException e) {
                mostrarErro();
                io.readLine();
+           } finally {
+               
+               // Fazer um break para ser possivel ler os resultados obtidos
+               if(opcao >= 2 && opcao <= 9) {
+                   System.out.println("\nPressione ENTER para continuar");
+                   io.readLine();
+               }
+
            }
        } while (opcao != 1);
 

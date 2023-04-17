@@ -17,8 +17,18 @@ import app.Musica;
 
 public class ListaInvertida_AnoLancamento {
 
+    /**
+     * Construtor padrao da ListaInvertida_AnoLancamento.
+     */
     public ListaInvertida_AnoLancamento() {}
 
+    /**
+     * Metodo para inserir uma musica na lista invertida a partir dos nomes do
+     * artista.
+     * @param musica - a ser inserida.
+     * @param endereco - posicao da musica no "Registro.db".
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public void inserir(Musica musica, long endereco) throws Exception {
 
         // Obter data de lancamento da musica
@@ -66,6 +76,12 @@ public class ListaInvertida_AnoLancamento {
         }
     }
 
+    /**
+     * Metodo para pesquisar uma musica a partir do ano de lancamento.
+     * @param dataBusca - data de lancamento da musica para se pesquisar.
+     * @return Array List com os enderecos das musicas desejadas.
+     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     */
     public List<Long> read(Date dataBusca) throws Exception {
 
         List<Long> enderecos = new ArrayList<>();
