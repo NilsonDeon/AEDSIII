@@ -169,8 +169,8 @@ public class CRUD {
                 while ((linhaLida = csvFile.readLine()) != null) {
 
                     // Mostrar barra progresso
-                    gerarBarraProgresso(tamanhoArqCSV, count);
-                    count++;
+                    //gerarBarraProgresso(tamanhoArqCSV, count);
+                    //count++;
 
                     // Obter posicao do registro no arquivo
                     long posRegistro = dbFile.getFilePointer();
@@ -182,23 +182,25 @@ public class CRUD {
 
                     // Inserir, utilizando hashing
                     hash.inserir(musica, posRegistro);
-/*
+
                     // Inserir, utilizando arvore B
-                    arvoreB.inserir(musica, posRegistro);
+                    //arvoreB.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B*
-                    arvoreBestrela.inserir(musica, posRegistro);
+                    //arvoreBestrela.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B+
                     arvoreBmais.inserir(musica, posRegistro);
-*/
+                    arvoreBmais.mostrarArquivo();
+                    io.readLine();
+
                     // Inserir nas listas invertidas
                     lista.inserir(musica, posRegistro);
                 }
 
                 // Mostrar barra de progresso completa
-                gerarBarraProgresso(tamanhoArqCSV, count);
-                System.out.println("\n");
+                //gerarBarraProgresso(tamanhoArqCSV, count);
+                //System.out.println("\n");
               
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);

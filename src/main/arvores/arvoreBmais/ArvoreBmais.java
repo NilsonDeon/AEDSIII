@@ -25,24 +25,24 @@ public class ArvoreBmais {
      * Metodo para inicializar o arquivo "Arvore.db", inicializando a raiz.
      */
     public void inicializarArvoreB() {
-        RandomAccessFile arvoreBFile = null;
+        RandomAccessFile arvoreBmaisFile = null;
 
         try {
-            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Posicionar ponteiro no inicio do arquivo
-            arvoreBFile.seek(0);
+            arvoreBmaisFile.seek(0);
 
             // Escrever posicao da raiz (proximos 8 bytes)
             long posRaiz = 8;
             byte[] posRaizBytes = ByteBuffer.allocate(8).putLong(posRaiz).array();
-            arvoreBFile.write(posRaizBytes);
+            arvoreBmaisFile.write(posRaizBytes);
 
             // Escrever raiz no arquivo
             raiz.escreverNoB();
 
             // Fechar arquivo
-            arvoreBFile.close();
+            arvoreBmaisFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -53,17 +53,17 @@ public class ArvoreBmais {
      * Metodo para obter posicao da raiz no arquivo de 'arvore
      */
     private long getPosRaiz() {
-        RandomAccessFile arvoreBFile = null;
+        RandomAccessFile arvoreBmaisFile = null;
         long posRaiz = -1;
 
         try {
-            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Ler posicao da raiz
-            posRaiz = arvoreBFile.readLong();
+            posRaiz = arvoreBmaisFile.readLong();
 
             // Fechar arquivo
-            arvoreBFile.close();
+            arvoreBmaisFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -94,21 +94,21 @@ public class ArvoreBmais {
      * @return novo No.
      */
     private NoBmais inserir(NoBmais noBmais, long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir) {
-        RandomAccessFile arvoreBFile = null;
+        RandomAccessFile arvoreBmaisFile = null;
 
         try {
-            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Obter chave de insercao
             int newChave = musica.getId();
 
             // Obter raiz
-            arvoreBFile.seek(0);
-            long posRaiz = arvoreBFile.readLong();
+            arvoreBmaisFile.seek(0);
+            long posRaiz = arvoreBmaisFile.readLong();
 
             // Localizar e ler NoBmais
-            arvoreBFile.seek(posArvore);
-            noBmais.lerNoB(posArvore);
+            arvoreBmaisFile.seek(posArvore);
+            noBmais.lerNoBmais(posArvore);
 
             // Testar se No tem espaco livre para insercao e e' folha
             if (noBmais.temEspacoLivre() && noBmais.isFolha()) {
@@ -125,7 +125,7 @@ public class ArvoreBmais {
                 // Atualizar NoBmais caso nao esteja fazendo o split recursivo
                 if ((filhoEsq == -1 && filhoDir == -1)) {
                     posInserir = noBmais.encontrarInsercao(newChave);
-                    noBmais.lerNoB(posInserir);
+                    noBmais.lerNoBmais(posInserir);
                 }
 
                 // Se couber no NoBmais, basta inserir
@@ -142,6 +142,10 @@ public class ArvoreBmais {
                     // Escrever novos NoBmais em arquivo
                     long posEsq = noEsq.escreverNoB();
                     long posDir = noDir.escreverNoB();
+
+                    // Atualizar ponteiro para folha da direita
+                    noEsq.inserirFolhaDir(posDir);
+                    noEsq.escreverNoB(posEsq);
 
                     // Separar elemento do meio para "subir"
                     noBmais = noBmais.getMeio();
@@ -186,7 +190,7 @@ public class ArvoreBmais {
                     // Testar se No pai esta' com espaco livre
                     NoBmais noPai = new NoBmais();
                     long newPos = noPai.encontrarPai(posInserir);
-                    noPai.lerNoB(newPos);
+                    noPai.lerNoBmais(newPos);
                     
                     // Se tiver espaco, basta inserir
                     if (noPai.temEspacoLivre()) {
@@ -196,6 +200,10 @@ public class ArvoreBmais {
 
                         // Inserir novo filho direita
                         long posDir = noDir.escreverNoB();
+
+                        // Adicionar ponteiro para filho da esquerda
+                        noBmais.inserirFolhaDir(posDir);
+                        noBmais.escreverNoB(posInserir);
 
                         // Incluir chave que subiu no arquivo
                         noPai.inserir(newPos, chave, endereco, posDir);
@@ -230,9 +238,9 @@ public class ArvoreBmais {
                             long posNewRaiz = newRaiz.escreverNoB();
 
                             // Alterar ponteiro para nova raiz
-                            arvoreBFile.seek(0);
+                            arvoreBmaisFile.seek(0);
                             byte[] posRaizBytes = ByteBuffer.allocate(8).putLong(posNewRaiz).array();
-                            arvoreBFile.write(posRaizBytes);
+                            arvoreBmaisFile.write(posRaizBytes);
 
                             // Inserir nova chave
                             inserir(musica, newEndereco);
@@ -264,7 +272,7 @@ public class ArvoreBmais {
             }
 
             // Fechar arquivo
-            arvoreBFile.close();
+            arvoreBmaisFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -294,7 +302,7 @@ public class ArvoreBmais {
 
         // Ler NoBmais desejado
         NoBmais noBmais = new NoBmais();
-        noBmais.lerNoB(pos);
+        noBmais.lerNoBmais(pos);
 
         // Procurar possivel local da chave
         int i;
@@ -324,18 +332,18 @@ public class ArvoreBmais {
     }
 
     public void mostrarArquivo() {
-        RandomAccessFile arvoreBFile = null;
+        RandomAccessFile arvoreBmaisFile = null;
 
         try {
-            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             System.out.print("Pos [" + String.format("%8d", 0) + "]: raiz: ");
-            long posRaiz = arvoreBFile.readLong();
-            long posAtual = arvoreBFile.getFilePointer();
+            long posRaiz = arvoreBmaisFile.readLong();
+            long posAtual = arvoreBmaisFile.getFilePointer();
             System.out.println("|" + String.format("%8d", posRaiz) + "|");
 
             // Percorrer todo arquivo
-            while(posAtual != arvoreBFile.length()) {
+            while(posAtual != arvoreBmaisFile.length()) {
                 
                 // Mostrar posicao atual do arquivo
                 System.out.print("Pos [" + String.format("%8d", posAtual) + "]: ");
@@ -344,27 +352,30 @@ public class ArvoreBmais {
                 NoBmais aux = new NoBmais();
 
                 // Posicionar ponteiro na posicao de inicio do No
-                arvoreBFile.seek(posAtual);
+                arvoreBmaisFile.seek(posAtual);
 
                 // Ler numero de elementos no No
-                aux.numElementos = arvoreBFile.readShort();
+                aux.numElementos = arvoreBmaisFile.readShort();
 
                 // Ler informacoes do No
                 for (int i = 0; i < aux.ordemArvore-1; i++) {
                     
                     // Ler ponteiro para filho da esquerda da posicao i
-                    aux.noFilho[i] = arvoreBFile.readLong();
+                    aux.noFilho[i] = arvoreBmaisFile.readLong();
 
                     // Ler chave na posicao i
-                    aux.chave[i] = arvoreBFile.readInt();
+                    aux.chave[i] = arvoreBmaisFile.readInt();
 
                     // Ler endereco na posicao i para  "Registro.db"
-                    aux.endereco[i] = arvoreBFile.readLong();
+                    aux.endereco[i] = arvoreBmaisFile.readLong();
                 }
 
                 // Ler ultimo ponteiro 'a direita
-                aux.noFilho[aux.ordemArvore-1] = arvoreBFile.readLong();
-                posAtual = arvoreBFile.getFilePointer();
+                aux.noFilho[aux.ordemArvore-1] = arvoreBmaisFile.readLong();
+
+                // Ler ponteiro para folha da direita
+                aux.folhaDir = arvoreBmaisFile.readLong();
+                posAtual = arvoreBmaisFile.getFilePointer();
 
                 //Printar
                 System.out.println(aux);
@@ -372,7 +383,7 @@ public class ArvoreBmais {
             System.out.println();
             
             // Fechar arquivo
-            arvoreBFile.close();
+            arvoreBmaisFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -385,50 +396,50 @@ public class ArvoreBmais {
      * @return total de chaves inseridas.
      */
     public int contarChaves() {
-        RandomAccessFile arvoreBFile = null;
+        RandomAccessFile arvoreBmaisFile = null;
         int total = 0;
 
         try {
-            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
-            long posRaiz = arvoreBFile.readLong();
-            long posAtual = arvoreBFile.getFilePointer();
+            long posRaiz = arvoreBmaisFile.readLong();
+            long posAtual = arvoreBmaisFile.getFilePointer();
 
             // Percorrer todo arquivo
-            while(posAtual != arvoreBFile.length()) {
+            while(posAtual != arvoreBmaisFile.length()) {
                 
 
                 // Ler NoBmais e mostrar
                 NoBmais aux = new NoBmais();
 
                 // Posicionar ponteiro na posicao de inicio do No
-                arvoreBFile.seek(posAtual);
+                arvoreBmaisFile.seek(posAtual);
 
                 // Ler numero de elementos no No
-                aux.numElementos = arvoreBFile.readShort();
+                aux.numElementos = arvoreBmaisFile.readShort();
                 total += aux.numElementos;
 
                 // Ler informacoes do No
                 for (int i = 0; i < aux.ordemArvore-1; i++) {
                     
                     // Ler ponteiro para filho da esquerda da posicao i
-                    aux.noFilho[i] = arvoreBFile.readLong();
+                    aux.noFilho[i] = arvoreBmaisFile.readLong();
 
                     // Ler chave na posicao i
-                    aux.chave[i] = arvoreBFile.readInt();
+                    aux.chave[i] = arvoreBmaisFile.readInt();
 
                     // Ler endereco na posicao i para  "Registro.db"
-                    aux.endereco[i] = arvoreBFile.readLong();
+                    aux.endereco[i] = arvoreBmaisFile.readLong();
                 }
 
                 // Ler ultimo ponteiro 'a direita
-                aux.noFilho[aux.ordemArvore-1] = arvoreBFile.readLong();
+                aux.noFilho[aux.ordemArvore-1] = arvoreBmaisFile.readLong();
 
-                posAtual = arvoreBFile.getFilePointer();
+                posAtual = arvoreBmaisFile.getFilePointer();
             }
             
             // Fechar arquivo
-            arvoreBFile.close();
+            arvoreBmaisFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -440,7 +451,7 @@ public class ArvoreBmais {
     private void caminhar(long pos) {
         if (pos != -1) {
             NoBmais no = new NoBmais();
-            no.lerNoB(pos);
+            no.lerNoBmais(pos);
 
             int i;
             for(i = 0; i < no.numElementos; i++) {
