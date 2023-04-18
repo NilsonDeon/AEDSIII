@@ -27,7 +27,9 @@ import java.util.Locale;
 import app.IO;
 import app.Musica;
 import hashing.HashingExtensivel;
-import arvoreB.ArvoreB;
+import arvores.arvoreB.ArvoreB;
+import arvores.arvoreBestrela.ArvoreBestrela;
+import arvores.arvoreBmais.ArvoreBmais;
 import listaInvertida.ListaInvertida;
 
 /**
@@ -50,6 +52,14 @@ public class CRUD {
     private static ArvoreB arvoreB;
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
+    // Arvore B*
+    private static ArvoreBestrela arvoreBestrela;
+    private static final String arvoreBestrelaDB = "./src/resources/ArvoreBestrela.db";
+
+    // Arvore B+
+    private static ArvoreBmais arvoreBmais;
+    private static final String arvoreBmaisDB = "./src/resources/ArvoreBmais.db";
+
     // Lista invertida
     private static ListaInvertida lista;
 
@@ -63,6 +73,8 @@ public class CRUD {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
+        arvoreBestrela = new ArvoreBestrela();
+        arvoreBmais = new ArvoreBmais();
         lista = new ListaInvertida();
     }
     
@@ -118,6 +130,16 @@ public class CRUD {
                 antigaArvoreB.delete();
                 arvoreB.inicializarArvoreB();
 
+                // Apagar antiga "ArvoreBestrela.db"
+                File antigaArvoreBestrela = new File(arvoreBestrelaDB);
+                antigaArvoreBestrela.delete();
+                arvoreBestrela.inicializarArvoreB();
+
+                // Apagar antiga "ArvoreBmais.db"
+                File antigaArvoreBmais = new File(arvoreBmaisDB);
+                antigaArvoreBmais.delete();
+                arvoreBmais.inicializarArvoreB();
+
                 // Apagar antigas listas invertidas
                 lista.delete();
                 lista.inicializarListas();
@@ -160,10 +182,16 @@ public class CRUD {
 
                     // Inserir, utilizando hashing
                     hash.inserir(musica, posRegistro);
-
+/*
                     // Inserir, utilizando arvore B
                     arvoreB.inserir(musica, posRegistro);
 
+                    // Inserir, utilizando arvore B*
+                    arvoreBestrela.inserir(musica, posRegistro);
+
+                    // Inserir, utilizando arvore B+
+                    arvoreBmais.inserir(musica, posRegistro);
+*/
                     // Inserir nas listas invertidas
                     lista.inserir(musica, posRegistro);
                 }
