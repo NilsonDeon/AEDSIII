@@ -42,6 +42,14 @@ public class ListaInvertida {
     }
 
     /**
+     * Metodo para inserir uma musica nas duas invertidas.
+     * @param musica - a ser inserida.
+     */
+    public void delete(Musica musica) {
+        listaArtistas.delete(musica);
+    }
+
+    /**
      * Metodo para criar as pastas para armazenar as listas invertidas.
      */
     public void inicializarListas() {

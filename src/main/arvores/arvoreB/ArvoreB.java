@@ -78,7 +78,7 @@ public class ArvoreB {
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
      */
     public void inserir(Musica musica, long newEndereco) {
-        raiz = inserir(raiz, getPosRaiz(), musica, newEndereco, -1, -1);
+        raiz = inserir(raiz, getPosRaiz(), musica, newEndereco, -1, -1, false);
     }
 
     /**
@@ -89,9 +89,10 @@ public class ArvoreB {
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
      * @param filhoEsq - posicao filho 'a esquerda que esta' sendo inserido.
      * @param filhoDir - posicao filho 'a direita que esta' sendo inserido.
+     * @param split 
      * @return novo No.
      */
-    private NoB inserir(NoB noB, long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir) {
+    private NoB inserir(NoB noB, long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir, boolean isSplit) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -113,7 +114,7 @@ public class ArvoreB {
                 noB.inserir(posArvore, newChave, newEndereco);
             
             // Se nao for folha, testar se chave ja pertencia 'a arvore anteriormente
-            } else if (noB.temEspacoLivre() && (filhoEsq != -1 || filhoDir != -1)) {
+            } else if (noB.temEspacoLivre() && (filhoEsq != -1 || filhoDir != -1) && isSplit) {
                 noB.inserir(posArvore, newChave, newEndereco, filhoEsq, filhoDir);
 
             // Se nao couber na folha, deve-se procurar No de insercao
@@ -121,11 +122,12 @@ public class ArvoreB {
                 long posInserir = posArvore;
 
                 // Atualizar NoB caso nao esteja fazendo o split recursivo
-                if ((filhoEsq == -1 && filhoDir == -1)) {
+                if ((filhoEsq == -1 && filhoDir == -1) && isSplit == false) {
                     posInserir = noB.encontrarInsercao(newChave);
                     noB.lerNoB(posInserir);
                 }
 
+                isSplit = true;
                 // Se couber no NoB, basta inserir
                 if (noB.temEspacoLivre()) {
                     noB.inserir(posInserir, newChave, newEndereco, filhoEsq, filhoDir);
@@ -161,7 +163,7 @@ public class ArvoreB {
                     }
 
                     // Inserir nova chave
-                    inserir(noB, posInserir, musica, newEndereco, filhoEsq, filhoDir);
+                    inserir(noB, posInserir, musica, newEndereco, filhoEsq, filhoDir, isSplit);
                 
                 // Senao, deve-se dividir o No
                 } else {
@@ -250,7 +252,7 @@ public class ArvoreB {
                             posInserir = noPai.encontrarPai(newPos);
 
                             // Inserir no pai do pai a chave que sofreu split
-                            inserir(tmp, posInserir, musicaSplit, enderecoSplit, posEsq, posDir);
+                            inserir(tmp, posInserir, musicaSplit, enderecoSplit, posEsq, posDir, isSplit);
 
                             // Inserir nova chave
                             inserir(musica, newEndereco);

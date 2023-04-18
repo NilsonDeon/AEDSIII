@@ -169,8 +169,8 @@ public class CRUD {
                 while ((linhaLida = csvFile.readLine()) != null) {
 
                     // Mostrar barra progresso
-                    //gerarBarraProgresso(tamanhoArqCSV, count);
-                    //count++;
+                    gerarBarraProgresso(tamanhoArqCSV, count);
+                    count++;
 
                     // Obter posicao do registro no arquivo
                     long posRegistro = dbFile.getFilePointer();
@@ -181,27 +181,30 @@ public class CRUD {
                     dbFile.write(byteArray);
 
                     // Inserir, utilizando hashing
-                    hash.inserir(musica, posRegistro);
+                    //hash.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B
-                    //arvoreB.inserir(musica, posRegistro);
+                    arvoreB.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B*
                     //arvoreBestrela.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B+
-                    arvoreBmais.inserir(musica, posRegistro);
-                    arvoreBmais.mostrarArquivo();
-                    io.readLine();
+                    //arvoreBmais.inserir(musica, posRegistro);
+                    //arvoreBmais.mostrarArquivo();
+                    //io.readLine();
 
                     // Inserir nas listas invertidas
-                    lista.inserir(musica, posRegistro);
+                    //lista.inserir(musica, posRegistro);
                 }
 
                 // Mostrar barra de progresso completa
-                //gerarBarraProgresso(tamanhoArqCSV, count);
-                //System.out.println("\n");
-              
+                gerarBarraProgresso(tamanhoArqCSV, count);
+                System.out.println("\n");
+
+                // Mostar arquivo da arvore B
+                arvoreB.mostrarArquivo();
+                              
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
                 newId = musica.intToByteArray(ultimoId);
@@ -354,9 +357,9 @@ public class CRUD {
         if (find) {
             // Procurar no hashing extensivel
             long hashInicio = now();
-            long posicaoHash = hash.read(idProcurado);
+            //long posicaoHash = hash.read(idProcurado);
             long hashFim = now();
-            System.out.println("\nposicao hash: " + posicaoHash);
+            //System.out.println("\nposicao hash: " + posicaoHash);
 
             // Procurar na Arvore B
             long arvoreBInicio = now();
@@ -979,6 +982,9 @@ public class CRUD {
                             byte[] newLapide = aux.booleanToByteArray(musica.isLapide());
                             dbFile.write(newLapide);
                             find = true;
+
+                            // Deletar na lista
+                            lista.delete(musica);
 
                             // Retornar ponteiro para final do registro
                             dbFile.seek(posicaoFinal);

@@ -51,7 +51,7 @@ public class ListaInvertida_Artistas {
      * Metodo privado para inserir uma musica na lista invertida a partir de 
      * uma unica palavra.
      * @param musica - a ser inserida.
-     * @param newArista
+     * @param newArista - nome do artista.
      * @param endereco - posicao da musica no "Registro.db".
      */
     private void inserir(Musica musica, String newArtista, long endereco) {
@@ -103,6 +103,7 @@ public class ListaInvertida_Artistas {
         }
     }
 
+
     /**
      * Metodo para normalizar a string de busca, substituindo caracteres nao
      * padronizados, retirando os acentos e os caracteres especiais, alem de
@@ -123,7 +124,7 @@ public class ListaInvertida_Artistas {
         strNormalizada = strNormalizada.replaceAll("[Å|å|Ǻ|ǻ]", "a");
 
         // Remover caracteres especiais
-        strNormalizada = strNormalizada.replaceAll("[\\\"'!@#$%¨&><*()|\\\\/\\-+.,;:?\\[\\]{}✦]", "");
+        strNormalizada = strNormalizada.replaceAll("[\\\"'!@#$%¨&*()|\\\\/\\-+.,;:?\\[\\]{}✦<>]", "");
 
         // Converter para letras maiusculas
         strNormalizada = strNormalizada.toLowerCase();
@@ -183,4 +184,84 @@ public class ListaInvertida_Artistas {
         }
     }
 
+    /**
+     * Metodo para remover uma musica na lista invertida a partir de uma 
+     * lista de palavras.
+     * @param musica - a ser removida.
+     */
+    public void delete(Musica musica) {
+
+        int chave = musica.getId();
+        String nomeArtistas = musica.getArtistas();
+        String arrayNomes[] = nomeArtistas.split(" ");
+
+        for(int i = 0; i < arrayNomes.length; i++) {
+            String artista = normalizarString(arrayNomes[i]);
+            if (!artista.equals("")){
+                delete(artista, chave);
+            }
+        }
+    }
+    /**
+     * Metodo privado para remover uma musica na lista invertida a partir de 
+     * uma unica palavra.
+     * @param nomeArtista - nome Artista a se remover.
+     * @param chaveProcurada - id da musica a se remover.
+     */
+    private void delete(String nomeArtista, int chaveProcurada) {
+
+        boolean find = false;
+        // Obter nome do arquivo
+        String nomeArquivo = "./src/resources/listaInvertida_Artistas/" + nomeArtista + ".db";
+
+        RandomAccessFile artistasDB = null;
+
+        try{
+            // Tenta abrir arquivo para remover
+            artistasDB = new RandomAccessFile (nomeArquivo, "rw");
+
+            // Remover logicamente
+            long posicao = artistasDB.getFilePointer();
+            while(posicao != artistasDB.length() && find == false) {
+
+                // Ler chave
+                int chave = artistasDB.readInt();
+
+                // Ler endereco
+                long endereco = artistasDB.readLong();
+
+                // Testar se chave e' valida
+                if (chave == chaveProcurada) {
+                    // Reposicionar ponteiro
+                    artistasDB.seek(posicao);
+
+                    // Inserir chave do registro
+                    chave = -1;
+                    byte[] chaveBytes = ByteBuffer.allocate(4).putInt(chave).array();
+                    artistasDB.write(chaveBytes);
+
+                    // Inserir endereco do registro
+                    endereco = -1;
+                    byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco).array();
+                    artistasDB.write(enderecoBytes);
+                }
+
+                // Marcar como encontrado
+                find = true;
+
+                // Atualizar ponteiro
+                posicao = artistasDB.getFilePointer();
+            }
+
+            // Fechar arquivo
+            artistasDB.close();
+
+        // Excecao caso arquivo nao exista
+        } catch (FileNotFoundException e1) {
+            // Nao esta inserido
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+        }
+    }
+    
 }
