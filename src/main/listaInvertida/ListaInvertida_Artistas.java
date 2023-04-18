@@ -123,7 +123,7 @@ public class ListaInvertida_Artistas {
         strNormalizada = strNormalizada.replaceAll("[Å|å|Ǻ|ǻ]", "a");
 
         // Remover caracteres especiais
-        strNormalizada = strNormalizada.replaceAll("[\\\"'!@#$%¨&*()|\\\\/\\-+.,;:?\\[\\]{}✦]", "");
+        strNormalizada = strNormalizada.replaceAll("[\\\"'!@#$%¨&><*()|\\\\/\\-+.,;:?\\[\\]{}✦]", "");
 
         // Converter para letras maiusculas
         strNormalizada = strNormalizada.toLowerCase();
