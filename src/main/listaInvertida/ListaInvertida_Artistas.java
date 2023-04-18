@@ -153,14 +153,19 @@ public class ListaInvertida_Artistas {
             while(posicao != artistasDB.length()) {
                 
                 // Ler chave
-                artistasDB.readInt();
+                int chave = artistasDB.readInt();
 
-                // Ler e adicionar endereco ao array
+                // Ler endereco
                 long endereco = artistasDB.readLong();
-                enderecos.add(endereco);
 
                 // Atualizar ponteiro
                 posicao = artistasDB.getFilePointer();
+
+                // Testar se chave e' valida
+                if (chave != -1) {
+                    // Adicionar endereco ao array
+                    enderecos.add(endereco);
+                }
             }
 
             // Fechar arquivo
