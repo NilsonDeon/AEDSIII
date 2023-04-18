@@ -1,3 +1,4 @@
+// Package
 package crud;
 
 // Bibliotecas
@@ -10,16 +11,19 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
-import java.util.InputMismatchException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.InputMismatchException;
 import java.util.List;
-import java.text.ParseException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+// Bibliotecas proprias
 import app.IO;
 import app.Musica;
 import hashing.HashingExtensivel;
@@ -55,7 +59,7 @@ public class CRUD {
     /**
      * Construtor padrao da classe CRUD.
      */
-    public CRUD () throws Exception {
+    public CRUD () {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
@@ -65,9 +69,8 @@ public class CRUD {
     /**
      * Metodo para carregar todas as musicas do arquivo csv e salva-las em
      * arquivo.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void carregarCSV() throws Exception {
+    public void carregarCSV() {
         BufferedReader csvFile = null;
         RandomAccessFile dbFile = null;
 
@@ -129,9 +132,23 @@ public class CRUD {
                 newId = musica.intToByteArray(ultimoId);
                 dbFile.write(newId);
 
+                // Obter tamanho arquivo csv
+                LineNumberReader lnr = new LineNumberReader(new FileReader(arquivoCSV));
+                lnr.skip(Long.MAX_VALUE);
+                long tamanhoArqCSV = lnr.getLineNumber();
+                lnr.close();
+
+                // Mostrar mensagem de insercao
+                System.out.println("\nCarregando dados do CSV: ");
+
                 // Ler CSV, criar array de bytes e salva-lo em arquivo
                 String linhaLida;
+                int count = 0;
                 while ((linhaLida = csvFile.readLine()) != null) {
+
+                    // Mostrar barra progresso
+                    gerarBarraProgresso(tamanhoArqCSV, count);
+                    count++;
 
                     // Obter posicao do registro no arquivo
                     long posRegistro = dbFile.getFilePointer();
@@ -151,13 +168,10 @@ public class CRUD {
                     lista.inserir(musica, posRegistro);
                 }
 
-                
-                // Mostrar arquivo dar arvore B
-                int totalElementos = arvoreB.contarChaves();
-                System.out.println("Ha' " + totalElementos + " na arvore:\n");
-                arvoreB.mostrarArquivo();
-                io.readLine();
-                
+                // Mostrar barra de progresso completa
+                gerarBarraProgresso(tamanhoArqCSV, count);
+                System.out.println("\n");
+              
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
                 newId = musica.intToByteArray(ultimoId);
@@ -166,23 +180,24 @@ public class CRUD {
                 System.out.println("\nArquivo \"" + registroDB + 
                                 "\" criado com sucesso!");
             }
+
+            // Fechar arquivos
+            csvFile.close();
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: O arquivo \""+ arquivoCSV + 
                                "\"não encontrado!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + registroDB + "\"\n");
-        } finally {
-            if (csvFile != null) csvFile.close();
-            if (dbFile != null) dbFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + csvFile + "\"\n");
         }
     }
 
     /**
      * Metodo para cadastrar uma nova musica no banco de dados.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void create () throws Exception {
+    public void create () {
         RandomAccessFile dbFile = null;
 
         try {
@@ -216,13 +231,7 @@ public class CRUD {
                 hash.inserir(musica, finalRegistro);
 
                 // Inserir, utilizando arvore B
-                arvoreB.inserir(musica, finalRegistro);
-
-                // Mostrar arquivo dar arvore B
-                int totalElementos = arvoreB.contarChaves();
-                System.out.println("Ha' " + totalElementos + " na arvore:\n");
-                arvoreB.mostrarArquivo();
-                io.readLine();
+                //arvoreB.inserir(musica, finalRegistro);
 
                 System.out.println("\nMusica [" + musica.getId() + "]: \"" +
                                             musica.getNome() + "\" " +
@@ -232,11 +241,14 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
         }
     }
 
@@ -244,10 +256,9 @@ public class CRUD {
     /**
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
      * @return true, se a música foi encontrada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
 
-    public void read () throws Exception {
+    public void read () {
         
         boolean pesquisaFeita = false;
         int opcao = -1;
@@ -281,7 +292,19 @@ public class CRUD {
         } while(opcao < 1 || opcao > 4);
     }
 
-    private void procurarId() throws Exception {
+    /**
+     * Metodo para obter horario atual.
+     * @return timestamp atual em milissegundos
+     */
+    private long now() {
+      return new Date().getTime();
+    }
+
+    private String getTempoBusca(long inicio, long fim) {
+        return ((fim - inicio) / 1000.0 + " segundos");
+    }
+
+    private void procurarId() {
         int idProcurado = 0;
         do{
             System.out.print("\nDigite o ID procurado: ");
@@ -294,13 +317,34 @@ public class CRUD {
         } while (idProcurado == 0);
 
         // Procurar sequenciamente
-        read(idProcurado);
+        long sequencialInicio = now();
+        boolean find = read(idProcurado);
+        long sequencialFim = now();
 
-        // Procurar no hashing extensivel
-        hash.read(idProcurado);
+        if (find) {
+            // Procurar no hashing extensivel
+            long hashInicio = now();
+            long posicaoHash = hash.read(idProcurado);
+            long hashFim = now();
+            System.out.println("\nposicao hash: " + posicaoHash);
+
+            // Procurar na Arvore B
+            long arvoreBInicio = now();
+            long posicaoArvore = arvoreB.read(idProcurado);
+            long arvoreBFim = now();
+            System.out.println("\nposicao arvore: " + posicaoArvore);
+
+            // Mostrar tempos de busca
+            String temposBusca = "\nTempos de busca:\n" +
+                                 "\nSequencialmente ----------------------------- " + getTempoBusca(sequencialInicio, sequencialFim) +
+                                 "\nHash Estensivel ----------------------------- " + getTempoBusca(hashInicio, hashFim) +
+                                 "\nArvore B ------------------------------------ " + getTempoBusca(arvoreBInicio, arvoreBFim);
+            System.out.println(temposBusca);
+        }
+        
     }
 
-    private void procurarArtistas() throws Exception {
+    private void procurarArtistas() {
 
         // Ler palavras para filtar os artistas
         System.out.print("\nDigite o artista procurado: ");
@@ -418,16 +462,18 @@ public class CRUD {
                 } while (opcao == 0);
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
         }        
-        
     }
 
-    private void procurarDatas() throws Exception {
+    private void procurarDatas() {
 
         // Ler data para filtar as musicas
         System.out.print("\nDigite o ano procurado: ");
@@ -437,7 +483,7 @@ public class CRUD {
         // Converter para data
         Locale US = new Locale("US");
         DateFormat df;
-        Date dataProcurada;
+        Date dataProcurada = new Date();
         
         try{
             df = new SimpleDateFormat("yyyy", US);
@@ -448,12 +494,17 @@ public class CRUD {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataProcurada = df.parse(strDate);
+            try {
+                dataProcurada = df.parse(strDate);
+            } catch (ParseException ex) {}
+
         } catch (IllegalArgumentException e) {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataProcurada = df.parse(strDate);  
+            try {
+                dataProcurada = df.parse(strDate);
+            } catch (ParseException ex) {}
         }        
         
 
@@ -556,16 +607,18 @@ public class CRUD {
                 } while (opcao == 0);
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
-        }        
-        
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+        }
     }
 
-    private void procurarDatasEArtistas() throws Exception {
+    private void procurarDatasEArtistas() {
 
         // Ler palavras para filtar os artistas
         System.out.print("\nDigite o artista procurado: ");
@@ -584,7 +637,7 @@ public class CRUD {
         // Converter para data
         Locale US = new Locale("US");
         DateFormat df;
-        Date dataProcurada;
+        Date dataProcurada = new Date();
         
         try{
             df = new SimpleDateFormat("yyyy", US);
@@ -595,12 +648,17 @@ public class CRUD {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataProcurada = df.parse(strDate);
+            try {
+                dataProcurada = df.parse(strDate);
+            } catch (ParseException ex) {}
+
         } catch (IllegalArgumentException e) {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataProcurada = df.parse(strDate);  
+            try {
+                dataProcurada = df.parse(strDate);
+            } catch (ParseException ex) {}            
         }
 
         // Procurar posicoes correspondentes pela data
@@ -710,21 +768,22 @@ public class CRUD {
                 } while (opcao == 0);
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
-        }        
-        
-    }
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+        }
+    }    
 
     /**
      * Metodo para excluir uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public boolean delete () throws Exception {
+    public boolean delete () {
         int idProcurado = 0;
 
        do {
@@ -747,9 +806,8 @@ public class CRUD {
     /**
      * Metodo para atualizar uma musica a partir do seu ID.
      * @return true, se a música foi atualizada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public boolean update () throws Exception {
+    public boolean update () {
         int idProcurado = 0;
 
        do {
@@ -770,9 +828,8 @@ public class CRUD {
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
      * @return true, se a música foi encontrada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    private boolean read (int idProcurado) throws Exception {
+    private boolean read (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
 
@@ -788,8 +845,8 @@ public class CRUD {
 
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
-                long posicaoAtual = dbFile.getFilePointer();
                 int ultimoId = dbFile.readInt();
+                long posicaoAtual = dbFile.getFilePointer();
 
                 while (dbFile.length() != posicaoAtual && find == false) {
                                         
@@ -807,6 +864,7 @@ public class CRUD {
 
                         if (idProcurado == musica.getId()) {
                             find = true;
+                            System.out.println("\nposicao sequencial: " + posicaoAtual);
                             System.out.println(musica);
                         }
 
@@ -829,11 +887,15 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
         } finally {
-            if (dbFile != null) dbFile.close();
             return find;
         }
     }
@@ -841,9 +903,8 @@ public class CRUD {
     /**
      * Metodo privado para excluir uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    private boolean delete (int idProcurado) throws Exception {
+    private boolean delete (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
 
@@ -915,11 +976,16 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + dbFile + "\"\n");
         } finally {
-            if (dbFile != null) dbFile.close();
             return find;
         }
     }
@@ -927,9 +993,8 @@ public class CRUD {
     /**
      * Metodo privado para atualizar uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    private boolean update (int idProcurado) throws Exception {
+    private boolean update (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
         boolean atualizado = false;
@@ -1040,21 +1105,24 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + dbFile + "\"\n");
         } finally {
-            if (dbFile != null) dbFile.close();
-            return atualizado;
+            return find;
         }
     }
 
     /**
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
      * @return true, se a música foi encontrada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
     */
-    public void abrirMusica() throws Exception {
+    public void abrirMusica() {
         int idProcurado = 0;
 
        do {
@@ -1074,10 +1142,8 @@ public class CRUD {
     /**
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo ou ID nao
-     * for encontrado
      */
-    public void abrirMusica (int idProcurado) throws Exception{
+    public void abrirMusica (int idProcurado) {
 
         RandomAccessFile dbFile = null;
         boolean find = false;
@@ -1134,12 +1200,15 @@ public class CRUD {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
-        } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
+            // Fechar arquivos
+            dbFile.close();
 
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+        } finally {
             if (find == true) {
                 abrirMusica (musica.getUri());
             }
@@ -1150,7 +1219,7 @@ public class CRUD {
     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
     * @param uri link da musica.
     */
-    private void abrirMusica (String uri) throws IOException {
+    private void abrirMusica (String uri) {
         // Tratamento da string URI para ser adaptavel ao link
         // Pegar terceiro elemento correspondente ao trackID da musica
         String[] parts = uri.split(":");
@@ -1164,7 +1233,12 @@ public class CRUD {
             pb.start();
         } catch (IOException e){
             // Codigo para windows
-            Runtime.getRuntime().exec("cmd /c start " + url);
+            try{
+                Runtime.getRuntime().exec("cmd /c start " + url);
+            } catch (Exception ex ) {
+                System.out.println("\nERRO:" + ex.getMessage() + "ao abrir a musica");
+            }
+            
         } catch (Exception e) {
             System.out.print("\nERRO: " + e + " Link incorreto. Tente atualizar o URI!");
             System.out.print("\nModelo: \"spotify:track:(INSERIR TRACK ID)\"\n");
@@ -1173,9 +1247,8 @@ public class CRUD {
 
     /**
      * Metodo privado para salvar todo banco de dados em arquivo txt.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public void saveTXT () throws Exception {
+    public void saveTXT () {
         RandomAccessFile dbFile = null;
         BufferedWriter dbFileTXT = null;
 
@@ -1229,14 +1302,30 @@ public class CRUD {
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
+            // Fechar arquivos
+            dbFile.close();
+            dbFileTXT.close();
 
         } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
-            if (dbFileTXT != null) dbFileTXT.close();
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
         }
+    }
+
+    private void gerarBarraProgresso(long tamanhoArqCSV, int linhaAtual) {
+        int progresso = (int) ((double) linhaAtual / tamanhoArqCSV * 100);
+        int barras = progresso / 2;
+        String barra = "[";
+        for (int i = 0; i < barras; i++) {
+            barra += "/";
+        }
+        for (int i = barras; i < 50; i++) {
+            barra += " ";
+        }
+        barra += "] " + progresso + "%";
+        System.out.print("\r" + barra);
     }
 
 }

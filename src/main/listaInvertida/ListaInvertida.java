@@ -1,21 +1,30 @@
+// Package
 package listaInvertida;
 
+// Bibliotecas
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
+// Bibliotecas proprias
 import app.Musica;
 
+/**
+ * Classe responsavel por criar e manipular as listas invertidas do banco de
+ * dados com os atributos de Musica: ano de lancamento e nome do artista.
+ */
 public class ListaInvertida {
 
-    protected static ListaInvertida_AnoLancamento listaAnosLancamento = new ListaInvertida_AnoLancamento();
-    protected static ListaInvertida_Artistas listaArtistas = new ListaInvertida_Artistas();
+    // Instancias da lista
+    private static ListaInvertida_AnoLancamento listaAnosLancamento = new ListaInvertida_AnoLancamento();
+    private static ListaInvertida_Artistas listaArtistas = new ListaInvertida_Artistas();
+
+    // Enderecos dos arquivos da lista
+    private static String pastaAnoLancamento = "./src/resources/listaInvertida_AnoLancamento";
+    private static String pastaNomeArtista = "./src/resources/listaInvertida_Artistas";
 
     /**
      * Construtor padrao da ListaInvertida.
@@ -26,9 +35,8 @@ public class ListaInvertida {
      * Metodo para inserir uma musica nas duas invertidas.
      * @param musica - a ser inserida.
      * @param endereco - posicao dela no arquivo "Registros.db".
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(Musica musica, long endereco) throws Exception {
+    public void inserir(Musica musica, long endereco) {
         listaAnosLancamento.inserir(musica, endereco);
         listaArtistas.inserir(musica, endereco);
     }
@@ -37,22 +45,17 @@ public class ListaInvertida {
      * Metodo para criar as pastas para armazenar as listas invertidas.
      */
     public void inicializarListas() {
-        // Obter caminho para a pasta
-        String pasta1 = "./src/resources/listaInvertida_AnoLancamento";
         
         // Cria um objeto File para representar a pasta
-        File novaPasta1 = new File(pasta1);
+        File novaPasta1 = new File(pastaAnoLancamento);
         
         // Se a pasta nao existir, cria ela
         if (!novaPasta1.exists()) {
             novaPasta1.mkdirs();
         }
 
-        // Obter caminho para a pasta
-        String pasta2 = "./src/resources/listaInvertida_Artistas";
-        
         // Cria um objeto File para representar a pasta
-        File novaPasta2 = new File(pasta2);
+        File novaPasta2 = new File(pastaNomeArtista);
         
         // Se a pasta nao existir, cria ela
         if (!novaPasta2.exists()) {
@@ -66,13 +69,9 @@ public class ListaInvertida {
      */
     public void delete() {
 
-        // Caminho para a pasta
-        String pasta1 = "./src/resources/listaInvertida_Artistas";
-        String pasta2 = "./src/resources/listaInvertida_AnoLancamento";
-
         // Obter arquivo correspondente
-        File diretorio1 = new File(pasta1);
-        File diretorio2 = new File(pasta2);
+        File diretorio1 = new File(pastaAnoLancamento);
+        File diretorio2 = new File(pastaNomeArtista);
 
         // Verificar se a pasta1 existe
         if (diretorio1.exists() && diretorio1.isDirectory()) {
@@ -103,9 +102,8 @@ public class ListaInvertida {
      * Metodo para pesquisar na lista pelos artistas.
      * @param artistaBusca - texto correspondente ao nome do artista procurado.
      * @return Array list de enderecos para aqueles nomes.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public List<Long> readArtistas(String artistaBusca) throws Exception {
+    public List<Long> readArtistas(String artistaBusca) {
         return listaArtistas.read(artistaBusca);
     }
 
@@ -113,9 +111,8 @@ public class ListaInvertida {
      * Metodo para pesquisar na lista pela data.
      * @param dataBusca - cada correspondente 'as musicas procuradas.
      * @return Array list de enderecos para aqueles nomes.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public List<Long> readAnosLancamento(Date dataBusca) throws Exception {
+    public List<Long> readAnosLancamento(Date dataBusca) {
         return listaAnosLancamento.read(dataBusca);
     }
 

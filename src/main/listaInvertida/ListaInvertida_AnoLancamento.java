@@ -1,5 +1,7 @@
+// Package
 package listaInvertida;
 
+// Bibliotecas
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -10,11 +12,16 @@ import java.text.DateFormat;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
+// Bibliotecas proprias
 import app.Musica;
 
+/**
+ * Classe responsavel por criar e manipular uma lista invertida sobre o atributo
+ * ano de lancamento da musica presente no banco de dados.
+ */
 public class ListaInvertida_AnoLancamento {
 
     /**
@@ -27,9 +34,8 @@ public class ListaInvertida_AnoLancamento {
      * artista.
      * @param musica - a ser inserida.
      * @param endereco - posicao da musica no "Registro.db".
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(Musica musica, long endereco) throws Exception {
+    public void inserir(Musica musica, long endereco) {
 
         // Obter data de lancamento da musica
         Date dataLancamento = musica.getDataLancamento();
@@ -45,10 +51,17 @@ public class ListaInvertida_AnoLancamento {
             // Tenta abrir arquivo para inserir
             dataDB = new RandomAccessFile (nomeArquivo, "rw");
 
-        } catch (FileNotFoundException e) {
-            // Arquivo nao encontrado, criar o arquivo aqui
-            File file = new File(nomeArquivo);
-            file.createNewFile();
+        // Excecao caso arquivo nao exista
+        } catch (FileNotFoundException e1) {
+
+            try{
+                // Se arquivo nao encontrado, deve-se cria-lo
+                File file = new File(nomeArquivo);
+                file.createNewFile();
+            } catch (IOException e2) {
+                System.out.println("\nERRO: " + e2.getMessage() + " ao criar o arquivo \"" + nomeArquivo + "\"\n");
+            }
+            
         }
 
         try{
@@ -68,11 +81,11 @@ public class ListaInvertida_AnoLancamento {
             byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco).array();
             dataDB.write(enderecoBytes);
 
+            // Fechar arquivo
+            dataDB.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                                "arquivo \"" + nomeArquivo + "\"\n");
-        } finally {
-            if (dataDB != null) dataDB.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
         }
     }
 
@@ -80,9 +93,8 @@ public class ListaInvertida_AnoLancamento {
      * Metodo para pesquisar uma musica a partir do ano de lancamento.
      * @param dataBusca - data de lancamento da musica para se pesquisar.
      * @return Array List com os enderecos das musicas desejadas.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public List<Long> read(Date dataBusca) throws Exception {
+    public List<Long> read(Date dataBusca) {
 
         List<Long> enderecos = new ArrayList<>();
 
@@ -111,16 +123,17 @@ public class ListaInvertida_AnoLancamento {
                 posicao = dataDB.getFilePointer();
             }
 
+            // Fechar arquivo
+            dataDB.close();
+
         } catch (FileNotFoundException e) {
-            // Nao existe a musica desejada
-            // Lista vazia
+            // Nao existe a musica com parametro desejado, logo lista sera null
             enderecos = null;
 
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de leitura no " +
-                                "arquivo \"" + nomeArquivo + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivo + "\"\n");
+
         } finally {
-            if (dataDB != null) dataDB.close();
             return enderecos;
         }
     }

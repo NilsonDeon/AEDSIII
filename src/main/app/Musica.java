@@ -1,3 +1,4 @@
+// Package
 package app;
 
 // Bibliotecas
@@ -63,9 +64,8 @@ public class Musica {
      * @param linha - string contendo todas as informacoes sobre o objeto a ser
      * criado.
      * @param id - id do objeto criado.
-     * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    public Musica (String linha, int id) throws Exception{
+    public Musica (String linha, int id) {
 
         String[] atributos = linha.split(",");
 
@@ -195,9 +195,8 @@ public class Musica {
      * Metodo para preencher o atributo dataLancamento, passando a data como
      * uma string no formato yyyy-MM-dd
      * @param strDate - string, contendo a data de lancamento.
-     * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    private void lerDataLancamentoUS (String strDate) throws Exception {
+    private void lerDataLancamentoUS (String strDate) {
      
         Locale US = new Locale("US");
         DateFormat df;
@@ -216,12 +215,17 @@ public class Musica {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataLancamento = df.parse(strDate);
+            try {
+                dataLancamento = df.parse(strDate);
+            } catch (ParseException ex) {}
+
         } catch (IllegalArgumentException e) {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataLancamento = df.parse(strDate);  
+            try {
+                dataLancamento = df.parse(strDate);
+            } catch (ParseException ex) {}
         }
     }
 
@@ -229,9 +233,8 @@ public class Musica {
      * Metodo para preencher o atributo dataLancamento, passando a data como
      * uma string no formato dd-MM-yyyy
      * @param strDate - string, contendo a data de lancamento.
-     * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    private void lerDataLancamentoBR (String strDate) throws Exception {
+    private void lerDataLancamentoBR (String strDate)  {
      
         Locale US = new Locale("US");
         DateFormat df;
@@ -250,12 +253,17 @@ public class Musica {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataLancamento = df.parse(strDate);
+            try {
+                dataLancamento = df.parse(strDate);
+            } catch (ParseException ex) {}
+            
         } catch (IllegalArgumentException e) {
             System.out.print("ERRO: Data invalida (" + strDate + ")\n");
             strDate = "0001";
             df = new SimpleDateFormat("yyyy", US);
-            dataLancamento = df.parse(strDate);  
+            try {
+                dataLancamento = df.parse(strDate);
+            } catch (ParseException ex) {}
         }
     }
 
@@ -312,9 +320,8 @@ public class Musica {
     /**
      * Metodo privado para atualizar algum atributo do objeto.
      * @return true, se atualizado; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular data.
      */
-    public boolean atualizar() throws Exception {
+    public boolean atualizar() {
 
        IO io = new IO();
        int opcao = -1;

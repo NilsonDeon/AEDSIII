@@ -1,5 +1,7 @@
+// Package
 package arvoreB;
 
+// Bibliotecas
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -111,9 +113,8 @@ public class NoB {
     /**
      * Metodo para criar um NoB em arquivo, como fluxo de bytes.
      * @return fimArquivo - posicao do arquivo que o NoB foi escrito.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public long escreverNoB() throws Exception {
+    public long escreverNoB() {
         RandomAccessFile arvoreBFile = null;
         long fimArquivo = -1;
 
@@ -148,11 +149,12 @@ public class NoB {
             byte[] noFilhoBytes = ByteBuffer.allocate(8).putLong(noFilho[ordemArvore-1]).array();
             arvoreBFile.write(noFilhoBytes);
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
             return fimArquivo;
         }
     }
@@ -160,9 +162,8 @@ public class NoB {
     /**
      * Metodo para criar um NoB em arquivo, como fluxo de bytes.
      * @param posicaoInserir - posicao de inicio para escrita do NoB.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void escreverNoB(long posicaoInserir) throws Exception {
+    public void escreverNoB(long posicaoInserir) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -195,11 +196,11 @@ public class NoB {
             byte[] noFilhoBytes = ByteBuffer.allocate(8).putLong(noFilho[ordemArvore-1]).array();
             arvoreBFile.write(noFilhoBytes);
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
@@ -208,9 +209,8 @@ public class NoB {
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(long posicaoInserir, int newChave, long newEndereco) throws Exception {
+    public void inserir(long posicaoInserir, int newChave, long newEndereco) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -223,11 +223,11 @@ public class NoB {
             arvoreBFile.seek(posicaoInserir);
             escreverNoB(posicaoInserir);
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
@@ -237,9 +237,8 @@ public class NoB {
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
      * @param filhoDir - endereco do filho da direita.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir) throws Exception {
+    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -252,11 +251,11 @@ public class NoB {
             arvoreBFile.seek(posicaoInserir);
             escreverNoB(posicaoInserir);
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
@@ -266,9 +265,8 @@ public class NoB {
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
      * @param filhoDir - endereco do filho da direita.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir, long filhoEsq) throws Exception {
+    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir, long filhoEsq) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -281,11 +279,11 @@ public class NoB {
             arvoreBFile.seek(posicaoInserir);
             escreverNoB(posicaoInserir);
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
@@ -294,7 +292,6 @@ public class NoB {
      * devidos ponteiros.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
     private void inserir(int newChave, long newEndereco) {
         if (temEspacoLivre()) {
@@ -330,7 +327,6 @@ public class NoB {
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
      * @param filhoDir - endereco do filho 'a direita.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
     private void inserir(int newChave, long newEndereco, long filhoDir) {
         if (temEspacoLivre()) {
@@ -367,7 +363,6 @@ public class NoB {
      * @param newEndereco - novo endereco a se inserir.
      * @param filhoEsq - endereco do filho 'a esquerda.
      * @param filhoDir - endereco do filho 'a direita.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
     private void inserir(int newChave, long newEndereco, long filhoEsq, long filhoDir) {
         if (temEspacoLivre()) {
@@ -401,9 +396,8 @@ public class NoB {
     /**
      * Metodo para ler NoB em arquivo, a apartir de sua posicao de inicio.
      * @param posInicio - posicao de inicio daquele NoB.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void lerNoB (long posInicio) throws Exception {
+    public void lerNoB (long posInicio) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -431,11 +425,11 @@ public class NoB {
             // Ler ultimo ponteiro 'a direita
             noFilho[ordemArvore-1] = arvoreBFile.readLong();
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
@@ -443,9 +437,8 @@ public class NoB {
      * Metodo para encontrar NoB de insersao de uma chave.
      * @param chave - que sera' inserida.
      * @return noB - no qual deve-se inserir a chave.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public long encontrarInsercao (int chave) throws Exception {
+    public long encontrarInsercao (int chave) {
         return encontrarInsercao(this, chave, 8);
     }
 
@@ -456,9 +449,8 @@ public class NoB {
      * @param chave - chave que sera' inserida.
      * @param posInserir - posicao para inserir a chave.
      * @return posInserir - endereco de insercao no arquivo.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    private long encontrarInsercao (NoB no, int chave, long posInserir) throws Exception {
+    private long encontrarInsercao (NoB no, int chave, long posInserir) {
      
         // Procurar o filho, no qual a chave poderia ficar
         int i;
@@ -471,8 +463,6 @@ public class NoB {
             posInserir = encontrarInsercao(no, chave, posInserir);
         }
 
-        //System.out.println("\n==================== posInserir: " + posInserir);
-
         return posInserir;
     }
 
@@ -480,9 +470,8 @@ public class NoB {
      * Metodo para encontrar a posicao do pai de um NoB.
      * @param posFilho - posicao do filho em arquivo
      * @return posInserir - endereco de insercao no arquivo.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public long encontrarPai(long posFilho) throws Exception {
+    public long encontrarPai(long posFilho) {
 
         RandomAccessFile arvoreBFile = null;
         long posicaoPai = -1;
@@ -519,11 +508,12 @@ public class NoB {
 
             if (find == false) posicaoPai = -1;
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
             return posicaoPai;
         }
     }
@@ -652,6 +642,10 @@ public class NoB {
         return resp;
     }
 
+    /**
+     * Metodo para sobrescrever o toString do Objeto e converter os atributos
+     * da classe NoB em uma string.
+     */
     public String toString() {
 
         String noB = "";

@@ -1,14 +1,16 @@
+// Package
 package sort;
 
-// bibliotecas
+// Bibliotecas
 import java.util.InputMismatchException;
 
+// Bibliotecas proprias
 import app.IO;
 import hashing.HashingExtensivel;
 
 public class OrdenacaoExterna {
 
-    public void ordenarArquivo () throws Exception {
+    public void ordenarArquivo () {
 
         IO io = new IO();
         HashingExtensivel hash = new HashingExtensivel();

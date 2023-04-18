@@ -1,13 +1,20 @@
+// Package
 package hashing;
 
+// Bibliotecas
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
-import app.Musica;
+// Bibliotecas proprias
 import app.IO;
+import app.Musica;
 
+/**
+ * Classe HasshingExtensivel responsavel por implementar o Hash extensivel em
+ * memoria secundaria, utilizando as classes Bucket e Diretorio.
+ */
 public class HashingExtensivel {
 
     protected Diretorio diretorio;
@@ -16,25 +23,22 @@ public class HashingExtensivel {
 
     /**
      * Construtor padrao da classe HashExtensivel.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public HashingExtensivel() throws Exception {
+    public HashingExtensivel() {
         diretorio = new Diretorio();
     }
 
     /**
      * Metodo para inicializar o diretorio em arquivo, com valores nulos.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public void inicializarDiretorio() throws Exception {
+    public void inicializarDiretorio() {
         diretorio.criarDiretorio();
     }
 
     /**
      * Metodo para inicializar os buckets no arquivo, com valores nulos.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public void inicializarBuckets() throws Exception {
+    public void inicializarBuckets() {
         Bucket bucket = new Bucket();
         bucket.inicializarBuckets();
     }
@@ -54,13 +58,10 @@ public class HashingExtensivel {
      * @param musica - a ser inserida.
      * @param posicaoRegistro - posicao da musica no arquivo "Registro.db".
      * @return true, se a música foi inserida corretamente; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public boolean inserir (Musica musica, long posicaoRegistro) throws Exception {
+    public boolean inserir (Musica musica, long posicaoRegistro) {
         boolean inserido = false;
         Bucket bucket = new Bucket();
-
-        IO io = new IO();
 
         // Calcular hash
         int id = musica.getId();
@@ -102,9 +103,8 @@ public class HashingExtensivel {
         posicao = diretorio.posBucket[posHash];
 
         // Inserir no bucket
-        bucket.inserir(posicao, id, posicaoRegistro);
-        System.out.println("Inserindo id: " + id);
-
+        inserido = bucket.inserir(posicao, id, posicaoRegistro);
+        
         return inserido;
     }
 
@@ -112,18 +112,18 @@ public class HashingExtensivel {
      * Metodo para procurar e exibir as informacoes de uma musica a partir do 
      * seu ID.
      * @param idProcurado - id da musica para pesquisar.
-     * @return true, se a música foi encontrada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     * @return posicao da musica no arquivo "Registro.db".
      */
-    public boolean read(int idProcurado) throws Exception {
-        boolean find = false;
+    public long read(int idProcurado) {
 
         RandomAccessFile bucketFile = null;
-        RandomAccessFile dbFile = null;
+
+        int chave = -1;
+        long endereco = -1;
+        boolean find = false;
 
         try {
             bucketFile = new RandomAccessFile (bucketDB, "rw");
-            dbFile = new RandomAccessFile (registroDB, "rw");
 
             // Calcular hash
             int posHash = hash(idProcurado);
@@ -143,53 +143,32 @@ public class HashingExtensivel {
             int cont = 0;
             while(cont < bucket.tamBucket && find == false) {
 
-                int chave = bucketFile.readInt();
-                long endereco = bucketFile.readLong();
+                chave = bucketFile.readInt();
+                endereco = bucketFile.readLong();
 
                 // Testar id
                 if (chave == idProcurado) {
-                    
-                    Musica musicaProcurada = new Musica();
-                    dbFile.seek(endereco);
-
-                    // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
-                    int tamRegistro = dbFile.readInt();
-
-                    // Testar se registro e' valido
-                    if (lapide == false) {
-
-                        // Trazer musica para a memoria primaria
-                        byte[] registro = new byte[tamRegistro];
-                        dbFile.read(registro);
-                        musicaProcurada.fromByteArray(registro);
-
-                        find = true;
-                        System.out.println(musicaProcurada);
-                    }
-
+                    find = true;
                 }
                 cont++;
             }
-            
+
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
-            if (dbFile != null) dbFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketDB + "\"\n");
         }
 
-        return find;
+        return endereco;
     }
 
     /**
      * Metodo para procurar e deletar uma musica a partir do seu ID.
      * @param idProcurado - id da musica para deletar.
      * @return true, se a música foi deletada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public boolean delete(int idProcurado) throws Exception {
+    public boolean delete(int idProcurado) {
         boolean find = false;
 
         RandomAccessFile bucketFile = null;
@@ -243,12 +222,13 @@ public class HashingExtensivel {
                 cont++;
             }
             
+            // Fechar arquivos
+            bucketFile.close();
+            dbFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
-            if (dbFile != null) dbFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
 
         return find;
@@ -259,17 +239,14 @@ public class HashingExtensivel {
      * @param idProcurado - id da musica para atualizar endereco.
      * @param newEndereco - novo endereco da musica.
      * @return true, se a música foi deletada; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public boolean update(int idProcurado, long newEndereco) throws Exception {
+    public boolean update(int idProcurado, long newEndereco) {
         boolean find = false;
 
         RandomAccessFile bucketFile = null;
-        RandomAccessFile dbFile = null;
 
         try {
             bucketFile = new RandomAccessFile (bucketDB, "rw");
-            dbFile = new RandomAccessFile (registroDB, "rw");
 
             // Calcular hash
             int posHash = hash(idProcurado);
@@ -307,23 +284,22 @@ public class HashingExtensivel {
                 cont++;
             }
                  
+            // Fechar arquivos
+            bucketFile.close();
 
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
-            if (dbFile != null) dbFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + bucketDB + "\"\n");
         }
+
 
         return find;
     }
 
     /**
-     * Metodo para refazer hashing, utilizado apos as ordenacoes.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
+     * Metodo para refazer hashing, utilizado apos as ordenacoes. De forma a
+     * trocar os enderecos antigos pelos novos.
      */
-    public void refazerHashing () throws Exception {
+    public void refazerHashing () {
         RandomAccessFile dbFile = null;
 
         try {
@@ -362,11 +338,14 @@ public class HashingExtensivel {
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
+            // Fechar arquivos
+            dbFile.close();
+
         } catch (FileNotFoundException e) {
                 System.out.println("\nERRO: Registro nao encontrado!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
-        } finally {
-            if (dbFile != null) dbFile.close();
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
     }
 

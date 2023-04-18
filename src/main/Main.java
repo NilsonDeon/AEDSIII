@@ -4,9 +4,10 @@
  * @version 1.0 03/2023
  */
 
-// bibliotecas
+// Bibliotecas
 import java.util.InputMismatchException;
 
+// Bibliotecas proprias
 import app.IO;
 import crud.CRUD;
 import sort.OrdenacaoExterna;
@@ -18,7 +19,7 @@ class Main {
      * e inicializar um banco de dados capaz de realizar CRUD e Ordenacao
      * Externa.
      */
-    public static void main (String args[]) throws Exception {
+    public static void main (String args[]) {
 
         OrdenacaoExterna sort = new OrdenacaoExterna();
         IO io = new IO();

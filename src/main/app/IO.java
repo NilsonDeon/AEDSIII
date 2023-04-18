@@ -1,3 +1,4 @@
+// Package
 package app;
 
 // Bibliotecas
@@ -7,7 +8,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
-
 
 /**
  * CRUD - Classe responsavel por tratar a leitura de dados do teclado dos tipos:

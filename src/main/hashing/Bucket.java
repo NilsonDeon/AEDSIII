@@ -1,10 +1,16 @@
+// Package
 package hashing;
 
+// Bibliotecas
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
+/**
+ * Classe Bucket responsavel por criar e manipular o bucket de armazenamento
+ * para o Hashing Extensivel.
+ */
 public class Bucket {
     protected int profundidadeLocal;
     protected short numElementos;
@@ -17,24 +23,25 @@ public class Bucket {
     /**
      * Construtor padrao da classe Bucket.
      */
-    public Bucket() throws Exception {
+    public Bucket() {
         this(1);
     }
 
     /**
      * Construtor da classe Bucket com passagem de parametros.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public Bucket(int profundidadeLocal) throws Exception {
-        if (profundidadeLocal <= 0) {
-            throw new Exception ("\nERRO: Bucket(" + profundidadeLocal + ") -> profundidade local invalida!\n");
+    public Bucket(int profundidadeLocal) {
+
+        // Gerar excecao caso a pronfundidade seja menor que 1
+        if (profundidadeLocal < 1) {
+            throw new IllegalArgumentException("ERRO: profundidade local invalida: " + profundidadeLocal);
         }
 
+        // Instanciar os arrays e inicializar com -1 as posicoes dos buckets 
         this.profundidadeLocal = profundidadeLocal;
         numElementos = 0;
         chave = new int[tamBucket];
         endereco = new long[tamBucket];
-
         for(int i = 0; i < tamBucket; i++) {
             chave[i] = -1;
             endereco[i] = -1;
@@ -43,9 +50,8 @@ public class Bucket {
 
     /**
      * Metodo para criar os buckets iniciais, de acordo com a profundidade.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inicializarBuckets() throws Exception {
+    public void inicializarBuckets() {
 
         // Inicializar os primeiros buckets vazios
         int numBuckets = (int)Math.pow (2.0, profundidadeLocal);
@@ -56,9 +62,8 @@ public class Bucket {
 
     /**
      * Metodo para escrever um bucket em um arquivo binario como fluxo de bytes.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void criarBucket() throws Exception {
+    public void criarBucket() {
         RandomAccessFile bucketFile = null;
 
         try {
@@ -78,20 +83,20 @@ public class Bucket {
             
             for (int i = 0; i < tamBucket; i++) {
 
-                // Escrever chave (ID)
+                // Escrever chave
                 byte[] chaveBytes = ByteBuffer.allocate(4).putInt(chave[i]).array();
                 bucketFile.write(chaveBytes);
 
-                // Escrever endereco no arquivo "Registros.db"
+                // Escrever endereco
                 byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco[i]).array();
                 bucketFile.write(enderecoBytes);
             }
             
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + bucketDB + "\"\n");
         }
     }
 
@@ -99,9 +104,8 @@ public class Bucket {
      * Metodo para aumentar a profundidade de um bucket em arquivo.
      * @param posBucket - posicao do bucket em arquivo que tera' a profundidade
      * aumentada.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void aumentarProfundidade (long posBucket) throws Exception {
+    public void aumentarProfundidade (long posBucket) {
         RandomAccessFile bucketFile = null;
 
         try {
@@ -118,12 +122,12 @@ public class Bucket {
             bucketFile.seek(posBucket);
             byte[] profundidadeBytes = ByteBuffer.allocate(4).putInt(profundidadeLocal).array();
             bucketFile.write(profundidadeBytes);
-            
+
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de leitura do " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + bucketDB + "\"\n");
         }
     }
 
@@ -147,9 +151,8 @@ public class Bucket {
      * @param newChave - id da Musica a ser inserida.
      * @param newEndereco - posicao da Musica no arquivo "Registros.db".
      * @return true, se inserido corretamente; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public boolean inserir (long posBucket, int newChave, long newEndereco) throws Exception {
+    public boolean inserir (long posBucket, int newChave, long newEndereco) {
 
         boolean inserido = false;
         RandomAccessFile bucketFile = null;
@@ -175,7 +178,7 @@ public class Bucket {
                     // Voltar a posicao lida
                     bucketFile.seek(posicaoInserir);
 
-                    // Escrever nova chave (ID)
+                    // Escrever nova chave
                     byte[] chaveBytes = ByteBuffer.allocate(4).putInt(newChave).array();
                     bucketFile.write(chaveBytes);
 
@@ -200,12 +203,12 @@ public class Bucket {
             bucketFile.write(numElementosBytes);
 
             inserido = true;
-            
+
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + bucketDB + "\"\n");
         }
 
         return inserido;
@@ -216,9 +219,8 @@ public class Bucket {
      * @param posBucket - posicao de inicio do bucket.
      * @param posElemento - posicao do elemento que se deseja remover.
      * @return true, se removido corretamente; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public boolean remover (long posBucket, long posElemento) throws Exception {
+    public boolean remover (long posBucket, long posElemento) {
 
         boolean removido = false;
 
@@ -247,16 +249,16 @@ public class Bucket {
             byte[] chaveBytes = ByteBuffer.allocate(4).putInt(chave).array();
             bucketFile.write(chaveBytes);
 
-            // Escrever endereco null do arquivo "Registros.db"
+            // Escrever endereco null
             long endereco = -1;
             byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco).array();
             bucketFile.write(enderecoBytes);
 
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + bucketDB + "\"\n");
         }
 
         return removido; 
@@ -265,21 +267,22 @@ public class Bucket {
     /**
      * Metodo para se obter a posicao final do arquivo de buckets.
      * @return finalArq - posicao final do arquivo.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public long getFinalArquivo () throws Exception {
+    public long getFinalArquivo () {
 
         RandomAccessFile bucketFile = null;
-        long finalArq = 0;
+        long finalArq = -1;
         try {
             bucketFile = new RandomAccessFile (bucketDB, "rw");
+
+            // Obter posicao final do arquivo
             finalArq = bucketFile.length();
 
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketDB + "\"\n");
         }
 
         return finalArq; 
@@ -289,9 +292,8 @@ public class Bucket {
      * Metodo para determinar se um bucket esta' cheio.
      * @param posBucket - posicao do bucket no arquivo.
      * @return true, se estiver cheio; false, caso contrario.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public boolean isFull(long posBucket) throws Exception {
+    public boolean isFull(long posBucket){
 
         RandomAccessFile bucketFile = null;
 
@@ -305,30 +307,21 @@ public class Bucket {
             // Obter numero de elementos
             numElementos = bucketFile.readShort();
 
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketDB + "\"\n");
         }
 
         return numElementos == tamBucket;     
     }
 
-    public String string(int num) {
-        String bucket = "";
-        bucket += "Bucket " +  String.format("%4d", num) + " = [";
-
-        for(int i = 0; i < tamBucket; i++) {
-            bucket += (chave[i] == -1) ? "      |" : String.format("%6s|", chave[i]);
-        }
-
-        bucket += "\b].";    
-        
-        return bucket;
-    }
-
-    public void lerBucket (long posicao) throws Exception {
+    /**
+     * Metodo para, a partir de uma posicao, ler o bucket contido nela.
+     * @param posicao - so bucket desejado.
+     */
+    public void lerBucket (long posicao) {
 
         RandomAccessFile bucketFile = null;
         try {
@@ -347,13 +340,11 @@ public class Bucket {
                 endereco[i] = bucketFile.readLong();
             }
 
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketDB + "\"\n");
         }
-
     }
-
 }

@@ -1,5 +1,7 @@
+// Package
 package listaInvertida;
 
+// Bibliotecas
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -12,12 +14,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+// Bibliotecas proprias
 import app.Musica;
 
+/**
+ * Classe responsavel por criar e manipular uma lista invertida sobre o atributo
+ * nome do artista da musica presente no banco de dados.
+ */
 public class ListaInvertida_Artistas {
-
-    private String arrayArtistas[] = new String[200000];
-    private int tamArray = 0;
 
     /**
      * Construtor padrao da ListaInvertida_Artistas.
@@ -29,9 +33,8 @@ public class ListaInvertida_Artistas {
      * lista de palavras.
      * @param musica - a ser inserida.
      * @param endereco - posicao da musica no "Registro.db".
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(Musica musica, long endereco) throws Exception {
+    public void inserir(Musica musica, long endereco) {
 
         String nomeArtistas = musica.getArtistas();
         String arrayNomes[] = nomeArtistas.split(" ");
@@ -50,9 +53,8 @@ public class ListaInvertida_Artistas {
      * @param musica - a ser inserida.
      * @param newArista
      * @param endereco - posicao da musica no "Registro.db".
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    private void inserir(Musica musica, String newArtista, long endereco) throws Exception {
+    private void inserir(Musica musica, String newArtista, long endereco) {
 
         // Obter nome do arquivo
         String nomeArquivo = "./src/resources/listaInvertida_Artistas/" + newArtista + ".db";
@@ -63,10 +65,17 @@ public class ListaInvertida_Artistas {
             // Tenta abrir arquivo para inserir
             artistasDB = new RandomAccessFile (nomeArquivo, "rw");
 
-        } catch (FileNotFoundException e) {
-            // Arquivo nao encontrado, criar o arquivo
-            File file = new File(nomeArquivo);
-            file.createNewFile();
+        // Excecao caso arquivo nao exista
+        } catch (FileNotFoundException e1) {
+
+            try{
+                // Se arquivo nao encontrado, deve-se cria-lo
+                File file = new File(nomeArquivo);
+                file.createNewFile();
+            } catch (IOException e2) {
+                System.out.println("\nERRO: " + e2.getMessage() + " ao criar o arquivo \"" + nomeArquivo + "\"\n");
+            }
+            
         }
 
         try{
@@ -86,11 +95,11 @@ public class ListaInvertida_Artistas {
             byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco).array();
             artistasDB.write(enderecoBytes);
 
+            // Fechar arquivo
+            artistasDB.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                                "arquivo \"" + nomeArquivo + "\"\n");
-        } finally {
-            if (artistasDB != null) artistasDB.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
         }
     }
 
@@ -98,6 +107,8 @@ public class ListaInvertida_Artistas {
      * Metodo para normalizar a string de busca, substituindo caracteres nao
      * padronizados, retirando os acentos e os caracteres especiais, alem de
      * converter as letrar para letra minuscula.
+     * @param texto - a ser normalizado
+     * @return strNormalizada - contendo a string pronta para ser utilizada.
      */
     protected String normalizarString(String texto) {
 
@@ -112,7 +123,7 @@ public class ListaInvertida_Artistas {
         strNormalizada = strNormalizada.replaceAll("[Å|å|Ǻ|ǻ]", "a");
 
         // Remover caracteres especiais
-        strNormalizada = strNormalizada.replaceAll("[\\\"'!@#$%¨&*()|\\\\/\\-+.,;:?\\[\\]{}]", "");
+        strNormalizada = strNormalizada.replaceAll("[\\\"'!@#$%¨&*()|\\\\/\\-+.,;:?\\[\\]{}✦]", "");
 
         // Converter para letras maiusculas
         strNormalizada = strNormalizada.toLowerCase();
@@ -124,9 +135,8 @@ public class ListaInvertida_Artistas {
      * Metodo para pesquisar uma musica a partir do artista.
      * @param chaveBusca - da musica para se pesquisar.
      * @return Array List com os enderecos das musicas desejadas.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public List<Long> read(String chaveBusca) throws Exception {
+    public List<Long> read(String chaveBusca) {
 
         List<Long> enderecos = new ArrayList<>();
 
@@ -153,16 +163,17 @@ public class ListaInvertida_Artistas {
                 posicao = artistasDB.getFilePointer();
             }
 
+            // Fechar arquivo
+            artistasDB.close();
+
         } catch (FileNotFoundException e) {
-            // Nao existe a musica desejada
-            // Lista vazia
+            // Nao existe a musica com parametro desejado, logo lista sera null
             enderecos = null;
 
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de leitura no " +
-                                "arquivo \"" + nomeArquivo + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivo + "\"\n");
+
         } finally {
-            if (artistasDB != null) artistasDB.close();
             return enderecos;
         }
     }

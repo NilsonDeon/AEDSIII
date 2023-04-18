@@ -1,11 +1,15 @@
+// Package
 package hashing;
 
+// Bibliotecas
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
-import app.IO;
-
+/**
+ * Classe Bucket responsavel por criar e manipular o diretorio de armazenamento
+ * para o Hashing Extensivel.
+ */
 public class Diretorio {
 
     private static final String diretorioDB = "./src/resources/Diretorio.db";
@@ -26,7 +30,7 @@ public class Diretorio {
     /**
      * Construtor padrao da classe Diretorio.
      */
-    public Diretorio () throws Exception {
+    public Diretorio () {
         this(1);
     }
 
@@ -35,15 +39,17 @@ public class Diretorio {
      * @param profundidadeGlobal - profundidade para se inicializar o diretorio.
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public Diretorio (int profundidadeGlobal) throws Exception {
-        if (profundidadeGlobal <= 0) {
-            throw new IllegalArgumentException("Profundidade global inválida");
+    public Diretorio (int profundidadeGlobal) {
+
+        // Gerar excecao caso a pronfundidade global seja menor que 1
+        if (profundidadeGlobal < 1) {
+            throw new IllegalArgumentException("ERRO: profundidade global invalida: " + profundidadeGlobal);
         }
 
+        // Instanciar os arrays e inicializar as posicoes dos buckets 
         this.profundidadeGlobal = profundidadeGlobal;
         tamDiretorio = (int)Math.pow(2.0, this.profundidadeGlobal);
         posBucket = new long[tamDiretorio];
-
         long pos = 0;
         for(int i = 0; i < tamDiretorio; i++) {
             posBucket[i] = pos;
@@ -51,12 +57,10 @@ public class Diretorio {
         }
     }
 
-
     /**
-     * Metodo para escrever um diretorio em arquivo, como fluxo de bytes.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     * Metodo para escrever o diretorio em arquivo, como fluxo de bytes.
      */
-    public void criarDiretorio() throws Exception {
+    public void criarDiretorio() {
         RandomAccessFile diretorioFile = null;
 
         try {
@@ -73,19 +77,19 @@ public class Diretorio {
                 byte[] posBytes = ByteBuffer.allocate(8).putLong(posLong).array();
                 diretorioFile.write(posBytes);
             }
+
+            // Fechar arquivo
+            diretorioFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + diretorioDB + "\"\n");
-        } finally {
-            if (diretorioFile != null) diretorioFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + diretorioFile + "\"\n");
         }
     }
 
     /**
-     * Metodo para ler um diretorio de arquivo, como fluxo de bytes.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
+     * Metodo para ler o diretorio de arquivo, como fluxo de bytes.
      */
-    public void lerDiretorio() throws Exception {
+    public void lerDiretorio() {
         RandomAccessFile diretorioFile = null;
 
         try {
@@ -102,11 +106,11 @@ public class Diretorio {
                 posBucket[i] = diretorioFile.readLong();
             }
 
+            // Fechar arquivo
+            diretorioFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de leitura do " +
-                               "arquivo \"" + diretorioDB + "\"\n");
-        } finally {
-            if (diretorioFile != null) diretorioFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + diretorioFile + "\"\n");
         }
     }
 
@@ -114,9 +118,8 @@ public class Diretorio {
      * Metodo para aumentar a profundidade do diretorio em arquivo.
      * @param finalArquivoBucket - posicao final do arquivo de bucket, na qual
      * deve-se inserir o novo bucket.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public void aumentarProfundidade(long finalArquivoBucket) throws Exception {
+    public void aumentarProfundidade(long finalArquivoBucket) {
         RandomAccessFile diretorioFile = null;
 
         try {
@@ -154,11 +157,11 @@ public class Diretorio {
             }
             posBucket = newPosBucket;
 
+            // Fechar arquivo
+            diretorioFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + diretorioDB + "\"\n");
-        } finally {
-            if (diretorioFile != null) diretorioFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + diretorioFile + "\"\n");
         }
     }
 
@@ -167,9 +170,8 @@ public class Diretorio {
      * aumentar o diretorio.
      * @param posicao - posicao do arquivo de hash, na qual o bucket colidido
      * se encontra.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public void redistribuir(long posicao) throws Exception {
+    public void redistribuir(long posicao) {
 
         RandomAccessFile bucketFile = null;
         Bucket bucket = new Bucket();
@@ -209,11 +211,11 @@ public class Diretorio {
                 cont++;
             }
 
+            // Fechar arquivo
+            bucketFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + bucketDB + "\"\n");
-        } finally {
-            if (bucketFile != null) bucketFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketFile + "\"\n");
         }
 
     }
@@ -223,9 +225,8 @@ public class Diretorio {
      * @param id - codigo da Musica que, ao tentar ser inserida, deu erro.
      * @param posicaoBucket - posicao do novo bucket inserido no arquivo "Bucket.db".
      * @param profundidade - profundidade antiga do bucket que colidiu.
-     * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
      */
-    public void atualizarPonteiro(int id, long posicaoBucket, int profundidade) throws Exception {
+    public void atualizarPonteiro(int id, long posicaoBucket, int profundidade) {
         RandomAccessFile diretorioFile = null;
 
         try {
@@ -250,14 +251,18 @@ public class Diretorio {
             byte[] posBytes = ByteBuffer.allocate(8).putLong(posLong).array();
             diretorioFile.write(posBytes); 
 
+            // Fechar arquivo
+            diretorioFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + diretorioDB + "\"\n");
-        } finally {
-            if (diretorioFile != null) diretorioFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + diretorioFile + "\"\n");
         }
     }
 
+    /**
+     * Metodo para sobrescrever o toString do Objeto e converter os atributos
+     * da classe Diretorio em uma string.
+     */
     public String toString() {
         String diretorio = "Diretorio = [";
         for(int i = 0; i < tamDiretorio; i++) {

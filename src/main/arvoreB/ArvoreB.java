@@ -1,9 +1,12 @@
+// Package
 package arvoreB;
 
+// Bibliotecas
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
+// Bibliotecas proprias
 import app.*;
 
 public class ArvoreB {
@@ -20,9 +23,8 @@ public class ArvoreB {
 
     /**
      * Metodo para inicializar o arquivo "Arvore.db", inicializando a raiz.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inicializarArvoreB() throws Exception {
+    public void inicializarArvoreB() {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -39,19 +41,18 @@ public class ArvoreB {
             // Escrever raiz no arquivo
             raiz.escreverNoB();
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
     /**
      * Metodo para obter posicao da raiz no arquivo de 'arvore
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    private long getPosRaiz() throws Exception {
+    private long getPosRaiz() {
         RandomAccessFile arvoreBFile = null;
         long posRaiz = -1;
 
@@ -61,11 +62,12 @@ public class ArvoreB {
             // Ler posicao da raiz
             posRaiz = arvoreBFile.readLong();
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
             return posRaiz;
         }
     }
@@ -74,9 +76,8 @@ public class ArvoreB {
      * Metodo para inserir uma chave de pesquisa na arvore B.
      * @param musica - musica a se inserir.
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    public void inserir(Musica musica, long newEndereco) throws Exception {
+    public void inserir(Musica musica, long newEndereco) {
         raiz = inserir(raiz, getPosRaiz(), musica, newEndereco, -1, -1);
     }
 
@@ -89,9 +90,8 @@ public class ArvoreB {
      * @param filhoEsq - posicao filho 'a esquerda que esta' sendo inserido.
      * @param filhoDir - posicao filho 'a direita que esta' sendo inserido.
      * @return novo No.
-     * @throws Exception Se ocorrer algum erro ao manipular os arquivos.
      */
-    private NoB inserir(NoB noB, long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir) throws Exception {
+    private NoB inserir(NoB noB, long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -203,13 +203,11 @@ public class ArvoreB {
                     
                     // Se No pai estiver cheio, deve-se fazer o split no pai
                     } else {
-                        int chaveSplit = noPai.getChave((noPai.ordemArvore-1)/2);
 
-//========================== CORRIGIR GAMBIARRA: ===================================//
+                        // Gerar musica fake com id para insercao
+                        int chaveSplit = noPai.getChave((noPai.ordemArvore-1)/2);
                         Musica musicaSplit = new Musica();
                         musicaSplit.setId(chaveSplit);
-//==================================================================================//
-
                         long enderecoSplit = noPai.getEndereco((noPai.ordemArvore-1)/2);
 
                         // Testar se NoB gerado e' raiz
@@ -263,16 +261,67 @@ public class ArvoreB {
                 }
             }
 
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
             return noB;
         }
     }
 
-    public void mostrarArquivo() throws Exception {
+    /**
+     * Metodo para procurar uma chave na arvore.
+     * @param chaveProcurada - id da chave que se deseja encontrar.
+     * @return posicao da chave no arquivo "Registro.db".
+     */
+    public long read(int chaveProcurada) {
+        return read(getPosRaiz(), chaveProcurada);
+    }
+
+    /**
+     * Metodo para procurar uma chave na arvore.
+     * @param pos - posicao a ser analisada se a chava esta' inclusa ou nao.
+     * @param chaveProcurada - id da chave que se deseja encontrar.
+     * @return posicao da chave no arquivo "Registro.db".
+     */
+    private long read(long pos, int chaveProcurada) {
+
+        long endereco = -1;
+
+        // Ler NoB desejado
+        NoB noB = new NoB();
+        noB.lerNoB(pos);
+
+        // Procurar possivel local da chave
+        int i;
+
+        // Se chave procurada for menor que a primeira
+        if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
+            endereco = read(noB.noFilho[0], chaveProcurada);
+        
+        // Senao, testar o ultimo
+        } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
+            endereco = read(noB.noFilho[noB.numElementos], chaveProcurada);
+
+        // Senao, procurar valores intermediarios
+        } else {
+            for(i = 0; (i < noB.numElementos) && (noB.chave[i] < chaveProcurada); i++);
+
+            // Testar se chave foi encontrada
+            if(noB.chave[i] == chaveProcurada) {
+                endereco = noB.endereco[i];
+
+            } else {
+                endereco = read(noB.noFilho[i+1], chaveProcurada);
+            }
+        }
+
+        return endereco;
+    }
+
+    public void mostrarArquivo() {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -320,15 +369,20 @@ public class ArvoreB {
             }
             System.out.println();
             
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         }
     }
 
-    public int contarChaves() throws Exception {
+    /**
+     * Metodo para obter o total de chaves que estao, de fato, inseridas na
+     * arvore.
+     * @return total de chaves inseridas.
+     */
+    public int contarChaves() {
         RandomAccessFile arvoreBFile = null;
         int total = 0;
 
@@ -371,16 +425,17 @@ public class ArvoreB {
                 posAtual = arvoreBFile.getFilePointer();
             }
             
+            // Fechar arquivo
+            arvoreBFile.close();
+
         } catch (IOException e) {
-            System.out.println("\nERRO: Ocorreu um erro de escrita no " +
-                               "arquivo \"" + arvoreBDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            if (arvoreBFile != null) arvoreBFile.close();
             return total;
         }
     }
 
-    private void caminhar(long pos) throws Exception {
+    private void caminhar(long pos) {
         if (pos != -1) {
             NoB no = new NoB();
             no.lerNoB(pos);
@@ -399,7 +454,7 @@ public class ArvoreB {
         }
     }
 
-    public void caminhar() throws Exception {
+    public void caminhar() {
         System.out.println("In order:");
         caminhar(getPosRaiz());
 

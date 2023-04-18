@@ -1,14 +1,16 @@
+// Package
 package sort;
 
-// bibliotecas
+// Bibliotecas
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import sort.auxiliar.QuickSort;
+// Bibliotecas proprias
 import app.Musica;
+import sort.auxiliar.QuickSort;
 
 /**
  * ComumSort - Classe responsavel por realizar a Intercalcao Balanceada ComumSort.
@@ -63,9 +65,8 @@ public class ComumSort {
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
      * sao chamadas.
      * @param atributo - a ser usado na ordenacao.
-     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public void ordenar(int atributo) throws IOException {
+    public void ordenar(int atributo) {
 
         boolean paridade = true;
         int numIntercalacao = 1;
@@ -107,9 +108,8 @@ public class ComumSort {
      * @param atributo - a ser usado na ordenacao.
      * @return true, se distribuicao ocorreu corretamente; false, caso 
      * contrario.
-     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    private boolean distribuicao(int atributo) throws IOException {
+    private boolean distribuicao(int atributo) {
 
         RandomAccessFile arqTemp = null;
         RandomAccessFile dbFile = null;
@@ -208,12 +208,18 @@ public class ComumSort {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
             }
+
+            // Fechar arquivo
+            dbFile.close();
+
        } catch (FileNotFoundException e) {
                 System.out.println("\nERRO: Registro nao encontrado!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
                 distribuicaoOK = false;
+
+       } catch (IOException e) {
+           System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
        } finally {
-            if (dbFile != null) dbFile.close();
             return distribuicaoOK;
        }
     }
@@ -226,9 +232,8 @@ public class ComumSort {
      * @param paridade - indicador para saber se e' uma intercalacao par ou
      * impar, implicando em qual arquivo sera' leitura e qual, escrita
      * @return numArquivos - numero de arquivos que foram criados.
-     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
      */
-    public int intercalacao (int atributo, int numIntercalacao, boolean paridade) throws IOException {
+    public int intercalacao (int atributo, int numIntercalacao, boolean paridade) {
 
         RandomAccessFile newTemp = null;
         int numArquivos = 0;
@@ -399,18 +404,24 @@ public class ComumSort {
             } else {
                System.out.println("\nERRO: Arquivos temporarios estao vazios\n");
             }
-        } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Arquivos temporarios nao encontrados\n");
-        } finally {
+
+            // Fechar arquivos
             for (int i = 0; i < NUM_CAMINHOS; i++){
                 if (arqTemp[i] != null) arqTemp[i].close();
             }
 
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Arquivos temporarios nao encontrados\n");
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever nos arquivos temporarios\n");
+
+        } finally {
             // Corrigir valor, do contador do numero de arquivos criados
             if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
 
             return numArquivos;
-       } 
+        }
     }
 
     /**
