@@ -12,12 +12,12 @@ all: | src/bin $(SOURCES:.java=.class)
 	javac -cp src/bin -d src/bin $<
 
 # Executar
-run: clean all
+run: all
 	java -cp src/bin Main
 
 # Limpar
-clean:
-	rm -rf src/bin
+#clean:
+#	rm -rf src/bin
 
 # Criar pasta bin, caso nao exista
 src/bin:
