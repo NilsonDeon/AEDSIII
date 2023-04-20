@@ -264,16 +264,54 @@ public class NoB {
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
+     * @param filhoEsq - endereco do filho da esquerda.
      * @param filhoDir - endereco do filho da direita.
      */
-    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir, long filhoEsq) {
+    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoEsq, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
             // Inserir o elemento de forma ordenada
-            inserir(newChave, newEndereco, filhoDir, filhoEsq);
+            inserir(newChave, newEndereco, filhoEsq, filhoDir);
+
+            // Escrever numero de elementos no No
+            arvoreBFile.seek(posicaoInserir);
+            escreverNoB(posicaoInserir);
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
+        }
+    }
+
+    /**
+     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * @param posicaoInserir - posicao de inicio para escrita no arquivo.
+     * @param noInserir - noB com 1 elemento a ser inserido.
+     */
+    public void inserir(long posicaoInserir, NoB noInserir) {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Obter informacoes do NoB
+            int newChave = noInserir.chave[0];
+            long newEndereco = noInserir.endereco[0];
+            long filhoEsq = noInserir.noFilho[0];
+            long filhoDir = noInserir.noFilho[1];
+
+            // Inserir o elemento de forma ordenada
+            if (filhoEsq == -1) {
+                inserir(newChave, newEndereco, filhoDir);
+            } else {
+                inserir(newChave, newEndereco, filhoEsq, filhoDir);
+            }
+            
 
             // Escrever numero de elementos no No
             arvoreBFile.seek(posicaoInserir);
@@ -436,31 +474,59 @@ public class NoB {
     /**
      * Metodo para encontrar NoB de insersao de uma chave.
      * @param chave - que sera' inserida.
+     * @param posRaiz - posicao da raiz da arvore
      * @return noB - no qual deve-se inserir a chave.
      */
-    public long encontrarInsercao (int chave) {
-        return encontrarInsercao(this, chave, 8);
+    public long encontrarInsercao (int chave, long posRaiz) {
+        return encontrarInsercao(this, chave, posRaiz);
     }
 
     /**
      * Metodo privado para encontrar o local de insersao de uma chave em um
      * determinado NoB.
-     * @param no - NoB em analise.
-     * @param chave - chave que sera' inserida.
+     * @param noB - NoB em analise.
+     * @param chaveProcurada - chave que sera' inserida.
      * @param posInserir - posicao para inserir a chave.
      * @return posInserir - endereco de insercao no arquivo.
      */
-    private long encontrarInsercao (NoB no, int chave, long posInserir) {
-     
-        // Procurar o filho, no qual a chave poderia ficar
-        int i;
-        for(i = 0; (i < no.numElementos) && (chave > no.chave[i]); i++);
+    private long encontrarInsercao (NoB noB, int chaveProcurada, long posInserir) {
 
-        // Se o No nao for folha, continuar recursao
-        if (no.noFilho[i] != -1) {
-            posInserir = no.noFilho[i];
-            no.lerNoB(posInserir);
-            posInserir = encontrarInsercao(no, chave, posInserir);
+        // Ler NoB desejado
+        noB.lerNoB(posInserir);
+     
+        // Se chave procurada for menor que a primeira
+        if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
+
+            // Se o No nao for folha, continuar recursao
+            if (noB.noFilho[0] != -1) {
+                posInserir = noB.noFilho[0];
+                noB.lerNoB(posInserir);
+                posInserir = encontrarInsercao(noB, chaveProcurada, posInserir);
+            }
+        
+        // Senao, testar se e' maior que a ultima
+        } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
+            
+            // Se o No nao for folha, continuar recursao
+            if (noB.noFilho[noB.numElementos] != -1) {
+                posInserir = noB.noFilho[numElementos];
+                noB.lerNoB(posInserir);
+                posInserir = encontrarInsercao(noB, chaveProcurada, posInserir);
+            }
+
+        // Senao, procurar valores intermediarios
+        } else {
+
+            // Procurar o filho, no qual a chave poderia ficar
+            int i;
+            for(i = 0; (i < noB.numElementos) && (chaveProcurada > noB.chave[i]); i++);
+
+            // Se o No nao for folha, continuar recursao
+            if (noB.noFilho[i] != -1) {
+                posInserir = noB.noFilho[i];
+                noB.lerNoB(posInserir);
+                posInserir = encontrarInsercao(noB, chaveProcurada, posInserir);
+            }
         }
 
         return posInserir;
@@ -610,6 +676,22 @@ public class NoB {
 
         // Adicionar filhos do novo NoB
         noFilho[i] = posEsq;
+        noFilho[i+1] = posDir;
+    }
+
+    /**
+     * Metodo para reestruturar os ponteiros para os filhos do NoB alterado.
+     * @param newChave - nova chave no NoB adicionada.
+     * @param posDir - posicao NoB filho da direita no arquivo.
+     */
+    public void remontarPonteiros(int newChave, long posDir) {
+
+        // Localizar chave recem inserida
+        int i;
+        for(i = 0; (i < (ordemArvore-1)/2) && (chave[i] != newChave); i++);
+
+        // Adicionar filho direita do novo NoB
+        noFilho[i] = -1;
         noFilho[i+1] = posDir;
     }
 

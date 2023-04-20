@@ -52,7 +52,7 @@ public class ArvoreB {
     /**
      * Metodo para obter posicao da raiz no arquivo de 'arvore
      */
-    private long getPosRaiz() {
+    private long getRaiz() {
         RandomAccessFile arvoreBFile = null;
         long posRaiz = -1;
 
@@ -73,221 +73,136 @@ public class ArvoreB {
     }
 
     /**
-     * Metodo para inserir uma chave de pesquisa na arvore B.
-     * @param musica - musica a se inserir.
+     * Metodo para inserir uma chave de pesquisa na arvore B, procurando No de
+     * insercao.
+     * @param newMusica - musica a se inserir.
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
      */
-    public void inserir(Musica musica, long newEndereco) {
-        inserir(getPosRaiz(), musica, newEndereco, -1, -1, false);
+    public void inserir(Musica newMusica, long newEndereco) {
+        NoB noB = new NoB();
+        long posInserir = noB.encontrarInsercao(newMusica.getId(), getRaiz());
+        inserir(posInserir, newMusica, newEndereco, -1, -1);
     }
 
     /**
      * Metodo para inserir uma chave de pesquisa na arvore B.
-     * @param posArvore - posicao do No na 'arvoreB
-     * @param musica - musica a se inserir.
+     * @param posInserir - posicao do No na 'arvoreB
+     * @param newMusica - musica a se inserir.
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
      * @param filhoEsq - posicao filho 'a esquerda que esta' sendo inserido.
      * @param filhoDir - posicao filho 'a direita que esta' sendo inserido.
-     * @param split - true, se a operacao envolver o split; false, caso
      * contrario.
      */
-    private void inserir(long posArvore, Musica musica, long newEndereco, long filhoEsq, long filhoDir, boolean isSplit) {
+    private void inserir(long posInserir, Musica newMusica, long newEndereco, long filhoEsq, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
-
-        this.mostrarArquivo();
-
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            // Obter chave de insercao
-            int newChave = musica.getId();
+            // Obter chave a ser inserida
+            int newChave = newMusica.getId();
 
             // Obter raiz
-            arvoreBFile.seek(0);
-            long posRaiz = arvoreBFile.readLong();
+            long posRaiz = getRaiz();
 
-            // Localizar e ler NoB
+            // Ler NoB indicado pela posicao
             NoB noB = new NoB();
-            arvoreBFile.seek(posArvore);
-            noB.lerNoB(posArvore);
+            noB.lerNoB(posInserir);
 
-            // Testar se No tem espaco livre para insercao e e' folha
+            // Testar se NoB esta' livre e e' folha
             if (noB.temEspacoLivre() && noB.isFolha()) {
-                noB.inserir(posArvore, newChave, newEndereco);
+                noB.inserir(posInserir, newChave, newEndereco);
             
-            // Se nao for folha, testar se chave ja pertencia 'a arvore anteriormente
-            } else if (noB.temEspacoLivre() && (filhoEsq != -1 || filhoDir != -1) && isSplit) {
-                noB.inserir(posArvore, newChave, newEndereco, filhoEsq, filhoDir);
-
-            // Se nao couber na folha, deve-se procurar No de insercao
+            // Inserir fora da folha, caso esteja realizandoo split
+            } else if((noB.temEspacoLivre()) && (filhoEsq != -1 || filhoDir != -1)) {
+                noB.inserir(posInserir, newChave, newEndereco, filhoEsq, filhoDir);
+            
+            // Senao, deve-se considerar o split
             } else {
-                long posInserir = posArvore;
 
-                // Atualizar NoB caso nao esteja fazendo o split recursivo
-                if ((filhoEsq == -1 && filhoDir == -1) && isSplit == false) {
-                    posInserir = noB.encontrarInsercao(newChave);
-                    noB.lerNoB(posInserir);
-                }
+                // Realizar o split
+                split(posInserir);
 
-                // Se couber no NoB, basta inserir
-                if (noB.temEspacoLivre()) {
-                    noB.inserir(posInserir, newChave, newEndereco, filhoEsq, filhoDir);
+                // Inserir na posicao desejada se for split
+                if((filhoEsq != -1 || filhoDir != -1)) {
+                   inserir(posInserir, newMusica, newEndereco, filhoEsq, filhoDir);
                 
-                // Se for raiz, basta criar novos dois filhos (split na raiz)
+                // Senao, procurar local de insercao
                 } else {
-                    
-                    if(posInserir == posRaiz) {
-
-                        // Separar filhos direita e esquerda do No
-                        NoB noEsq = noB.getFilhoEsq();
-                        NoB noDir = noB.getFilhoDir();
-
-                        // Escrever novos NoB em arquivo
-                        long posEsq = noEsq.escreverNoB();
-                        long posDir = noDir.escreverNoB();
-
-                        // Separar elemento do meio para "subir"
-                        noB = noB.getMeio();
-                        int chave = noB.getChave(0);
-
-                        // Alterar NoB pai
-                        noB.remontarPonteiros(chave, posEsq, posDir);
-
-                        // Reescrever NoB que sofreu o split
-                        noB.escreverNoB(posInserir);
-
-                        // Se estiver inserindo chave completamente nova
-                        if ((filhoEsq == -1 && filhoDir == -1)) {
-                            posInserir = noB.encontrarInsercao(newChave);
-                        
-                        // Senao, significa que nova posicao e' no final de arquivo
-                        } else {
-                            isSplit = true;
-                            posInserir = posDir;
-                        }
-
-                        // Inserir nova chave
-                        inserir(posInserir, musica, newEndereco, filhoEsq, filhoDir, isSplit);
-                    
-                    // Senao, deve-se dividir o No
-                    } else {
-
-                        // Copiar NoB atual
-                        NoB tmp = noB.clone();
-
-                        // Como sera' inserido sequencialmente, o nextID > thisID
-                        // Alterar NoB atual para filho da esquerda
-                        noB = tmp.getFilhoEsq();
-
-                        // Separar filho da direita
-                        NoB noDir = tmp.getFilhoDir();
-
-                        // Obter NoB que devera' "subir"
-                        NoB noMeio = tmp.getMeio();
-                        int chave = noMeio.getChave(0);
-                        long endereco = noMeio.getEndereco(0);
-
-                        // Testar se No pai esta' com espaco livre
-                        NoB noPai = new NoB();
-                        long newPos = noPai.encontrarPai(posInserir);
-                        noPai.lerNoB(newPos);
-                        
-                        // Se tiver espaco, basta inserir
-                        if (noPai.temEspacoLivre()) {
-
-                            // Alterar filho da esquerda em arquivo
-                            noB.escreverNoB(posInserir);
-
-                            // Inserir novo filho direita
-                            long posDir = noDir.escreverNoB();
-
-                            // Incluir chave que subiu no arquivo
-                            noPai.inserir(newPos, chave, endereco, posDir);
-
-                            // Inserir nova chave
-                            if (isSplit) {
-                                inserir(posDir, musica, newEndereco, filhoEsq, filhoDir, isSplit);
-                            } else {
-                                inserir(musica, newEndereco);
-                            }
-                        
-                        // Se No pai estiver cheio, deve-se fazer o split no pai
-                        } else {
-
-                            isSplit = true;
-
-                            // Gerar musica fake com id para insercao
-                            int posMeio = (noPai.ordemArvore-1)/2;
-                            int chaveSplit = noPai.getChave(posMeio);
-                            Musica musicaSplit = new Musica();
-                            musicaSplit.setId(chaveSplit);
-                            long enderecoSplit = noPai.getEndereco(posMeio);
-
-                            // Testar se NoB gerado e' raiz
-                            // Se for, deve-se altera-la em arquivo
-                            if(newPos == posRaiz) {
-
-                                // Inserir novo filho 'a direita da pagina cheia
-                                NoB newNoDir = noPai.getFilhoDir();
-                                long posDir = newNoDir.escreverNoB();
-
-                                // Sobrescrever filho esquerdo na raiz antiga
-                                NoB newNoEsq = noPai.getFilhoEsq();
-                                long posEsq = posRaiz;
-                                newNoEsq.escreverNoB(posEsq);
-
-                                // Escrever nova raiz
-                                NoB newRaiz = new NoB(chaveSplit, enderecoSplit, posEsq, posDir);
-                                long posNewRaiz = newRaiz.escreverNoB();
-
-                                // Alterar ponteiro para nova raiz
-                                arvoreBFile.seek(0);
-                                byte[] posRaizBytes = ByteBuffer.allocate(8).putLong(posNewRaiz).array();
-                                arvoreBFile.write(posRaizBytes);
-
-                                // Inserir nova chave
-                                //if (isSplit) {
-                                    inserir(posDir, musica, newEndereco, filhoEsq, filhoDir, false);
-                                //} else {
-                                //    inserir(musica, newEndereco);
-                                //}
-                            
-                            } else {
-
-                                // Inserir novo filho 'a direita da pagina cheia
-                                NoB newNoDir = noPai.getFilhoDir();
-                                long posDir = newNoDir.escreverNoB();
-
-                                // Sobrescrever filho esquerdo no NoB antigo
-                                NoB newNoEsq = noPai.getFilhoEsq();
-                                long posEsq = newPos;
-                                newNoEsq.escreverNoB(posEsq);
-
-                                // Obter posicao do pai
-                                posInserir = noPai.encontrarPai(newPos);
-
-                                System.out.println("\nposInserir: " + posInserir);
-                                System.out.println("\nchaveSplit: " + musicaSplit.getId());
-                                System.out.println("\nenderecoSplit: " + enderecoSplit);
-                                System.out.println("\nposEsq: " + posEsq);
-                                System.out.println("\nposDir: " + posDir);
-                                System.out.println("\nisSplit: " + isSplit);
-
-                                //IO io = new IO();
-                                //io.readLine("\nENTER");
-
-                                // Inserir no pai do pai a chave que sofreu split
-                                inserir(posInserir, musicaSplit, enderecoSplit, posEsq, posDir, isSplit);
-
-                                // Inserir nova chave
-                                inserir(musica, newEndereco);
-                            }
-
-                                    
-                        }
-                    }
+                    inserir(newMusica, newEndereco);
                 }
+                
+            } 
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
+        }
+    }
+
+    /**
+     * Metodo para realizar o split da arvore durante a insercao.
+     * @param posSplit - posicao do arquivo, no qual deve-se realizar o split.
+     */
+    private void split (long posSplit) {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Ler NoB que sofrera' split
+            NoB noSplit = new NoB();
+            noSplit.lerNoB(posSplit);
+
+            // Obter NoB filhos
+            NoB noEsq = noSplit.getFilhoEsq();
+            NoB noDir = noSplit.getFilhoDir();
+
+            // Escrever filhos direito em arquivo
+            noDir.escreverNoB(posSplit);
+            long filhoEsq = noEsq.escreverNoB();
+
+            // Separar NoB pra split
+            noSplit = noSplit.getMeio();
+            int chaveSplit = noSplit.getChave(0);
+            long enderecoSplit = noSplit.getEndereco(0);
+            noSplit.remontarPonteiros(chaveSplit, posSplit);
+
+            // Obter pai
+            NoB noBpai = new NoB();
+            long posPai = noBpai.encontrarPai(posSplit);
+            if (posPai != -1) {
+                noBpai.lerNoB(posPai);
+
+                // Testar se tem espaco livre no pai
+                if (noBpai.temEspacoLivre()) {
+
+                    // Remanejar ponteiros e reinserir chave que sofreu split
+                    noSplit.remontarPonteiros(chaveSplit, filhoEsq, posSplit);
+                    noBpai.inserir(posPai, noSplit);
+
+                // Se nao tiver, deve-se escrever outro No (Split recursivo)
+                } else {
+
+                    // Reinserir a chaveSplit na arvore
+                    Musica musicaSplit = new Musica();
+                    musicaSplit.setId(chaveSplit);
+                    inserir(posPai, musicaSplit, enderecoSplit, filhoEsq, posSplit);
+                }
+
+            // Se estiver na raiz, nao tera' pai
+            } else {
+
+                // Remanejar ponteiros e reinserir chave que sofreu split
+                noSplit.remontarPonteiros(chaveSplit, filhoEsq, posSplit);
+                long newRaiz = noSplit.escreverNoB();;
+
+                // Alterar ponteiro para nova raiz
+                arvoreBFile.seek(0);
+                byte[] posRaizBytes = ByteBuffer.allocate(8).putLong(newRaiz).array();
+                arvoreBFile.write(posRaizBytes);
             }
 
             // Fechar arquivo
@@ -304,7 +219,7 @@ public class ArvoreB {
      * @return posicao da chave no arquivo "Registro.db".
      */
     public long read(int chaveProcurada) {
-        return read(getPosRaiz(), chaveProcurada);
+        return read(getRaiz(), chaveProcurada);
     }
 
     /**
@@ -317,35 +232,38 @@ public class ArvoreB {
 
         long endereco = -1;
 
-        // Mostrar posicao
-        //System.out.print(pos + " -> ");
+        // Ler NoB desejado se nao for null
+        // Se chegou a -1, significa que nao encontrou
+        if (pos != -1) {
 
-        // Ler NoB desejado
-        NoB noB = new NoB();
-        noB.lerNoB(pos);
+            // Obter NoB para analise
+            NoB noB = new NoB();
+            noB.lerNoB(pos);
 
-        // Procurar possivel local da chave
-        int i;
+            // Procurar possivel local da chave
+            int i;
 
-        // Se chave procurada for menor que a primeira
-        if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
-            endereco = read(noB.noFilho[0], chaveProcurada);
-        
-        // Senao, testar o ultimo
-        } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
-            endereco = read(noB.noFilho[noB.numElementos], chaveProcurada);
+            // Se chave procurada for menor que a primeira
+            if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
+                endereco = read(noB.noFilho[0], chaveProcurada);
+            
+            // Senao, testar o ultimo
+            } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
+                endereco = read(noB.noFilho[noB.numElementos], chaveProcurada);
 
-        // Senao, procurar valores intermediarios
-        } else {
-            for(i = 0; (i < noB.numElementos) && (noB.chave[i] < chaveProcurada); i++);
-
-            // Testar se chave foi encontrada
-            if(noB.chave[i] == chaveProcurada) {
-                endereco = noB.endereco[i];
-
+            // Senao, procurar valores intermediarios
             } else {
-                endereco = read(noB.noFilho[i], chaveProcurada);
+                for(i = 0; (i < noB.numElementos) && (noB.chave[i] < chaveProcurada); i++);
+
+                // Testar se chave foi encontrada
+                if(noB.chave[i] == chaveProcurada) {
+                    endereco = noB.endereco[i];
+
+                } else {
+                    endereco = read(noB.noFilho[i], chaveProcurada);
+                }
             }
+        
         }
 
         return endereco;
@@ -463,31 +381,6 @@ public class ArvoreB {
         } finally {
             return total;
         }
-    }
-
-    private void caminhar(long pos) {
-        if (pos != -1) {
-            NoB no = new NoB();
-            no.lerNoB(pos);
-
-            int i;
-            for(i = 0; i < no.numElementos; i++) {
-                if(no.noFilho[i] != -1) {
-                    caminhar(no.noFilho[i]);
-                }
-                System.out.println(no.chave[i]);
-            }
-
-            if (no.noFilho[i] != -1) {
-                caminhar(no.noFilho[i]);
-            }
-        }
-    }
-
-    public void caminhar() {
-        System.out.println("In order:");
-        caminhar(getPosRaiz());
-
     }
 
 }

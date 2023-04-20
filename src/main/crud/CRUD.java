@@ -110,6 +110,7 @@ public class CRUD {
             }
 
             if (continuar == true) {
+                
                 // Apagar antigo "Registros.db"
                 File antigoDB = new File(registroDB);
                 antigoDB.delete();
@@ -181,7 +182,7 @@ public class CRUD {
                     dbFile.write(byteArray);
 
                     // Inserir, utilizando hashing
-                    //hash.inserir(musica, posRegistro);
+                    hash.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B
                     arvoreB.inserir(musica, posRegistro);
@@ -191,19 +192,13 @@ public class CRUD {
 
                     // Inserir, utilizando arvore B+
                     //arvoreBmais.inserir(musica, posRegistro);
-                    //arvoreBmais.mostrarArquivo();
-                    //io.readLine();
 
                     // Inserir nas listas invertidas
-                    //lista.inserir(musica, posRegistro);
+                    lista.inserir(musica, posRegistro);
                 }
 
                 // Mostrar barra de progresso completa
                 gerarBarraProgresso(tamanhoArqCSV, count);
-                System.out.println("\n");
-
-                // Mostar arquivo da arvore B
-                arvoreB.mostrarArquivo();
                               
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
@@ -263,8 +258,11 @@ public class CRUD {
                 // Inserir no hashing extensivel
                 hash.inserir(musica, finalRegistro);
 
-                // Inserir, utilizando arvore B
-                //arvoreB.inserir(musica, finalRegistro);
+                // Inserir na arvore B
+                arvoreB.inserir(musica, finalRegistro);
+
+                // Inserir nas listas invertidas
+                lista.inserir(musica, finalRegistro);
 
                 System.out.println("\nMusica [" + musica.getId() + "]: \"" +
                                             musica.getNome() + "\" " +
@@ -333,10 +331,19 @@ public class CRUD {
       return new Date().getTime();
     }
 
+    /**
+     * Metodo para obter o tempo de busca durante a pesquisa.
+     * @param inicio - horario de inicio da busca.
+     * @param fim - horario que a busca terminou.
+     * @return tempo relativo em segundos.
+     */
     private String getTempoBusca(long inicio, long fim) {
         return ((fim - inicio) / 1000.0 + " segundos");
     }
 
+    /**
+     * Metodo para procurar um Id em todas as estrututuras cadastradas.
+     */
     private void procurarId() {
         int idProcurado = 0;
         do{
@@ -351,28 +358,40 @@ public class CRUD {
 
         // Procurar sequenciamente
         long sequencialInicio = now();
-        boolean find = read(idProcurado);
+        long posicaoSequencial = read(idProcurado);
         long sequencialFim = now();
+        System.out.println("\nposicao sequencial: " + posicaoSequencial);
 
-        if (find) {
-            // Procurar no hashing extensivel
-            long hashInicio = now();
-            //long posicaoHash = hash.read(idProcurado);
-            long hashFim = now();
-            //System.out.println("\nposicao hash: " + posicaoHash);
+        // Procurar no hashing extensivel
+        long hashInicio = now();
+        long posicaoHash = hash.read(idProcurado);
+        long hashFim = now();
+        System.out.println("posicao hash: " + posicaoHash);
 
-            // Procurar na Arvore B
-            long arvoreBInicio = now();
-            long posicaoArvore = arvoreB.read(idProcurado);
-            long arvoreBFim = now();
-            System.out.println("\nposicao arvore: " + posicaoArvore);
+        // Procurar na Arvore B
+        long arvoreBInicio = now();
+        long posicaoArvoreB = arvoreB.read(idProcurado);
+        long arvoreBFim = now();
+        System.out.println("posicao arvoreB: " + posicaoArvoreB);
+
+        // Verificar se todas as estruturas encontraram a mesma musica com sucesso
+        boolean find = (posicaoSequencial == posicaoHash) && (posicaoHash == posicaoArvoreB) && (posicaoSequencial != -1);
+        
+        if(find) {
+
+            // Mostrar musica
+            Musica musicaProcurada = lerMusica(posicaoSequencial);
+            System.out.println(musicaProcurada);
 
             // Mostrar tempos de busca
             String temposBusca = "\nTempos de busca:\n" +
-                                 "\nSequencialmente ----------------------------- " + getTempoBusca(sequencialInicio, sequencialFim) +
-                                 "\nHash Estensivel ----------------------------- " + getTempoBusca(hashInicio, hashFim) +
-                                 "\nArvore B ------------------------------------ " + getTempoBusca(arvoreBInicio, arvoreBFim);
+                                "\nSequencialmente ----------------------------- " + getTempoBusca(sequencialInicio, sequencialFim) +
+                                "\nHash Estensivel ----------------------------- " + getTempoBusca(hashInicio, hashFim) +
+                                "\nArvore B ------------------------------------ " + getTempoBusca(arvoreBInicio, arvoreBFim);
             System.out.println(temposBusca);
+
+        } else {
+            System.out.println("\nMusica de ID (" + idProcurado + ") não esta cadastrada!");
         }
         
     }
@@ -860,11 +879,13 @@ public class CRUD {
     /**
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
-     * @return true, se a música foi encontrada; false, caso contrario.
+     * @param idProcurado - id para ser a chave de busca.
+     * @return posArquivo - posicao do registro no arquivo.
      */
-    private boolean read (int idProcurado) {
+    private long read (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
+        long posArquivo = -1;
 
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
@@ -897,8 +918,7 @@ public class CRUD {
 
                         if (idProcurado == musica.getId()) {
                             find = true;
-                            System.out.println("\nposicao sequencial: " + posicaoAtual);
-                            System.out.println(musica);
+                            posArquivo = posicaoAtual;
                         }
 
                     // Se nao for, pular o registro e reposicionar ponteiro
@@ -908,11 +928,6 @@ public class CRUD {
                         dbFile.seek(proximaPosicao);
                     }
                     posicaoAtual = dbFile.getFilePointer();
-                }
-
-                if (find == false) {
-                    System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") não esta cadastrada!"); 
                 }
 
             } else {
@@ -929,7 +944,7 @@ public class CRUD {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
         } finally {
-            return find;
+            return posArquivo;
         }
     }
 
@@ -1001,11 +1016,6 @@ public class CRUD {
                         dbFile.seek(proximaPosicao);
                     }
                     posicaoAtual = dbFile.getFilePointer();
-                }
-
-                if (find == false) {
-                    System.out.println("\nMusica de ID (" + idProcurado + 
-                                    ") não esta cadastrada!");
                 }
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -1362,6 +1372,39 @@ public class CRUD {
         }
         barra += "] " + progresso + "%";
         System.out.print("\r" + barra);
+    }
+
+    private Musica lerMusica(long posicaoProcurada) {
+        RandomAccessFile dbFile = null;
+        Musica musicaProcurada = new Musica();
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            // Posicionar ponteiro
+            dbFile.seek(posicaoProcurada);
+
+            // Ler informacoes do registro  
+            dbFile.readBoolean();
+            int tamRegistro = dbFile.readInt();
+
+            // Ler musica
+            byte[] registro = new byte[tamRegistro];
+            dbFile.read(registro);
+            musicaProcurada.fromByteArray(registro);
+
+            // Fechar arquivos
+            dbFile.close();
+
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + dbFile + "\"\n");
+        } finally {
+            return musicaProcurada;
+        }
     }
 
 }
