@@ -325,7 +325,12 @@ public class ArvoreB {
         return endereco;
     }
 
-
+    /**
+     * Metodo para exibir a estrutura da arvore em arquivos, sendo cada linha
+     * representando um NoB da arvore.
+     * Estrutura:
+     * Pos[ &arqArvore] : | &filho | chave | &arqRegistro | ... 
+     */
     public void mostrarArquivo() {
         RandomAccessFile arvoreBFile = null;
 
@@ -471,8 +476,82 @@ public class ArvoreB {
         return find;
     }
 
-    public void remontarArvoreB() {
+    /**
+     * Metodo para deletar uma musica da arvore, a partir de seu id.
+     * @param musica - a ser deletada.
+     */
+    public void delete (Musica musica) {
+        RandomAccessFile arvoreBFile = null;
 
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Obter chave a ser deletada
+            int chaveDelete = musica.getId();
+
+            // Obter posicao da chave no arquivo
+            long posicao = getPosicao(chaveDelete);
+
+            // Ler No em que a chave esta'
+            NoB noB = new NoB();
+            noB.lerNoB(posicao);
+
+            // Se estiver em uma folha e ela mantiver 50% de ocupacao
+            if(noB.isFolha() && noB.podeDeletar()) {
+                
+                // Deletar da folha
+                delete(posicao, chaveDelete);
+            
+            // Se ele nao estiver na folha, trocar pelo anterior
+            } else {
+
+            }
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
+        }
     }
+
+    /**
+     * Metodo privado para deletar uma musica na posicao desejada na arvore.
+     * @param posArvore - posicao da musica na arvore.
+     * @param chaveProcurada -  id da musica para se deletar.
+     */
+    private void delete(long posArvore, int chaveProcurada) {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Ler No em que a chave esta'
+            NoB noB = new NoB();
+            noB.lerNoB(posArvore);
+
+            // Localizar id e deletar
+            for(int i = 0; i < noB.numElementos; i++) {
+
+                // Alterar endereco e chave para -1
+                if(chaveProcurada == noB.chave[i]) {
+                    noB.chave[i] = -1;
+                    noB.endereco[i] = -1;
+                    i = noB.numElementos;
+                }
+            }
+
+            // Alterar em arquivo
+            noB.escreverNoB(posArvore);
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
+        }
+    }
+
+    public void remontarArvoreB() {}
 
 }

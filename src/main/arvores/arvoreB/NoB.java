@@ -744,4 +744,16 @@ public class NoB {
 
         return noB;
     }
+
+    /**
+     * Metodo para determinar se, ao retirar um elemento, o NoB permanecera'
+     * com 50% de ocupacao, e, assim, pode-se remover um elemento.
+     * @return true, se puder remover um elemento; false, caso contrario.
+     */
+    public boolean podeDeletar() {
+        int novoNumElementos = numElementos-1;
+        int metadeNoB = (ordemArvore-1)/2;
+        
+        return novoNumElementos > metadeNoB;
+    }
 }
