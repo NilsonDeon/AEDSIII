@@ -1,7 +1,7 @@
 # Trabalho Pratico - AEDSIII
 
-* Gabriel Vargas Bento de Souza
-* Nilson Deon Cordeiro Filho
+* [Gabriel Vargas Bento de Souza](https://github.com/gabrielvargas00)
+* [Nilson Deon Cordeiro Filho](https://github.com/NilsonDeon/)
 
 ## Parte 01 - CRUD e Ordenações
 
