@@ -226,6 +226,15 @@ public class ListaInvertida_AnoLancamento {
         }
     }
 
+    /**
+     * Metodo para atualizar uma musica na lista, trocando enderenco e o
+     * arquivo correspondente.
+     * @param musicaAntiga - musica antes da atualizacao no arquivo 
+     * "Registro.db".
+     * @param musicaNova - musica depois da atualizacao no arquivo 
+     * "Registro.db".
+     * @param newEndereco - na posicao da musica.
+     */
     public void update (Musica musicaAntiga, Musica musicaNova, long newEndereco) {
 
         SimpleDateFormat date = new SimpleDateFormat("yyyy");

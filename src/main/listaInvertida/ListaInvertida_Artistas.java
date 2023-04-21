@@ -212,7 +212,7 @@ public class ListaInvertida_Artistas {
     private void delete(String nomeArtista, int chaveProcurada) {
 
         boolean find = false;
-        
+
         // Obter nome do arquivo
         String nomeArquivo = "./src/resources/listaInvertida_Artistas/" + nomeArtista + ".db";
 
@@ -266,6 +266,15 @@ public class ListaInvertida_Artistas {
         }
     }
 
+    /**
+     * Metodo para atualizar uma musica na lista, trocando enderenco e o
+     * arquivo correspondente.
+     * @param musicaAntiga - musica antes da atualizacao no arquivo 
+     * "Registro.db".
+     * @param musicaNova - musica depois da atualizacao no arquivo 
+     * "Registro.db".
+     * @param newEndereco - na posicao da musica.
+     */
     public void update (Musica musicaAntiga, Musica newMusica, long newEndereco) {
 
         // Obter nomes dos artistas        

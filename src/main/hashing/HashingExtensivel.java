@@ -18,7 +18,7 @@ import app.Musica;
  */
 public class HashingExtensivel {
 
-    public Diretorio diretorio;
+    private Diretorio diretorio;
     private static final String registroDB = "./src/resources/Registro.db";
     private static final String diretorioDB = "./src/resources/Diretorio.db";
     private static final String bucketDB = "./src/resources/Bucket.db";
