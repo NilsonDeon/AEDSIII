@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Bibliotecas proprias
-import app.Musica;
+import app.*;
 
 /**
  * Classe responsavel por criar e manipular uma lista invertida sobre o atributo
@@ -202,6 +202,7 @@ public class ListaInvertida_Artistas {
             }
         }
     }
+
     /**
      * Metodo privado para remover uma musica na lista invertida a partir de 
      * uma unica palavra.
@@ -211,6 +212,7 @@ public class ListaInvertida_Artistas {
     private void delete(String nomeArtista, int chaveProcurada) {
 
         boolean find = false;
+        
         // Obter nome do arquivo
         String nomeArquivo = "./src/resources/listaInvertida_Artistas/" + nomeArtista + ".db";
 
@@ -244,10 +246,10 @@ public class ListaInvertida_Artistas {
                     endereco = -1;
                     byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco).array();
                     artistasDB.write(enderecoBytes);
-                }
 
-                // Marcar como encontrado
-                find = true;
+                    // Marcar como encontrado
+                    find = true;
+                }
 
                 // Atualizar ponteiro
                 posicao = artistasDB.getFilePointer();
@@ -262,6 +264,22 @@ public class ListaInvertida_Artistas {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
         }
+    }
+
+    public void update (Musica musicaAntiga, Musica newMusica, long newEndereco) {
+
+        // Obter nomes dos artistas        
+        String nomeAntigo = musicaAntiga.getArtistas();
+        String nomeNovo = newMusica.getArtistas();
+
+        // Chave para se atualizar
+        int chave = musicaAntiga.getId();
+        
+        // Deletar nome antigo
+        delete(musicaAntiga);
+
+        // Reinserir com posicao e nome corretos
+        inserir(newMusica, newEndereco);
     }
     
 }

@@ -2,6 +2,7 @@
 package hashing;
 
 // Bibliotecas
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -17,8 +18,9 @@ import app.Musica;
  */
 public class HashingExtensivel {
 
-    protected Diretorio diretorio;
+    public Diretorio diretorio;
     private static final String registroDB = "./src/resources/Registro.db";
+    private static final String diretorioDB = "./src/resources/Diretorio.db";
     private static final String bucketDB = "./src/resources/Bucket.db";
 
     /**
@@ -26,13 +28,21 @@ public class HashingExtensivel {
      */
     public HashingExtensivel() {
         diretorio = new Diretorio();
+
+        // Se diretorio ja existir, carregar em memoria primaria
+        File arqDiretorio = new File(diretorioDB);
+        if(arqDiretorio.exists()) {
+            diretorio.lerDiretorio();
+        }
     }
 
     /**
-     * Metodo para inicializar o diretorio em arquivo, com valores nulos.
+     * Metodo para inicializar o diretorio em arquivo.
      */
     public void inicializarDiretorio() {
-        diretorio.criarDiretorio();
+        diretorio = new Diretorio();
+        diretorio.salvarDiretorio();
+        diretorio.lerDiretorio();
     }
 
     /**
@@ -41,6 +51,13 @@ public class HashingExtensivel {
     public void inicializarBuckets() {
         Bucket bucket = new Bucket();
         bucket.inicializarBuckets();
+    }
+
+    /**
+     * Metodo publico para trazer diretorio para a memoria primaria
+     */
+    public void lerDiretorio() {
+        diretorio.lerDiretorio();
     }
 
     /**
@@ -96,6 +113,7 @@ public class HashingExtensivel {
                 long finalArqBucket = bucket.getFinalArquivo();
                 diretorio.aumentarProfundidade(finalArqBucket);
             }
+
         }
 
         // Recalcular hash
@@ -104,6 +122,9 @@ public class HashingExtensivel {
 
         // Inserir no bucket
         inserido = bucket.inserir(posicao, id, posicaoRegistro);
+
+        // Salvar alteracoes do diretorio
+        diretorio.salvarDiretorio();
         
         return inserido;
     }
@@ -221,7 +242,10 @@ public class HashingExtensivel {
                 }
                 cont++;
             }
-            
+
+            // Salvar alteracoes do diretorio
+            diretorio.salvarDiretorio();
+
             // Fechar arquivos
             bucketFile.close();
             dbFile.close();
@@ -242,7 +266,6 @@ public class HashingExtensivel {
      */
     public boolean update(int idProcurado, long newEndereco) {
         boolean find = false;
-
         RandomAccessFile bucketFile = null;
 
         try {
@@ -283,7 +306,10 @@ public class HashingExtensivel {
                 }
                 cont++;
             }
-                 
+            
+            // Salvar alteracoes do diretorio
+            diretorio.salvarDiretorio();
+
             // Fechar arquivos
             bucketFile.close();
 
@@ -299,8 +325,11 @@ public class HashingExtensivel {
      * Metodo para refazer hashing, utilizado apos as ordenacoes. De forma a
      * trocar os enderecos antigos pelos novos.
      */
-    public void refazerHashing () {
+    public void remontarHash() {
         RandomAccessFile dbFile = null;
+
+        // Ler diretorio
+        diretorio.lerDiretorio();
 
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");

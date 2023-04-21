@@ -60,7 +60,7 @@ public class Diretorio {
     /**
      * Metodo para escrever o diretorio em arquivo, como fluxo de bytes.
      */
-    public void criarDiretorio() {
+    public void salvarDiretorio() {
         RandomAccessFile diretorioFile = null;
 
         try {
@@ -207,7 +207,6 @@ public class Diretorio {
                     aux.inserir(newPosicao, chave, endereco);
                     bucket.remover(posicao, posicaoAtual);
                 }
-
                 cont++;
             }
 

@@ -113,14 +113,19 @@ public class ListaInvertida_AnoLancamento {
             while(posicao != dataDB.length()) {
                 
                 // Ler chave
-                dataDB.readInt();
+                int chave = dataDB.readInt();
 
-                // Ler e adicionar endereco ao array
+                // Ler endereco
                 long endereco = dataDB.readLong();
-                enderecos.add(endereco);
 
                 // Atualizar ponteiro
                 posicao = dataDB.getFilePointer();
+
+                // Testar se chave e' valida
+                if (chave != -1) {
+                    // Adicionar endereco ao array
+                    enderecos.add(endereco);
+                }
             }
 
             // Fechar arquivo
@@ -136,5 +141,110 @@ public class ListaInvertida_AnoLancamento {
         } finally {
             return enderecos;
         }
+    }
+
+    /**
+     * Metodo privado para remover uma musica na lista invertida a partir do ano
+     * de lancamento. 
+     * @param musica - a ser removida.
+     */
+    public void delete(Musica musica) {
+
+        // Obter data de lancamento da musica
+        Date dataLancamento = musica.getDataLancamento();
+
+        // Obter string com o ano de lancamento
+        SimpleDateFormat date = new SimpleDateFormat("yyyy");
+        String anoDeletar = date.format(dataLancamento);
+
+        // Obter chave para se deletar
+        int chave = musica.getId();
+
+        // Deletar musica desejada
+        delete(anoDeletar, chave);
+    }
+
+    /**
+     * Metodo privado para remover uma musica na lista invertida a partir do ano
+     * de lancamento. 
+     * @param anoDeletar - ano em que a musica desejada foi lancada
+     * @param chaveProcurada - id da musica a se remover.
+     */
+    private void delete(String anoDeletar, int chaveProcurada) {
+
+        boolean find = false;
+        // Obter nome do arquivo
+        String nomeArquivo = "./src/resources/listaInvertida_AnoLancamento/" + anoDeletar + ".db";
+
+        RandomAccessFile dataDB = null;
+
+        try{
+            // Tenta abrir arquivo para remover
+            dataDB = new RandomAccessFile (nomeArquivo, "rw");
+
+            // Remover logicamente
+            long posicao = dataDB.getFilePointer();
+            while(posicao != dataDB.length() && find == false) {
+
+                // Ler chave
+                int chave = dataDB.readInt();
+
+                // Ler endereco
+                long endereco = dataDB.readLong();
+
+                // Testar se chave e' valida
+                if (chave == chaveProcurada) {
+                    // Reposicionar ponteiro
+                    dataDB.seek(posicao);
+
+                    // Inserir chave do registro
+                    chave = -1;
+                    byte[] chaveBytes = ByteBuffer.allocate(4).putInt(chave).array();
+                    dataDB.write(chaveBytes);
+
+                    // Inserir endereco do registro
+                    endereco = -1;
+                    byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco).array();
+                    dataDB.write(enderecoBytes);
+
+                    // Marcar como encontrado
+                    find = true;
+                }
+
+                // Atualizar ponteiro
+                posicao = dataDB.getFilePointer();
+            }
+
+            // Fechar arquivo
+            dataDB.close();
+
+        // Excecao caso arquivo nao exista
+        } catch (FileNotFoundException e1) {
+            // Nao esta inserido
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+        }
+    }
+
+    public void update (Musica musicaAntiga, Musica musicaNova, long newEndereco) {
+
+        SimpleDateFormat date = new SimpleDateFormat("yyyy");
+
+        // Obter data antiga cadastrada
+        Date dataAntiga = musicaAntiga.getDataLancamento();
+        String anoAntigo = date.format(dataAntiga);
+
+        // Obter nova data para se cadastradar      
+        Date dataNova = musicaNova.getDataLancamento();
+        String anoNovo = date.format(dataNova);
+
+        // Chave para se atualizar
+        int chave = musicaAntiga.getId();
+            
+        // Deletar nome antigo
+        delete(musicaAntiga);
+
+        // Reinserir com posicao e nome corretos
+        inserir(musicaNova, newEndereco);
     }
 }

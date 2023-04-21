@@ -22,7 +22,7 @@ public class ArvoreB {
     }
 
     /**
-     * Metodo para inicializar o arquivo "Arvore.db", inicializando a raiz.
+     * Metodo para inicializar o arquivo "ArvoreB.db", inicializando a raiz.
      */
     public void inicializarArvoreB() {
         RandomAccessFile arvoreBFile = null;
@@ -269,6 +269,63 @@ public class ArvoreB {
         return endereco;
     }
 
+    /**
+     * Metodo para procurar uma chave na arvore.
+     * @param chaveProcurada - id da chave que se deseja encontrar.
+     * @return posicao da chave no arquivo "AroreB.db".
+     */
+    public long getPosicao(int chaveProcurada) {
+        return getPosicao(getRaiz(), chaveProcurada);
+    }
+
+    /**
+     * Metodo para procurar uma chave na arvore.
+     * @param pos - posicao a ser analisada se a chava esta' inclusa ou nao.
+     * @param chaveProcurada - id da chave que se deseja encontrar.
+     * @return posicao da chave no arquivo "AroreB.db".
+     */
+    private long getPosicao(long pos, int chaveProcurada) {
+
+        long endereco = -1;
+
+        // Ler NoB desejado se nao for null
+        // Se chegou a -1, significa que nao encontrou
+        if (pos != -1) {
+
+            // Obter NoB para analise
+            NoB noB = new NoB();
+            noB.lerNoB(pos);
+
+            // Procurar possivel local da chave
+            int i;
+
+            // Se chave procurada for menor que a primeira
+            if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
+                endereco = getPosicao(noB.noFilho[0], chaveProcurada);
+            
+            // Senao, testar o ultimo
+            } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
+                endereco = getPosicao(noB.noFilho[noB.numElementos], chaveProcurada);
+
+            // Senao, procurar valores intermediarios
+            } else {
+                for(i = 0; (i < noB.numElementos) && (noB.chave[i] < chaveProcurada); i++);
+
+                // Testar se chave foi encontrada
+                if(noB.chave[i] == chaveProcurada) {
+                    endereco = pos;
+
+                } else {
+                    endereco = getPosicao(noB.noFilho[i], chaveProcurada);
+                }
+            }
+        
+        }
+
+        return endereco;
+    }
+
+
     public void mostrarArquivo() {
         RandomAccessFile arvoreBFile = null;
 
@@ -381,6 +438,41 @@ public class ArvoreB {
         } finally {
             return total;
         }
+    }
+
+    /**
+     * Metodo para procurar e alterar endereco uma musica a partir do seu ID.
+     * @param idProcurado - id da musica para atualizar endereco.
+     * @param newEndereco - novo endereco da musica.
+     * @return true, se a música foi altualizada; false, caso contrario.
+     */
+    public boolean update(int idProcurado, long newEndereco) {
+        boolean find = false;
+
+        // Procurar id desejado
+        long posArvore = getPosicao(idProcurado);
+        NoB noB = new NoB();
+        noB.lerNoB(posArvore);
+
+        // Localizar id na posicao encontrada
+        for(int i = 0; i < noB.numElementos; i++) {
+
+            // Alterar novo endereco
+            if(idProcurado == noB.chave[i]) {
+                noB.endereco[i] = newEndereco;
+                i = noB.numElementos;
+                find = true;
+            }
+        }
+        
+        // Alterar em arquivo
+        noB.escreverNoB(posArvore);
+
+        return find;
+    }
+
+    public void remontarArvoreB() {
+
     }
 
 }

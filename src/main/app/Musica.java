@@ -167,7 +167,7 @@ public class Musica {
         pais[0] = pais[1] = ' ';
 
         for (int i = 0; i < siglaPais.length() && i < 2; i++) {
-            pais[i] = siglaPais.charAt(0);
+            pais[i] = siglaPais.charAt(i);
         }
     }
 

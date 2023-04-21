@@ -189,10 +189,9 @@ public class Bucket {
                     inserido = true;
                 } else {
 
-                    // Ler endereco inderejado (== -1)
+                    // Ler endereco indesejado (== -1)
                     bucketFile.readLong();
                 }
-
                 cont++;
             }
 

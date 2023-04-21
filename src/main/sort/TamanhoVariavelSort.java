@@ -94,8 +94,6 @@ public class TamanhoVariavelSort {
                 File file = new File(arquivoTemp + i + ".db");
                 file.delete();
             }
-
-            System.out.println("\nArquivo \"" + registroDB + "\" ordenado com sucesso!");
         }
     }
 

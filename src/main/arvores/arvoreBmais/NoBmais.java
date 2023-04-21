@@ -20,7 +20,7 @@ public class NoBmais {
     private static final String arvoreBmaisDB = "./src/resources/ArvoreBmais.db";
 
     /**
-     * Construtor padrao da classe NoBmais.
+     * Construtor padrao da classe NoBmais+.
      */
     public NoBmais() {
 
@@ -37,7 +37,6 @@ public class NoBmais {
         for(int i = 0; i < ordemArvore; i++) {
             noFilho[i] = -1;
         }
-
         folhaDir = -1;
     }
 
@@ -60,11 +59,11 @@ public class NoBmais {
         for(int i = 0; i < ordemArvore; i++) {
             noFilho[i] = -1;
         }
+        folhaDir = -1;
 
         numElementos = 1;
         chave[0] = newChave;
         endereco[0] = newEndereco;
-        folhaDir = -1;
     }
 
     /**
@@ -88,13 +87,14 @@ public class NoBmais {
         for(int i = 0; i < ordemArvore; i++) {
             noFilho[i] = -1;
         }
+        folhaDir = -1;
 
         numElementos = 1;
         chave[0] = newChave;
         endereco[0] = newEndereco;
         noFilho[0] = filhoEsq;
         noFilho[1] = filhoDir;
-        folhaDir = -1;
+
     }
 
     /**
@@ -103,15 +103,15 @@ public class NoBmais {
      */
     public NoBmais clone() {
 
-        NoBmais cloneNoB = new NoBmais();
+        NoBmais cloneNoBmais = new NoBmais();
 
-        cloneNoB.numElementos = this.numElementos;
-        cloneNoB.chave = this.chave;
-        cloneNoB.endereco = this.endereco;
-        cloneNoB.noFilho = this.noFilho;
-        cloneNoB.folhaDir = this.folhaDir;
+        cloneNoBmais.numElementos = this.numElementos;
+        cloneNoBmais.chave = this.chave;
+        cloneNoBmais.endereco = this.endereco;
+        cloneNoBmais.noFilho = this.noFilho;
+        cloneNoBmais.folhaDir = this.folhaDir;
 
-        return cloneNoB;
+        return cloneNoBmais;
     }
 
 
@@ -120,46 +120,46 @@ public class NoBmais {
      * @return fimArquivo - posicao do arquivo que o NoBmais foi escrito.
      */
     public long escreverNoB() {
-        RandomAccessFile arvoreBmaisFile = null;
+        RandomAccessFile arvoreBFile = null;
         long fimArquivo = -1;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Posicionar ponteiro no fim do arquivo
-            fimArquivo = arvoreBmaisFile.length();
-            arvoreBmaisFile.seek(fimArquivo);
+            fimArquivo = arvoreBFile.length();
+            arvoreBFile.seek(fimArquivo);
 
             // Escrever numero de elementos no No
             byte[] numElementosBytes = ByteBuffer.allocate(2).putShort(numElementos).array();
-            arvoreBmaisFile.write(numElementosBytes);
+            arvoreBFile.write(numElementosBytes);
 
             // Escrever informacoes do No
             for (int i = 0; i < ordemArvore-1; i++) {
                 
                 // Escrever ponteiro para filho da esquerda da posicao i
                 byte[] noFilhoBytes = ByteBuffer.allocate(8).putLong(noFilho[i]).array();
-                arvoreBmaisFile.write(noFilhoBytes);
+                arvoreBFile.write(noFilhoBytes);
 
                 // Escrever chave na posicao i
                 byte[] chaveBytes = ByteBuffer.allocate(4).putInt(chave[i]).array();
-                arvoreBmaisFile.write(chaveBytes);
+                arvoreBFile.write(chaveBytes);
 
                 // Escrever endereco na posicao i para "Registro.db"
                 byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco[i]).array();
-                arvoreBmaisFile.write(enderecoBytes);
+                arvoreBFile.write(enderecoBytes);
             }
 
             // Escrever ultimo ponteiro 'a direita
             byte[] noFilhoBytes = ByteBuffer.allocate(8).putLong(noFilho[ordemArvore-1]).array();
-            arvoreBmaisFile.write(noFilhoBytes);
+            arvoreBFile.write(noFilhoBytes);
 
-            // Escrever ponteiro para folha da direita
+            // Escrever ponteiro para folha 'a direita
             byte[] folhaDirBytes = ByteBuffer.allocate(8).putLong(folhaDir).array();
-            arvoreBmaisFile.write(folhaDirBytes);
+            arvoreBFile.write(folhaDirBytes);
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -173,44 +173,44 @@ public class NoBmais {
      * @param posicaoInserir - posicao de inicio para escrita do NoBmais.
      */
     public void escreverNoB(long posicaoInserir) {
-        RandomAccessFile arvoreBmaisFile = null;
+        RandomAccessFile arvoreBFile = null;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Posicionar ponteiro no local de inicio do NoBmais.
-            arvoreBmaisFile.seek(posicaoInserir);
+            arvoreBFile.seek(posicaoInserir);
 
             // Escrever numero de elementos no No
             byte[] numElementosBytes = ByteBuffer.allocate(2).putShort(numElementos).array();
-            arvoreBmaisFile.write(numElementosBytes);
+            arvoreBFile.write(numElementosBytes);
 
             // Escrever informacoes do No
             for (int i = 0; i < ordemArvore-1; i++) {
                 
                 // Escrever ponteiro para filho da esquerda da posicao i
                 byte[] noFilhoBytes = ByteBuffer.allocate(8).putLong(noFilho[i]).array();
-                arvoreBmaisFile.write(noFilhoBytes);
+                arvoreBFile.write(noFilhoBytes);
 
                 // Escrever chave na posicao i
                 byte[] chaveBytes = ByteBuffer.allocate(4).putInt(chave[i]).array();
-                arvoreBmaisFile.write(chaveBytes);
+                arvoreBFile.write(chaveBytes);
 
                 // Escrever endereco na posicao i para  "Registro.db"
                 byte[] enderecoBytes = ByteBuffer.allocate(8).putLong(endereco[i]).array();
-                arvoreBmaisFile.write(enderecoBytes);
+                arvoreBFile.write(enderecoBytes);
             }
 
             // Escrever ultimo ponteiro 'a direita
             byte[] noFilhoBytes = ByteBuffer.allocate(8).putLong(noFilho[ordemArvore-1]).array();
-            arvoreBmaisFile.write(noFilhoBytes);
+            arvoreBFile.write(noFilhoBytes);
 
-            // Escrever ponteiro para folha da direita
+            // Escrever ponteiro para folha 'a direita
             byte[] folhaDirBytes = ByteBuffer.allocate(8).putLong(folhaDir).array();
-            arvoreBmaisFile.write(folhaDirBytes);
+            arvoreBFile.write(folhaDirBytes);
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -224,20 +224,20 @@ public class NoBmais {
      * @param newEndereco - novo endereco a se inserir.
      */
     public void inserir(long posicaoInserir, int newChave, long newEndereco) {
-        RandomAccessFile arvoreBmaisFile = null;
+        RandomAccessFile arvoreBFile = null;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Inserir o elemento de forma ordenada
             inserir(newChave, newEndereco);
 
             // Escrever numero de elementos no No
-            arvoreBmaisFile.seek(posicaoInserir);
+            arvoreBFile.seek(posicaoInserir);
             escreverNoB(posicaoInserir);
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -252,20 +252,20 @@ public class NoBmais {
      * @param filhoDir - endereco do filho da direita.
      */
     public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir) {
-        RandomAccessFile arvoreBmaisFile = null;
+        RandomAccessFile arvoreBFile = null;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Inserir o elemento de forma ordenada
             inserir(newChave, newEndereco, filhoDir);
 
             // Escrever numero de elementos no No
-            arvoreBmaisFile.seek(posicaoInserir);
+            arvoreBFile.seek(posicaoInserir);
             escreverNoB(posicaoInserir);
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -277,23 +277,61 @@ public class NoBmais {
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
+     * @param filhoEsq - endereco do filho da esquerda.
      * @param filhoDir - endereco do filho da direita.
      */
-    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoDir, long filhoEsq) {
-        RandomAccessFile arvoreBmaisFile = null;
+    public void inserir(long posicaoInserir, int newChave, long newEndereco, long filhoEsq, long filhoDir) {
+        RandomAccessFile arvoreBFile = null;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Inserir o elemento de forma ordenada
-            inserir(newChave, newEndereco, filhoDir, filhoEsq);
+            inserir(newChave, newEndereco, filhoEsq, filhoDir);
 
             // Escrever numero de elementos no No
-            arvoreBmaisFile.seek(posicaoInserir);
+            arvoreBFile.seek(posicaoInserir);
             escreverNoB(posicaoInserir);
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
+        }
+    }
+
+    /**
+     * Metodo para inserir um NoBmais em arquivo, como fluxo de bytes.
+     * @param posicaoInserir - posicao de inicio para escrita no arquivo.
+     * @param noInserir - noBmais com 1 elemento a ser inserido.
+     */
+    public void inserir(long posicaoInserir, NoBmais noInserir) {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+
+            // Obter informacoes do NoBmais
+            int newChave = noInserir.chave[0];
+            long newEndereco = noInserir.endereco[0];
+            long filhoEsq = noInserir.noFilho[0];
+            long filhoDir = noInserir.noFilho[1];
+
+            // Inserir o elemento de forma ordenada
+            if (filhoEsq == -1) {
+                inserir(newChave, newEndereco, filhoDir);
+            } else {
+                inserir(newChave, newEndereco, filhoEsq, filhoDir);
+            }
+            
+
+            // Escrever numero de elementos no No
+            arvoreBFile.seek(posicaoInserir);
+            escreverNoB(posicaoInserir);
+
+            // Fechar arquivo
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -410,39 +448,39 @@ public class NoBmais {
      * Metodo para ler NoBmais em arquivo, a apartir de sua posicao de inicio.
      * @param posInicio - posicao de inicio daquele NoBmais.
      */
-    public void lerNoBmais (long posInicio) {
-        RandomAccessFile arvoreBmaisFile = null;
+    public void lerNoB (long posInicio) {
+        RandomAccessFile arvoreBFile = null;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Posicionar ponteiro na posicao de inicio do No
-            arvoreBmaisFile.seek(posInicio);
+            arvoreBFile.seek(posInicio);
 
             // Ler numero de elementos no No
-            numElementos = arvoreBmaisFile.readShort();
+            numElementos = arvoreBFile.readShort();
 
             // Ler informacoes do No
             for (int i = 0; i < ordemArvore-1; i++) {
                 
                 // Ler ponteiro para filho da esquerda da posicao i
-                noFilho[i] = arvoreBmaisFile.readLong();
+                noFilho[i] = arvoreBFile.readLong();
 
                 // Ler chave na posicao i
-                chave[i] = arvoreBmaisFile.readInt();
+                chave[i] = arvoreBFile.readInt();
 
                 // Ler endereco na posicao i para  "Registro.db"
-                endereco[i] = arvoreBmaisFile.readLong();
+                endereco[i] = arvoreBFile.readLong();
             }
 
             // Ler ultimo ponteiro 'a direita
-            noFilho[ordemArvore-1] = arvoreBmaisFile.readLong();
+            noFilho[ordemArvore-1] = arvoreBFile.readLong();
 
-            // Ler ponteiro para folha da direita
-            folhaDir = arvoreBmaisFile.readLong();
+            // Ler ponteiro para folha 'a direita
+            folhaDir = arvoreBFile.readLong();
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -452,31 +490,59 @@ public class NoBmais {
     /**
      * Metodo para encontrar NoBmais de insersao de uma chave.
      * @param chave - que sera' inserida.
-     * @return NoBmais - no qual deve-se inserir a chave.
+     * @param posRaiz - posicao da raiz da arvore
+     * @return noBmais - no qual deve-se inserir a chave.
      */
-    public long encontrarInsercao (int chave) {
-        return encontrarInsercao(this, chave, 8);
+    public long encontrarInsercao (int chave, long posRaiz) {
+        return encontrarInsercao(this, chave, posRaiz);
     }
 
     /**
      * Metodo privado para encontrar o local de insersao de uma chave em um
      * determinado NoBmais.
-     * @param no - NoBmais em analise.
-     * @param chave - chave que sera' inserida.
+     * @param noBmais - NoBmais em analise.
+     * @param chaveProcurada - chave que sera' inserida.
      * @param posInserir - posicao para inserir a chave.
      * @return posInserir - endereco de insercao no arquivo.
      */
-    private long encontrarInsercao (NoBmais no, int chave, long posInserir) {
-     
-        // Procurar o filho, no qual a chave poderia ficar
-        int i;
-        for(i = 0; (i < no.numElementos) && (chave > no.chave[i]); i++);
+    private long encontrarInsercao (NoBmais noBmais, int chaveProcurada, long posInserir) {
 
-        // Se o No nao for folha, continuar recursao
-        if (no.noFilho[i] != -1) {
-            posInserir = no.noFilho[i];
-            no.lerNoBmais(posInserir);
-            posInserir = encontrarInsercao(no, chave, posInserir);
+        // Ler NoBmais desejado
+        noBmais.lerNoB(posInserir);
+     
+        // Se chave procurada for menor que a primeira
+        if ((noBmais.numElementos > 0) && (chaveProcurada < noBmais.chave[0])) {
+
+            // Se o No nao for folha, continuar recursao
+            if (noBmais.noFilho[0] != -1) {
+                posInserir = noBmais.noFilho[0];
+                noBmais.lerNoB(posInserir);
+                posInserir = encontrarInsercao(noBmais, chaveProcurada, posInserir);
+            }
+        
+        // Senao, testar se e' maior que a ultima
+        } else if ((noBmais.numElementos > 0) && (chaveProcurada > noBmais.chave[noBmais.numElementos-1])) {
+            
+            // Se o No nao for folha, continuar recursao
+            if (noBmais.noFilho[noBmais.numElementos] != -1) {
+                posInserir = noBmais.noFilho[numElementos];
+                noBmais.lerNoB(posInserir);
+                posInserir = encontrarInsercao(noBmais, chaveProcurada, posInserir);
+            }
+
+        // Senao, procurar valores intermediarios
+        } else {
+
+            // Procurar o filho, no qual a chave poderia ficar
+            int i;
+            for(i = 0; (i < noBmais.numElementos) && (chaveProcurada > noBmais.chave[i]); i++);
+
+            // Se o No nao for folha, continuar recursao
+            if (noBmais.noFilho[i] != -1) {
+                posInserir = noBmais.noFilho[i];
+                noBmais.lerNoB(posInserir);
+                posInserir = encontrarInsercao(noBmais, chaveProcurada, posInserir);
+            }
         }
 
         return posInserir;
@@ -489,24 +555,24 @@ public class NoBmais {
      */
     public long encontrarPai(long posFilho) {
 
-        RandomAccessFile arvoreBmaisFile = null;
+        RandomAccessFile arvoreBFile = null;
         long posicaoPai = -1;
 
         try {
-            arvoreBmaisFile = new RandomAccessFile (arvoreBmaisDB, "rw");
+            arvoreBFile = new RandomAccessFile (arvoreBmaisDB, "rw");
 
             // Posicionar ponteiro no inicio do arquivo
-            arvoreBmaisFile.seek(0);
-            arvoreBmaisFile.readLong();
+            arvoreBFile.seek(0);
+            arvoreBFile.readLong();
 
-            long posicaoAtual = arvoreBmaisFile.getFilePointer();
+            long posicaoAtual = arvoreBFile.getFilePointer();
             boolean find = false;
 
             // Percorrer todo o arquivo
-            while(posicaoAtual != arvoreBmaisFile.length() && find == false) {
+            while(posicaoAtual != arvoreBFile.length() && find == false) {
                 NoBmais tmp = new NoBmais();
                 posicaoPai = posicaoAtual;
-                tmp.lerNoBmais(posicaoAtual);
+                tmp.lerNoB(posicaoAtual);
 
                 for (int i = 0; i < tmp.ordemArvore; i++) {
                     
@@ -525,7 +591,7 @@ public class NoBmais {
             if (find == false) posicaoPai = -1;
 
             // Fechar arquivo
-            arvoreBmaisFile.close();
+            arvoreBFile.close();
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBmaisDB + "\"\n");
@@ -546,10 +612,34 @@ public class NoBmais {
 
         // Copiar os primeiros elementos do No
         int pos = i;
-        while (pos <= tamNo) {
+        while (pos < tamNo) {
             noEsq.inserir(this.chave[pos], this.endereco[pos], this.noFilho[pos], this.noFilho[pos+1]);
             pos++;
         }
+
+        return noEsq;
+    }
+
+    /**
+     * Metodo para obter o No resultante com as chaves 'a esquerda do No em
+     * analise.
+     * @param folhaDireita - ponteiro para a folha 'a direita
+     * @return NoEsq - com os elementos menores que a chave do meio.
+     */
+    public NoBmais getFilhoEsq(long folhaDireita) {
+        int i = 0;
+        int tamNo = (ordemArvore-1)/2;
+        NoBmais noEsq = new NoBmais();
+
+        // Copiar os primeiros elementos do No
+        int pos = i;
+        while (pos < tamNo) {
+            noEsq.inserir(this.chave[pos], this.endereco[pos], this.noFilho[pos], this.noFilho[pos+1]);
+            pos++;
+        }
+
+        // Copiar ponteiro para a proxima folha irma
+        folhaDir = folhaDireita;
 
         return noEsq;
     }
@@ -628,12 +718,21 @@ public class NoBmais {
         noFilho[i] = posEsq;
         noFilho[i+1] = posDir;
     }
-    
+
     /**
-     * Metodo para inserir ponteiro de uma folha para a folha irma da direita
+     * Metodo para reestruturar os ponteiros para os filhos do NoBmais alterado.
+     * @param newChave - nova chave no NoBmais adicionada.
+     * @param posDir - posicao NoBmais filho da direita no arquivo.
      */
-    public void inserirFolhaDir(long folhaDir) {
-        this.folhaDir = folhaDir;
+    public void remontarPonteiros(int newChave, long posDir) {
+
+        // Localizar chave recem inserida
+        int i;
+        for(i = 0; (i < (ordemArvore-1)/2) && (chave[i] != newChave); i++);
+
+        // Adicionar filho direita do novo NoBmais
+        noFilho[i] = -1;
+        noFilho[i+1] = posDir;
     }
 
     /**

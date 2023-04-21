@@ -74,7 +74,7 @@ public class CRUD {
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
         arvoreBestrela = new ArvoreBestrela();
-        arvoreBmais = new ArvoreBmais();
+        //arvoreBmais = new ArvoreBmais();
         lista = new ListaInvertida();
     }
     
@@ -137,9 +137,9 @@ public class CRUD {
                 arvoreBestrela.inicializarArvoreB();
 
                 // Apagar antiga "ArvoreBmais.db"
-                File antigaArvoreBmais = new File(arvoreBmaisDB);
-                antigaArvoreBmais.delete();
-                arvoreBmais.inicializarArvoreB();
+                //File antigaArvoreBmais = new File(arvoreBmaisDB);
+                //antigaArvoreBmais.delete();
+                //arvoreBmais.inicializarArvoreB();
 
                 // Apagar antigas listas invertidas
                 lista.delete();
@@ -181,6 +181,8 @@ public class CRUD {
                     byte[] byteArray = musica.toByteArray();
                     dbFile.write(byteArray);
 
+//                    io.readLine("ok ID: " + ultimoId);
+
                     // Inserir, utilizando hashing
                     hash.inserir(musica, posRegistro);
 
@@ -207,6 +209,7 @@ public class CRUD {
 
                 System.out.println("\nArquivo \"" + registroDB + 
                                 "\" criado com sucesso!");
+            
             }
 
             // Fechar arquivos
@@ -291,36 +294,48 @@ public class CRUD {
 
     public void read () {
         
-        boolean pesquisaFeita = false;
-        int opcao = -1;
+        // Testar se arquivo existe
+        File arquivoRegistro = new File(registroDB);
 
-        String menu = "\n+------------------------------------------+" +
-                        "\n|               MENU PESQUISA              |" +
-                        "\n|------------------------------------------|" +
-                        "\n| 1 - Id                                   |" +
-                        "\n| 2 - Data de lancamento                   |" +
-                        "\n| 3 - Nome do artista                      |" +
-                        "\n| 4 - Data de lancamento e nome do artista |" +
-                        "\n+------------------------------------------+";
+        // Se existir, fazer a busca
+        if (arquivoRegistro.exists()) {
+
+            int opcao = -1;
+
+            String menu = "\n+------------------------------------------+" +
+                            "\n|               MENU PESQUISA              |" +
+                            "\n|------------------------------------------|" +
+                            "\n| 1 - Id                                   |" +
+                            "\n| 2 - Data de lancamento                   |" +
+                            "\n| 3 - Nome do artista                      |" +
+                            "\n| 4 - Data de lancamento e nome do artista |" +
+                            "\n+------------------------------------------+";
+            
+            do {
+                try{
+                    System.out.println(menu);
+                    opcao = io.readInt("\nDigite uma opcao: ");
+
+                    switch(opcao) {
+                        case 1 : procurarId();             break;
+                        case 2 : procurarDatas();          break;
+                        case 3 : procurarArtistas();       break;
+                        case 4 : procurarDatasEArtistas(); break;
+                        default: System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
+                    }
+
+                } catch (InputMismatchException e) {
+                    System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
+                    io.readLine();
+                }       
+            } while(opcao < 1 || opcao > 4);
+
+        // Senao, mensagem de erro
+        } else {
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
         
-        do {
-            try{
-                System.out.println(menu);
-                opcao = io.readInt("\nDigite uma opcao: ");
-
-                switch(opcao) {
-                    case 1 : procurarId();             break;
-                    case 2 : procurarDatas();          break;
-                    case 3 : procurarArtistas();       break;
-                    case 4 : procurarDatasEArtistas(); break;
-                    default: System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
-                }
-
-            } catch (InputMismatchException e) {
-                System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 4.");
-                io.readLine();
-            }       
-        } while(opcao < 1 || opcao > 4);
+        }
     }
 
     /**
@@ -345,6 +360,7 @@ public class CRUD {
      * Metodo para procurar um Id em todas as estrututuras cadastradas.
      */
     private void procurarId() {
+
         int idProcurado = 0;
         do{
             System.out.print("\nDigite o ID procurado: ");
@@ -521,7 +537,7 @@ public class CRUD {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }        
     }
 
@@ -666,7 +682,7 @@ public class CRUD {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
     }
 
@@ -827,7 +843,7 @@ public class CRUD {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
     }    
 
@@ -1080,7 +1096,7 @@ public class CRUD {
 
                             // Ler e criar novo Objeto musica
                             Musica newMusica = musica.clone();
-                            atualizado  = newMusica.atualizar();
+                            atualizado = newMusica.atualizar();
                             byte[] newRegistro = newMusica.toByteArray();
 
                             // Obter tamanho dos registros
@@ -1106,6 +1122,9 @@ public class CRUD {
                                 // Retornar ponteiro para final do registro
                                 dbFile.seek(posicaoFinal);
 
+                               // Atualizar nas listas invertidas
+                               lista.update(musica, newMusica, posicaoInicio);
+
                             } else {
                                 
                                 // Marcar registro como invalido
@@ -1123,6 +1142,12 @@ public class CRUD {
 
                                // Atualizar no hashing extensivel
                                hash.update(idProcurado, finalArquivo);
+
+                               // Atualizar na ArvoreB
+                               arvoreB.update(idProcurado, finalArquivo);
+
+                               // Atualizar nas listas invertidas
+                               lista.update(musica, newMusica, finalArquivo);
                             }
 
                             if (atualizado == true) {

@@ -46,7 +46,13 @@ public class ListaInvertida {
      * @param musica - a ser inserida.
      */
     public void delete(Musica musica) {
+        listaAnosLancamento.delete(musica);
         listaArtistas.delete(musica);
+    }
+
+    public void update(Musica musicaAntiga, Musica musicaNova, long newEndereco) {
+        listaAnosLancamento.update(musicaAntiga, musicaNova, newEndereco);
+        listaArtistas.update(musicaAntiga, musicaNova, newEndereco);
     }
 
     /**
