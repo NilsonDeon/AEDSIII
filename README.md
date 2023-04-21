@@ -11,7 +11,7 @@
 ## Parte 02 - Arquivos de Índices
 
 [TP02]() <br>
-[TP02_Relatorio.pdf]()
+[TP02_Relatorio.pdf]()<br>
 [Vídeo Explicativo]()
 
 ## Parte 03 - Compreção Huffman e LZW
