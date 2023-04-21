@@ -13,7 +13,7 @@
 [TP02]() <br>
 [TP02_Relatorio.pdf]()
 
-## Parte 03 - EM BREVE
+## Parte 03 - Compreção Huffman e LZW
 
 ## Parte 04 - EM BREVE
 
