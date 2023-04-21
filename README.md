@@ -8,7 +8,7 @@
 [TP01](https://github.com/NilsonDeon/AEDSIII/archive/refs/tags/v1.0.0.zip) <br>
 [Vídeo Explicativo](https://youtu.be/kb8gb98yIVY)
 
-## Parte 02 - Aqruivos de Índices
+## Parte 02 - Arquivos de Índices
 
 [TP02]() <br>
 [TP02_Relatorio.pdf]()
