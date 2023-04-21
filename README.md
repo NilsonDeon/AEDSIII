@@ -21,13 +21,13 @@
 
 ## Como Testar
 
-1. Pegando o código
-  1.1. [Baixando diretamente do GitHub](https://github.com/NilsonDeon/AEDSIII/archive/refs/heads/main.zip)
-  1.2. Clonando o repositório
-    1.2.1 No terminal insira o comando `git clone https://github.com/NilsonDeon/AEDSIII.git`
+1. Pegando o código<br>
+  I. [Baixando diretamente do GitHub](https://github.com/NilsonDeon/AEDSIII/archive/refs/heads/main.zip)<br>
+  II. Ou no terminal insira o comando `git clone https://github.com/NilsonDeon/AEDSIII.git`
     
-2. Executando
-  2.1 abra o terminal na pasta AEDSIII e digite no terminal `make run`
+2. Executando<br>
+  I. Abra o terminal na pasta AEDSIII<br>
+  II. Digite no terminal `make run`
 
 
 
