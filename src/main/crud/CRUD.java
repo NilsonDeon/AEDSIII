@@ -25,9 +25,9 @@ import java.util.Locale;
 // Bibliotecas proprias
 import app.IO;
 import app.Musica;
-import hashing.HashingExtensivel;
 import arvores.arvoreB.ArvoreB;
 import arvores.arvoreBStar.ArvoreBStar;
+import hashing.HashingExtensivel;
 import listaInvertida.ListaInvertida;
 
 /**
