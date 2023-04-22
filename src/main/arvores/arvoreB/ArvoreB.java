@@ -68,7 +68,7 @@ public class ArvoreB {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            return posRaiz;
+            return posRaiz; // não completa
         }
     }
 
@@ -101,9 +101,6 @@ public class ArvoreB {
 
             // Obter chave a ser inserida
             int newChave = newMusica.getId();
-
-            // Obter raiz
-            long posRaiz = getRaiz();
 
             // Ler NoB indicado pela posicao
             NoB noB = new NoB();
@@ -405,7 +402,6 @@ public class ArvoreB {
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            long posRaiz = arvoreBFile.readLong();
             long posAtual = arvoreBFile.getFilePointer();
 
             // Percorrer todo arquivo
@@ -447,7 +443,7 @@ public class ArvoreB {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            return total;
+            return total; // não completa
         }
     }
 
@@ -709,7 +705,7 @@ public class ArvoreB {
                     io.readLine("noIrmao.deletarNo(posIrmao)\n");
 
                     // Apagar o pai do noPai
-                    if(/*condicao para recuperar ou nao ponteiro*/) {
+                    if(isDuplicada) {
                         delete(posPai, chavePai, false);
                     } else {
                         delete(posPai, chavePai, true);
@@ -823,7 +819,7 @@ public class ArvoreB {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            return noIrmao;
+            return noIrmao; // não completa
         }
     }
 

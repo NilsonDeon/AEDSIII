@@ -155,7 +155,7 @@ public class NoB {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            return fimArquivo;
+            return fimArquivo; // não completa
         }
     }
 
@@ -574,7 +574,7 @@ public class NoB {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
         } finally {
-            return posicaoPai;
+            return posicaoPai; // não completa
         }
     }
 
