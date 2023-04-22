@@ -472,26 +472,18 @@ public class NoB {
     }
 
     /**
-     * Metodo para encontrar NoB de insersao de uma chave.
-     * @param chave - que sera' inserida.
-     * @param posRaiz - posicao da raiz da arvore
-     * @return noB - no qual deve-se inserir a chave.
-     */
-    public long encontrarInsercao (int chave, long posRaiz) {
-        return encontrarInsercao(this, chave, posRaiz);
-    }
-
-    /**
      * Metodo privado para encontrar o local de insersao de uma chave em um
      * determinado NoB.
-     * @param noB - NoB em analise.
      * @param chaveProcurada - chave que sera' inserida.
      * @param posInserir - posicao para inserir a chave.
      * @return posInserir - endereco de insercao no arquivo.
      */
-    private long encontrarInsercao (NoB noB, int chaveProcurada, long posInserir) {
+    public long encontrarInsercao (int chaveProcurada, long posInserir) {
 
+        System.out.println("posInserir: " + posInserir);
+        
         // Ler NoB desejado
+        NoB noB = new NoB();
         noB.lerNoB(posInserir);
     
         // Se chave procurada for menor que a primeira
@@ -501,7 +493,7 @@ public class NoB {
             if (noB.noFilho[0] != -1) {
                 posInserir = noB.noFilho[0];
                 noB.lerNoB(posInserir);
-                posInserir = encontrarInsercao(noB, chaveProcurada, posInserir);
+                posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
         
         // Senao, testar se e' maior que a ultima
@@ -511,7 +503,7 @@ public class NoB {
             if (noB.noFilho[noB.numElementos] != -1) {
                 posInserir = noB.noFilho[numElementos];
                 noB.lerNoB(posInserir);
-                posInserir = encontrarInsercao(noB, chaveProcurada, posInserir);
+                posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
 
         // Senao, procurar valores intermediarios
@@ -525,7 +517,7 @@ public class NoB {
             if (noB.noFilho[i] != -1) {
                 posInserir = noB.noFilho[i];
                 noB.lerNoB(posInserir);
-                posInserir = encontrarInsercao(noB, chaveProcurada, posInserir);
+                posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
         }
 
@@ -887,7 +879,6 @@ public class NoB {
      */
     public void swap(long posAntiga, int chaveAntiga, long enderecoAntigo, 
                      long posNova,   int chaveNova,   long enderecoNovo) {
-        RandomAccessFile arvoreBFile = null;
 
         NoB noAux = new NoB();
             
@@ -917,5 +908,24 @@ public class NoB {
 
         // Salvar em arquivo
         noAux.escreverNoB(posNova);
+    }
+
+    public void trocarChave(long enderecoNo, int chaveDeletar, int newChave, long newEndereco) {
+
+        NoB noAux = new NoB();
+            
+        // Ler primeiro No
+        noAux.lerNoB(enderecoNo);
+
+        // Localizar local de insercao no No
+        int i;
+        for(i = 0; (i < noAux.numElementos) && (noAux.chave[i] != chaveDeletar); i++);
+
+        // Trocar elementos
+        noAux.chave[i] = newChave;
+        noAux.endereco[i] = newEndereco;
+
+        // Salvar em arquivo
+        noAux.escreverNoB(enderecoNo);
     }
 }

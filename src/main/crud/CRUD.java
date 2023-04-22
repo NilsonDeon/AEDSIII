@@ -182,7 +182,7 @@ public class CRUD {
                     dbFile.write(byteArray);
 
                     // Inserir, utilizando hashing
-                    hash.inserir(musica, posRegistro);
+                    //hash.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B
                     arvoreB.inserir(musica, posRegistro);
@@ -194,7 +194,7 @@ public class CRUD {
                     //arvoreBmais.inserir(musica, posRegistro);
 
                     // Inserir nas listas invertidas
-                    lista.inserir(musica, posRegistro);
+                    //lista.inserir(musica, posRegistro);
                 }
 
                 // Mostrar barra de progresso completa
