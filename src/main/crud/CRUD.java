@@ -27,8 +27,7 @@ import app.IO;
 import app.Musica;
 import hashing.HashingExtensivel;
 import arvores.arvoreB.ArvoreB;
-//import arvores.arvoreBestrela.ArvoreBestrela;
-//import arvores.arvoreBmais.ArvoreBmais;
+import arvores.arvoreBStar.ArvoreBStar;
 import listaInvertida.ListaInvertida;
 
 /**
@@ -52,12 +51,8 @@ public class CRUD {
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
     // Arvore B*
-    //private static ArvoreBestrela arvoreBestrela;
-    //private static final String arvoreBestrelaDB = "./src/resources/ArvoreBestrela.db";
-
-    // Arvore B+
-    //private static ArvoreBmais arvoreBmais;
-    //private static final String arvoreBmaisDB = "./src/resources/ArvoreBmais.db";
+    private static ArvoreBStar arvoreBStar;
+    private static final String arvoreBStarDB = "./src/resources/ArvoreBStar.db";
 
     // Lista invertida
     private static ListaInvertida lista;
@@ -72,8 +67,7 @@ public class CRUD {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
-        //arvoreBestrela = new ArvoreBestrela();
-        //arvoreBmais = new ArvoreBmais();
+        arvoreBStar = new ArvoreBStar();
         lista = new ListaInvertida();
     }
     
@@ -130,15 +124,10 @@ public class CRUD {
                 antigaArvoreB.delete();
                 arvoreB.inicializarArvoreB();
 
-                // Apagar antiga "ArvoreBestrela.db"
-                /* File antigaArvoreBestrela = new File(arvoreBestrelaDB);
-                antigaArvoreBestrela.delete();
-                arvoreBestrela.inicializarArvoreB();*/
-
-                // Apagar antiga "ArvoreBmais.db"
-                //File antigaArvoreBmais = new File(arvoreBmaisDB);
-                //antigaArvoreBmais.delete();
-                //arvoreBmais.inicializarArvoreB();
+                // Apagar antiga "ArvoreBStar.db"
+                File antigaArvoreBStar = new File(arvoreBStarDB);
+                antigaArvoreBStar.delete();
+                arvoreBStar.inicializarArvoreB();
 
                 // Apagar antigas listas invertidas
                 lista.delete();
@@ -187,10 +176,7 @@ public class CRUD {
                     arvoreB.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B*
-                    //arvoreBestrela.inserir(musica, posRegistro);
-
-                    // Inserir, utilizando arvore B+
-                    //arvoreBmais.inserir(musica, posRegistro);
+                    arvoreBStar.inserir(musica, posRegistro);
 
                     // Inserir nas listas invertidas
                     lista.inserir(musica, posRegistro);
@@ -198,22 +184,20 @@ public class CRUD {
 
                 // Mostrar barra de progresso completa
                 io.gerarBarraProgresso(tamanhoArqCSV, count);
-
-                System.out.println("\n");
-                arvoreB.mostrarArquivo();
-                              
+                             
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
                 newId = musica.intToByteArray(ultimoId);
                 dbFile.write(newId);
 
-                System.out.println("\nArquivo \"" + registroDB + 
-                                "\" criado com sucesso!");
-                // Fechar arquivo
+                System.out.println("\n\nArquivo \"" + registroDB + 
+                                   "\" criado com sucesso!");
+
+                // Fechar registro DB
                 dbFile.close();
             }
 
-            // Fechar arquivos
+            // Fechar CSV
             csvFile.close();
             
 
@@ -264,6 +248,9 @@ public class CRUD {
 
                 // Inserir na arvore B
                 arvoreB.inserir(musica, finalRegistro);
+
+                // Inserir na arvore B*
+                arvoreBStar.inserir(musica, finalRegistro);
 
                 // Inserir nas listas invertidas
                 lista.inserir(musica, finalRegistro);
@@ -354,7 +341,18 @@ public class CRUD {
      * @return tempo relativo em segundos.
     */
     private String getTempoBusca(long inicio, long fim) {
-        return ((fim - inicio) / 1000.0 + " segundos");
+        double tempo = (fim - inicio) / 1000.0;
+        String strTempo = String.format("%.4f segundos", tempo);
+        return strTempo;
+    }
+
+    /**
+     * Metodo para obter a posicao do registro no arquivo.
+     * @param posicao - horario de inicio da busca.
+     * @return tempo relativo em segundos.
+    */
+    private String getPosicao(long posicao) {
+        return String.format("  %8d ", posicao);
     }
 
     /**
@@ -377,42 +375,66 @@ public class CRUD {
         long sequencialInicio = now();
         long posicaoSequencial = read(idProcurado);
         long sequencialFim = now();
-        System.out.println("\nposicao sequencial: " + posicaoSequencial);
 
         // Procurar no hashing extensivel
         long hashInicio = now();
         long posicaoHash = hash.read(idProcurado);
         long hashFim = now();
-        System.out.println("posicao hash: " + posicaoHash);
 
         // Procurar na Arvore B
         long arvoreBInicio = now();
         long posicaoArvoreB = arvoreB.read(idProcurado);
         long arvoreBFim = now();
-        System.out.println("posicao arvoreB: " + posicaoArvoreB);
+
+        // Procurar na Arvore B*
+        long arvoreBStarInicio = now();
+        long posicaoArvoreBStar = arvoreBStar.read(idProcurado);
+        long arvoreBStarFim = now();
 
         // Verificar se todas as estruturas encontraram a mesma musica com sucesso
-        boolean find = (posicaoSequencial == posicaoHash) && (posicaoHash == posicaoArvoreB) && (posicaoSequencial != -1);
+        boolean find = (posicaoSequencial != -1)                &&
+                       (posicaoSequencial == posicaoHash)       && 
+                       (posicaoSequencial == posicaoArvoreB)    && 
+                       (posicaoSequencial == posicaoArvoreBStar);
         
         if(find) {
-
             // Mostrar musica
             Musica musicaProcurada = lerMusica(posicaoSequencial);
             System.out.println(musicaProcurada);
 
-            // Mostrar tempos de busca
-            String temposBusca = "\nTempos de busca:\n" +
-                                "\nSequencialmente ----------------------------- " + getTempoBusca(sequencialInicio, sequencialFim) +
-                                "\nHash Estensivel ----------------------------- " + getTempoBusca(hashInicio, hashFim) +
-                                "\nArvore B ------------------------------------ " + getTempoBusca(arvoreBInicio, arvoreBFim);
-            System.out.println(temposBusca);
-
         } else {
             System.out.println("\nMusica de ID (" + idProcurado + ") não esta cadastrada!");
         }
+
+        // Obter tempos de buca
+        String tempoSeq  = getTempoBusca(sequencialInicio, sequencialFim);
+        String tempoHash = getTempoBusca(hashInicio, hashFim);
+        String tempoB    = getTempoBusca(arvoreBInicio, arvoreBFim);
+        String tempoStar = getTempoBusca(arvoreBStarInicio, arvoreBStarFim);
+
+        // Obter posicao no arquivo sequencial
+        String posSeq  = getPosicao(posicaoSequencial);
+        String posHash = getPosicao(posicaoHash);
+        String posB    = getPosicao(posicaoArvoreB);
+        String posStar = getPosicao(posicaoArvoreBStar);
+
+        // Mostrar tempos de busca
+        String temposBusca = "\n ________________________________________________"  +
+                             "\n|    Estruturas    |   Tempo Busca   |  Posicao  |" +
+                             "\n|------------------|-----------------|-----------|" +
+                             "\n| Sequencialmente  | " + tempoSeq +" |"+posSeq +"|" +
+                             "\n| Hash Estensivel  | " + tempoHash+" |"+posHash+"|" +
+                             "\n| Arvore B         | " + tempoB   +" |"+posB   +"|" +
+                             "\n| Arvore B*        | " + tempoStar+" |"+posStar+"|" +
+                             "\n|__________________|_________________|___________|";
+        System.out.println(temposBusca);
         
     }
 
+    /**
+     * Metodo para procurar, pelos nomes do(s) artista(s), uma musica nas listas
+     * invertidas.
+     */
     private void procurarArtistas() {
 
         // Ler palavras para filtar os artistas
@@ -542,6 +564,10 @@ public class CRUD {
         }        
     }
 
+    /**
+     * Metodo para procurar, pelo ano de lancamento, uma musica nas listas
+     * invertidas.
+     */
     private void procurarDatas() {
 
         // Ler data para filtar as musicas
@@ -687,6 +713,10 @@ public class CRUD {
         }
     }
 
+    /**
+     * Metodo para procurar, pelos nomes do(s) artista(s) e pelo ano de 
+     * lancamento uma musica nas listas invertidas.
+     */
     private void procurarDatasEArtistas() {
 
         // Ler palavras para filtar os artistas
@@ -880,14 +910,13 @@ public class CRUD {
 
             // Deletar no hashing extensivel
             hash.delete(idProcurado);
+            hash.lerDiretorio();
 
             // Deletar na Arvore B
-            System.out.println("\nEntrou pra deletar");
             arvoreB.delete(idProcurado);
 
-            System.out.println("\ndeletou");
-            arvoreB.mostrarArquivo();
-            System.out.println("\nsucesso"); 
+            // Deletar na Arvore B*
+            arvoreBStar.delete(idProcurado);
 
         // Senao, mensagem de erro
         } else {
@@ -938,7 +967,6 @@ public class CRUD {
                 Musica musica = null;
                 boolean lapide;
                 int tamRegistro;
-
 
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
@@ -1171,6 +1199,9 @@ public class CRUD {
                                // Atualizar na ArvoreB
                                arvoreB.update(idProcurado, finalArquivo);
 
+                               // Atualizar na ArvoreB*
+                               arvoreBStar.update(idProcurado, finalArquivo);
+
                                // Atualizar nas listas invertidas
                                lista.update(musica, newMusica, finalArquivo);
                             }
@@ -1312,9 +1343,9 @@ public class CRUD {
     }
 
     /**
-    * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
-    * @param uri link da musica.
-    */
+     * Metodo privado para abrir a musica no aplicativo do Spotify, apartir da sua URI.
+     * @param uri link da musica.
+     */
     private void abrirMusica (String uri) {
         // Tratamento da string URI para ser adaptavel ao link
         // Pegar terceiro elemento correspondente ao trackID da musica
@@ -1343,7 +1374,7 @@ public class CRUD {
 
     /**
      * Metodo privado para salvar todo banco de dados em arquivo txt.
-    */
+     */
     public void saveTXT () {
         RandomAccessFile dbFile = null;
         BufferedWriter dbFileTXT = null;
@@ -1410,6 +1441,12 @@ public class CRUD {
         }
     }
 
+    /**
+     * Metodo para ler uma musica diretamento do arquivo "Registro.db", a partir
+     * de seu endereco no arquivo.
+     * @param posicaoProcurada - posicao da musica no arquivo sequencial.
+     * @return musicProcurada - a partir da posicao.
+     */
     private Musica lerMusica(long posicaoProcurada) {
         RandomAccessFile dbFile = null;
         Musica musicaProcurada = new Musica();

@@ -1,5 +1,5 @@
 // Package
-package arvores.arvoreB;
+package arvores.arvoreBStar;
 
 // Bibliotecas
 import java.io.IOException;
@@ -9,20 +9,20 @@ import java.nio.ByteBuffer;
 // Bibliotecas proprias
 import app.*;
 
-public class ArvoreB {
+public class ArvoreBStar {
 
-    protected NoB raiz;
-    private static final String arvoreBDB = "./src/resources/ArvoreB.db";
+    protected NoBStar raiz;
+    private static final String arvoreBDB = "./src/resources/ArvoreBStar.db";
 
     /**
-     * Construtor padrao da classe ArvoreB
+     * Construtor padrao da classe ArvoreBStar
     */
-    public ArvoreB() {
-        raiz = new NoB();
+    public ArvoreBStar() {
+        raiz = new NoBStar();
     }
 
     /**
-     * Metodo para inicializar o arquivo "ArvoreB.db", inicializando a raiz.
+     * Metodo para inicializar o arquivo "ArvoreBStar.db", inicializando a raiz.
     */
     public void inicializarArvoreB() {
         RandomAccessFile arvoreBFile = null;
@@ -80,7 +80,7 @@ public class ArvoreB {
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
     */
     public void inserir(Musica newMusica, long newEndereco) {
-        NoB noB = new NoB();
+        NoBStar noB = new NoBStar();
         long posInserir = noB.encontrarInsercao(newMusica.getId(), getRaiz());
         inserir(posInserir, newMusica, newEndereco, -1, -1);
     }
@@ -97,17 +97,19 @@ public class ArvoreB {
     private void inserir(long posInserir, Musica newMusica, long newEndereco, long filhoEsq, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
 
+        IO io = new IO();
+
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
             // Obter chave a ser inserida
             int newChave = newMusica.getId();
 
-            // Ler NoB indicado pela posicao
-            NoB noB = new NoB();
+            // Ler NoBStar indicado pela posicao
+            NoBStar noB = new NoBStar();
             noB.lerNoB(posInserir);
 
-            // Testar se NoB esta' livre e e' folha
+            // Testar se NoBStar esta' livre e e' folha
             if (noB.temEspacoLivre() && noB.isFolha()) {
                 noB.inserir(posInserir, newChave, newEndereco);
             
@@ -115,19 +117,112 @@ public class ArvoreB {
             } else if((noB.temEspacoLivre()) && (filhoEsq != -1 || filhoDir != -1)) {
                 noB.inserir(posInserir, newChave, newEndereco, filhoEsq, filhoDir);
             
-            // Senao, deve-se considerar o split
+            // Senao, deve-se tentar adiar o slip (irmao ceder chave)
             } else {
 
-                // Realizar o split
-                split(posInserir);
+                // Encontrar NoB pai do NoB analisado
+                NoBStar noPai = new NoBStar();
+                long posPai = noPai.encontrarPai(posInserir);
 
-                // Inserir na posicao desejada se for split
-                if((filhoEsq != -1 || filhoDir != -1)) {
-                   inserir(posInserir, newMusica, newEndereco, filhoEsq, filhoDir);
+                // Testar se nao e' raiz
+                if (posPai != -1) {
+
+                    // Ler noPai
+                    noPai.lerNoB(posPai);
+
+                    // Encontrar irmao da esquerda
+                    NoBStar noIrmaoEsq = new NoBStar();
+                    long posIrmaoEsq = noIrmaoEsq.encontrarIrmaoEsq(posPai, newChave);
+
+                    // Encontrar irmao da direita
+                    NoBStar noIrmaoDir = new NoBStar();
+                    long posIrmaoDir = noIrmaoDir.encontrarIrmaoDir(posPai, newChave);
+
+                    // Informacoes sobre o irmao a ser utilizado
+                    NoBStar noIrmao;
+                    long posIrmao;
+                    int chaveIrmao;
+                    long enderecoIrmao;
+
+                    // Informacoes do pai
+                    int chavePai;
+                    long enderecoPai;
+
+                    // Selecionar o NoB com mais elementos
+                    if(noIrmaoDir.numElementos >= noIrmaoEsq.numElementos) {
+                        noIrmao = noIrmaoDir;
+                        posIrmao = posIrmaoDir;
+
+                        // Primeiro registro do NoB
+                        chaveIrmao = noIrmaoDir.chave[0];
+                        enderecoIrmao = noIrmaoDir.endereco[0];
+
+                        // Obter chave pai correspondente
+                        int i;
+                        for(i = 0; (i < noPai.numElementos) && (noPai.chave[i] < newChave); i++);
+                        chavePai = noPai.chave[i];
+                        enderecoPai = noPai.endereco[i];
+
+                    // Da esquerda e' o maior
+                    } else {
+                        noIrmao = noIrmaoEsq;
+                        posIrmao = posIrmaoEsq;
+
+                        // Ultimo registro do NoB
+                        chaveIrmao = noIrmaoEsq.chave[noIrmaoEsq.numElementos-1];
+                        enderecoIrmao = noIrmaoEsq.endereco[noIrmaoEsq.numElementos-1];   
+
+                        // Obter chave pai correspondente
+                        int i;
+                        for(i = 0; (i < noPai.numElementos) && (noPai.chave[i] < newChave); i++);
+                        chavePai = noPai.chave[i-1];
+                        enderecoPai = noPai.endereco[i-1];
+                    }
+
+                    // Se pagina irma puder ceder um registro
+                    if(noIrmao.temEspacoLivre()) {
+
+                        // Inserir no irmao o pai
+                        noIrmao.inserir(posIrmao, chavePai, enderecoPai);
+
+                        // NoB cede a chave para trocar com pai
+                        int chaveNoB = noB.chave[0];
+                        long enderecoNoB = noB.endereco[0];
+                        noB.swap(posPai, chavePai, enderecoPai, posInserir, chaveNoB, enderecoNoB);
+
+                        // Deletar antiga posicao noB
+                        delete(posInserir, chavePai, true);
+
+                        // Inserir chave desejada
+                        noB.lerNoB(posInserir);
+                        noB.inserir(posInserir, newChave, newEndereco);
+                    
+                    // Realizar o split
+                    } else {
+                        split(posInserir);
+
+                        // Inserir na posicao desejada se for split
+                        if((filhoEsq != -1 || filhoDir != -1)) {
+                        inserir(posInserir, newMusica, newEndereco, filhoEsq, filhoDir);
+                        
+                        // Senao, procurar local de insercao
+                        } else {
+                            inserir(newMusica, newEndereco);
+                        }
+                    }
                 
-                // Senao, procurar local de insercao
+                // Se for raiz, split obrigatorio
                 } else {
-                    inserir(newMusica, newEndereco);
+                    split(posInserir);
+
+                    // Inserir na posicao desejada se for split
+                    if((filhoEsq != -1 || filhoDir != -1)) {
+                    inserir(posInserir, newMusica, newEndereco, filhoEsq, filhoDir);
+                    
+                    // Senao, procurar local de insercao
+                    } else {
+                        inserir(newMusica, newEndereco);
+                    }
                 }
                 
             } 
@@ -150,26 +245,26 @@ public class ArvoreB {
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            // Ler NoB que sofrera' split
-            NoB noSplit = new NoB();
+            // Ler NoBStar que sofrera' split
+            NoBStar noSplit = new NoBStar();
             noSplit.lerNoB(posSplit);
 
-            // Obter NoB filhos
-            NoB noEsq = noSplit.getFilhoEsq();
-            NoB noDir = noSplit.getFilhoDir();
+            // Obter NoBStar filhos
+            NoBStar noEsq = noSplit.getFilhoEsq();
+            NoBStar noDir = noSplit.getFilhoDir();
 
             // Escrever filhos direito em arquivo
             noDir.escreverNoB(posSplit);
             long filhoEsq = noEsq.escreverNoB();
 
-            // Separar NoB pra split
+            // Separar NoBStar pra split
             noSplit = noSplit.getMeio();
             int chaveSplit = noSplit.getChave(0);
             long enderecoSplit = noSplit.getEndereco(0);
             noSplit.remontarPonteiros(chaveSplit, posSplit);
 
             // Obter pai
-            NoB noBpai = new NoB();
+            NoBStar noBpai = new NoBStar();
             long posPai = noBpai.encontrarPai(posSplit);
             if (posPai != -1) {
                 noBpai.lerNoB(posPai);
@@ -230,12 +325,12 @@ public class ArvoreB {
 
         long endereco = -1;
 
-        // Ler NoB desejado se nao for null
+        // Ler NoBStar desejado se nao for null
         // Se chegou a -1, significa que nao encontrou
         if (pos != -1) {
 
-            // Obter NoB para analise
-            NoB noB = new NoB();
+            // Obter NoBStar para analise
+            NoBStar noB = new NoBStar();
             noB.lerNoB(pos);
 
             // Procurar possivel local da chave
@@ -283,15 +378,14 @@ public class ArvoreB {
      * @return posicao da chave no arquivo "AroreB.db".
     */
     private long getPosicao(long pos, int chaveProcurada) {
-
         long endereco = -1;
 
-        // Ler NoB desejado se nao for null
+        // Ler NoBStar desejado se nao for null
         // Se chegou a -1, significa que nao encontrou
         if (pos != -1) {
 
-            // Obter NoB para analise
-            NoB noB = new NoB();
+            // Obter NoBStar para analise
+            NoBStar noB = new NoBStar();
             noB.lerNoB(pos);
 
             // Procurar possivel local da chave
@@ -312,7 +406,6 @@ public class ArvoreB {
                 // Testar se chave foi encontrada
                 if(noB.chave[i] == chaveProcurada) {
                     endereco = pos;
-
                 } else {
                     endereco = getPosicao(noB.noFilho[i], chaveProcurada);
                 }
@@ -325,7 +418,7 @@ public class ArvoreB {
 
     /**
      * Metodo para exibir a estrutura da arvore em arquivos, sendo cada linha
-     * representando um NoB da arvore.
+     * representando um NoBStar da arvore.
      * Estrutura:
      * Pos[ &arqArvore] : | &filho | chave | &arqRegistro | ... 
     */
@@ -346,8 +439,8 @@ public class ArvoreB {
                 // Mostrar posicao atual do arquivo
                 System.out.print("Pos [" + String.format("%8d", posAtual) + "]: ");
 
-                // Ler NoB e mostrar
-                NoB aux = new NoB();
+                // Ler NoBStar e mostrar
+                NoBStar aux = new NoBStar();
 
                 // Posicionar ponteiro na posicao de inicio do No
                 arvoreBFile.seek(posAtual);
@@ -356,7 +449,7 @@ public class ArvoreB {
                 aux.numElementos = arvoreBFile.readShort();
 
                 // Ler informacoes do No
-                for (int i = 0; i < NoB.ordemArvore-1; i++) {
+                for (int i = 0; i < NoBStar.ordemArvore-1; i++) {
                     
                     // Ler ponteiro para filho da esquerda da posicao i
                     aux.noFilho[i] = arvoreBFile.readLong();
@@ -369,7 +462,7 @@ public class ArvoreB {
                 }
 
                 // Ler ultimo ponteiro 'a direita
-                aux.noFilho[NoB.ordemArvore-1] = arvoreBFile.readLong();
+                aux.noFilho[NoBStar.ordemArvore-1] = arvoreBFile.readLong();
                 posAtual = arvoreBFile.getFilePointer();
 
                 //Printar
@@ -403,8 +496,8 @@ public class ArvoreB {
             while(posAtual != arvoreBFile.length()) {
                 
 
-                // Ler NoB e mostrar
-                NoB aux = new NoB();
+                // Ler NoBStar e mostrar
+                NoBStar aux = new NoBStar();
 
                 // Posicionar ponteiro na posicao de inicio do No
                 arvoreBFile.seek(posAtual);
@@ -414,7 +507,7 @@ public class ArvoreB {
                 total += aux.numElementos;
 
                 // Ler informacoes do No
-                for (int i = 0; i < NoB.ordemArvore-1; i++) {
+                for (int i = 0; i < NoBStar.ordemArvore-1; i++) {
                     
                     // Ler ponteiro para filho da esquerda da posicao i
                     aux.noFilho[i] = arvoreBFile.readLong();
@@ -427,7 +520,7 @@ public class ArvoreB {
                 }
 
                 // Ler ultimo ponteiro 'a direita
-                aux.noFilho[NoB.ordemArvore-1] = arvoreBFile.readLong();
+                aux.noFilho[NoBStar.ordemArvore-1] = arvoreBFile.readLong();
 
                 posAtual = arvoreBFile.getFilePointer();
             }
@@ -453,7 +546,7 @@ public class ArvoreB {
 
         // Procurar id desejado
         long posArvore = getPosicao(idProcurado);
-        NoB noB = new NoB();
+        NoBStar noB = new NoBStar();
         noB.lerNoB(posArvore);
 
         // Localizar id na posicao encontrada
@@ -485,11 +578,12 @@ public class ArvoreB {
     */
     private void delete (int chaveProcurada, boolean isDuplicada) {
         RandomAccessFile arvoreBFile = null;
+                    IO io = new IO();
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            NoB noB = new NoB();
+            NoBStar noB = new NoBStar();
             long posNo;
 
             // Obter posicao da chave no arquivo
@@ -497,11 +591,13 @@ public class ArvoreB {
                 posNo = noB.encontrarInsercao(chaveProcurada, getRaiz());
             } else {
                 posNo = getPosicao(chaveProcurada);
+
             }
 
             // Ler No em que a chave esta'
             noB.lerNoB(posNo);
         
+
             // Se estiver em uma folha e ela mantiver 50% de ocupacao
             if(noB.isFolha() && noB.isMaisMetade()) {
                 
@@ -514,7 +610,7 @@ public class ArvoreB {
                 // Obter antecessor
                 long posAnt = noB.encontrarInsercao(chaveProcurada, posNo);
 
-                NoB noAnt = new NoB();
+                NoBStar noAnt = new NoBStar();
                 noAnt.lerNoB(posAnt);
 
                 // Obter elementos do antecessor
@@ -530,21 +626,21 @@ public class ArvoreB {
             // Se ele estiver na folha e nao ceder
             } else {
 
-                // Encontrar NoB pai do NoB analisado
-                NoB noPai = new NoB();
+                // Encontrar NoBStar pai do NoBStar analisado
+                NoBStar noPai = new NoBStar();
                 long posPai = noPai.encontrarPai(posNo);
                 noPai.lerNoB(posPai);
 
                 // Encontrar irmao da esquerda
-                NoB noIrmaoEsq = new NoB();
+                NoBStar noIrmaoEsq = new NoBStar();
                 long posIrmaoEsq = noIrmaoEsq.encontrarIrmaoEsq(posPai, chaveProcurada);
 
                 // Encontrar irmao da direita
-                NoB noIrmaoDir = new NoB();
+                NoBStar noIrmaoDir = new NoBStar();
                 long posIrmaoDir = noIrmaoDir.encontrarIrmaoDir(posPai, chaveProcurada);
 
                 // Informacoes sobre o irmao a ser utilizado
-                NoB noIrmao;
+                NoBStar noIrmao;
                 long posIrmao;
                 int chaveIrmao;
                 long enderecoIrmao;
@@ -553,12 +649,13 @@ public class ArvoreB {
                 int chavePai;
                 long enderecoPai;
         
-                // Selecionar o NoB com mais elementos
+
+                // Selecionar o NoBStar com mais elementos
                 if(noIrmaoDir.numElementos >= noIrmaoEsq.numElementos) {
                     noIrmao = noIrmaoDir;
                     posIrmao = posIrmaoDir;
 
-                    // Primeiro registro do NoB
+                    // Primeiro registro do NoBStar
                     chaveIrmao = noIrmaoDir.chave[0];
                     enderecoIrmao = noIrmaoDir.endereco[0];
 
@@ -573,7 +670,7 @@ public class ArvoreB {
                     noIrmao = noIrmaoEsq;
                     posIrmao = posIrmaoEsq;
 
-                    // Ultimo registro do NoB
+                    // Ultimo registro do NoBStar
                     chaveIrmao = noIrmaoEsq.chave[noIrmaoEsq.numElementos-1];
                     enderecoIrmao = noIrmaoEsq.endereco[noIrmaoEsq.numElementos-1];   
 
@@ -605,7 +702,7 @@ public class ArvoreB {
 
                     // Selecionar irmao existente
                     noIrmao = noIrmaoDir;
-                    posIrmao = posIrmaoDir; 
+                    posIrmao = posIrmaoDir;
 
                     // Testar se irmao da direita e' valido
                     if (noIrmao.numElementos != 0) {
@@ -618,7 +715,6 @@ public class ArvoreB {
 
 
                     } else {
-
                         // Ler irmao da esquerda
                         noIrmao = noIrmaoEsq;
                         posIrmao = posIrmaoEsq;
@@ -632,7 +728,7 @@ public class ArvoreB {
                     }
 
                     // Juntar, no atual, o pai
-                    noB.inserir(posNo, chavePai, enderecoPai);                   
+                    noB.inserir(posNo, chavePai, enderecoPai);                    
 
                     // Juntar elementos do irmao
                     for(int i = 0; i < noIrmao.numElementos; i++) {
@@ -672,29 +768,29 @@ public class ArvoreB {
     }
 
 
-    public NoB corrigirNoB (int chaveErro, long posErro) {
+    public NoBStar corrigirNoB (int chaveErro, long posErro) {
         RandomAccessFile arvoreBFile = null;
-        NoB noIrmao = null;
+        NoBStar noIrmao = null;
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
             // Ler No com erro
-            NoB noErro = new NoB();
+            NoBStar noErro = new NoBStar();
             noErro.lerNoB(posErro);                                               // 20 24 32
 
-            // Encontrar NoB pai do NoB analisado
-            NoB noPai = new NoB();
+            // Encontrar NoBStar pai do NoBStar analisado
+            NoBStar noPai = new NoBStar();
             long posPai = noPai.encontrarPai(posErro);                            // 16 36
             noPai.lerNoB(posPai);
 
             // Procurar irmaos
             // Encontrar irmao da esquerda
-            NoB noIrmaoEsq = new NoB();
+            NoBStar noIrmaoEsq = new NoBStar();
             long posIrmaoEsq = noIrmaoEsq.encontrarIrmaoEsq(posPai, chaveErro);
 
             // Encontrar irmao da direita
-            NoB noIrmaoDir = new NoB();
+            NoBStar noIrmaoDir = new NoBStar();
             long posIrmaoDir = noIrmaoDir.encontrarIrmaoDir(posPai, chaveErro);  //[40 48 53]
 
             // Informacoes sobre o irmao a ser utilizado
@@ -707,12 +803,12 @@ public class ArvoreB {
             int chavePai;
             long enderecoPai;
 
-            // Selecionar o NoB com mais elementos (preferencialmente 'a direita)
+            // Selecionar o NoBStar com mais elementos (preferencialmente 'a direita)
             if(noIrmaoDir.numElementos >= noIrmaoEsq.numElementos) {
                 noIrmao = noIrmaoDir;
                 posIrmao = posIrmaoDir;
 
-                // Primeiro registro do NoB
+                // Primeiro registro do NoBStar
                 chaveIrmao = noIrmaoDir.chave[0];
                 enderecoIrmao = noIrmaoDir.endereco[0];
                 noFilhoIrmao = noIrmao.noFilho[0];
@@ -728,7 +824,7 @@ public class ArvoreB {
                 noIrmao = noIrmaoEsq;
                 posIrmao = posIrmaoEsq;
 
-                // Ultimo registro do NoB
+                // Ultimo registro do NoBStar
                 chaveIrmao = noIrmaoEsq.chave[noIrmaoEsq.numElementos-1];
                 enderecoIrmao = noIrmaoEsq.endereco[noIrmaoEsq.numElementos-1];   
                 noFilhoIrmao = noIrmao.noFilho[noIrmao.numElementos-1];
@@ -772,7 +868,7 @@ public class ArvoreB {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
             // Ler No em que a chave esta'
-            NoB noB = new NoB();
+            NoBStar noB = new NoBStar();
             noB.lerNoB(posArvore);
 
             // Localizar id e deletar

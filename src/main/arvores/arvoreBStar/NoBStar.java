@@ -1,12 +1,12 @@
 // Package
-package arvores.arvoreB;
+package arvores.arvoreBStar;
 
 // Bibliotecas
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
-public class NoB {
+public class NoBStar {
 
     protected static final int ordemArvore = 8;
     protected static final int tamNoB = 150;
@@ -16,12 +16,12 @@ public class NoB {
     protected long endereco[];
     protected long noFilho[];
 
-    private static final String arvoreBDB = "./src/resources/ArvoreB.db";
+    private static final String arvoreBDB = "./src/resources/ArvoreBStar.db";
 
     /**
-     * Construtor padrao da classe NoB.
+     * Construtor padrao da classe NoBStar.
     */
-    public NoB() {
+    public NoBStar() {
 
         numElementos = 0;
         chave = new int[ordemArvore-1];
@@ -39,11 +39,11 @@ public class NoB {
     }
 
     /**
-     * Costrutor da classe NoB, utilizando passagem de parametros.
+     * Costrutor da classe NoBStar, utilizando passagem de parametros.
      * @param newChave - id da chave a ser inserida no No.
      * @param newEndereco - posicao do id no arquivo "Registro.db".
     */
-    public NoB(int newChave, long newEndereco) {
+    public NoBStar(int newChave, long newEndereco) {
 
         chave = new int[ordemArvore-1];
         endereco = new long[ordemArvore-1];
@@ -64,13 +64,13 @@ public class NoB {
     }
 
     /**
-     * Costrutor da classe NoB, utilizando passagem de parametros.
+     * Costrutor da classe NoBStar, utilizando passagem de parametros.
      * @param newChave - id da chave a ser inserida no No.
      * @param newEndereco - posicao do id no arquivo "Registro.db".
      * @param filhoEsq - posicao filho 'a esquerda.
      * @param filhoDir - posicao filho 'a direita.
     */
-    public NoB(int newChave, long newEndereco, long filhoEsq, long filhoDir) {
+    public NoBStar(int newChave, long newEndereco, long filhoEsq, long filhoDir) {
 
         chave = new int[ordemArvore-1];
         endereco = new long[ordemArvore-1];
@@ -94,12 +94,12 @@ public class NoB {
     }
 
     /**
-     * Metodo para clonar um NoB.
-     * @return NoB clonado.
+     * Metodo para clonar um NoBStar.
+     * @return NoBStar clonado.
     */
-    public NoB clone() {
+    public NoBStar clone() {
 
-        NoB cloneNoB = new NoB();
+        NoBStar cloneNoB = new NoBStar();
 
         cloneNoB.numElementos = this.numElementos;
         cloneNoB.chave = this.chave;
@@ -111,8 +111,8 @@ public class NoB {
 
 
     /**
-     * Metodo para criar um NoB em arquivo, como fluxo de bytes.
-     * @return fimArquivo - posicao do arquivo que o NoB foi escrito.
+     * Metodo para criar um NoBStar em arquivo, como fluxo de bytes.
+     * @return fimArquivo - posicao do arquivo que o NoBStar foi escrito.
     */
     public long escreverNoB() {
         RandomAccessFile arvoreBFile = null;
@@ -161,8 +161,8 @@ public class NoB {
     }
 
     /**
-     * Metodo para criar um NoB em arquivo, como fluxo de bytes.
-     * @param posicaoInserir - posicao de inicio para escrita do NoB.
+     * Metodo para criar um NoBStar em arquivo, como fluxo de bytes.
+     * @param posicaoInserir - posicao de inicio para escrita do NoBStar.
     */
     public void escreverNoB(long posicaoInserir) {
         RandomAccessFile arvoreBFile = null;
@@ -170,7 +170,7 @@ public class NoB {
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            // Posicionar ponteiro no local de inicio do NoB.
+            // Posicionar ponteiro no local de inicio do NoBStar.
             arvoreBFile.seek(posicaoInserir);
 
             // Escrever numero de elementos no No
@@ -206,7 +206,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * Metodo para inserir um NoBStar em arquivo, como fluxo de bytes.
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
@@ -233,7 +233,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * Metodo para inserir um NoBStar em arquivo, como fluxo de bytes.
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
@@ -261,7 +261,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * Metodo para inserir um NoBStar em arquivo, como fluxo de bytes.
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
@@ -290,17 +290,17 @@ public class NoB {
     }
 
     /**
-     * Metodo para inserir um NoB em arquivo, como fluxo de bytes.
+     * Metodo para inserir um NoBStar em arquivo, como fluxo de bytes.
      * @param posicaoInserir - posicao de inicio para escrita no arquivo.
-     * @param noInserir - noB com 1 elemento a ser inserido.
+     * @param noInserir - NoBStar com 1 elemento a ser inserido.
     */
-    public void inserir(long posicaoInserir, NoB noInserir) {
+    public void inserir(long posicaoInserir, NoBStar noInserir) {
         RandomAccessFile arvoreBFile = null;
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            // Obter informacoes do NoB
+            // Obter informacoes do NoBStar
             int newChave = noInserir.chave[0];
             long newEndereco = noInserir.endereco[0];
             long filhoEsq = noInserir.noFilho[0];
@@ -327,7 +327,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
+     * Metodo para inserir uma chave no NoBStar de forma ordenada, mantendo os 
      * devidos ponteiros.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
@@ -361,7 +361,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
+     * Metodo para inserir uma chave no NoBStar de forma ordenada, mantendo os 
      * devidos ponteiros.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
@@ -396,7 +396,7 @@ public class NoB {
     }
 
    /**
-     * Metodo para inserir uma chave no NoB de forma ordenada, mantendo os 
+     * Metodo para inserir uma chave no NoBStar de forma ordenada, mantendo os 
      * devidos ponteiros.
      * @param newChave - nova chave a se inserir.
      * @param newEndereco - novo endereco a se inserir.
@@ -433,8 +433,8 @@ public class NoB {
     }
 
     /**
-     * Metodo para ler NoB em arquivo, a apartir de sua posicao de inicio.
-     * @param posInicio - posicao de inicio daquele NoB.
+     * Metodo para ler NoBStar em arquivo, a apartir de sua posicao de inicio.
+     * @param posInicio - posicao de inicio daquele NoBStar.
     */
     public void lerNoB (long posInicio) {
         RandomAccessFile arvoreBFile = null;
@@ -474,32 +474,32 @@ public class NoB {
 
     /**
      * Metodo privado para encontrar o local de insersao de uma chave em um
-     * determinado NoB.
+     * determinado NoBStar.
      * @param chaveProcurada - chave que sera' inserida.
      * @param posInserir - posicao para inserir a chave.
      * @return posInserir - endereco de insercao no arquivo.
     */
     public long encontrarInsercao (int chaveProcurada, long posInserir) {
         
-        // Ler NoB desejado
-        NoB noB = new NoB();
-        noB.lerNoB(posInserir);
+        // Ler NoBStar desejado
+        NoBStar NoBStar = new NoBStar();
+        NoBStar.lerNoB(posInserir);
 
         // Se chave procurada for menor que a primeira
-        if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
+        if ((NoBStar.numElementos > 0) && (chaveProcurada < NoBStar.chave[0])) {
 
             // Se o No nao for folha, continuar recursao
-            if (noB.noFilho[0] != -1) {
-                posInserir = noB.noFilho[0];
+            if (NoBStar.noFilho[0] != -1) {
+                posInserir = NoBStar.noFilho[0];
                 posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
         
         // Senao, testar se e' maior que a ultima
-        } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
+        } else if ((NoBStar.numElementos > 0) && (chaveProcurada > NoBStar.chave[NoBStar.numElementos-1])) {
             
             // Se o No nao for folha, continuar recursao
-            if (noB.noFilho[noB.numElementos] != -1) {
-                posInserir = noB.noFilho[noB.numElementos];
+            if (NoBStar.noFilho[NoBStar.numElementos] != -1) {
+                posInserir = NoBStar.noFilho[NoBStar.numElementos];
                 posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
 
@@ -508,11 +508,11 @@ public class NoB {
 
             // Procurar o filho, no qual a chave poderia ficar
             int i;
-            for(i = 0; (i < noB.numElementos) && (chaveProcurada > noB.chave[i]); i++);
+            for(i = 0; (i < NoBStar.numElementos) && (chaveProcurada > NoBStar.chave[i]); i++);
 
             // Se o No nao for folha, continuar recursao
-            if (noB.noFilho[i] != -1) {
-                posInserir = noB.noFilho[i];
+            if (NoBStar.noFilho[i] != -1) {
+                posInserir = NoBStar.noFilho[i];
                 posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
         }
@@ -521,7 +521,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para encontrar a posicao do pai de um NoB.
+     * Metodo para encontrar a posicao do pai de um NoBStar.
      * @param posFilho - posicao do filho em arquivo
      * @return posInserir - endereco do pai no arquivo.
     */
@@ -542,11 +542,11 @@ public class NoB {
 
             // Percorrer todo o arquivo
             while(posicaoAtual != arvoreBFile.length() && find == false) {
-                NoB tmp = new NoB();
+                NoBStar tmp = new NoBStar();
                 posicaoPai = posicaoAtual;
                 tmp.lerNoB(posicaoAtual);
 
-                for (int i = 0; i < NoB.ordemArvore; i++) {
+                for (int i = 0; i < NoBStar.ordemArvore; i++) {
                     
                     // Encontrar pai procurando a partir do filho
                     if (tmp.noFilho[i] == posFilho) {
@@ -577,10 +577,10 @@ public class NoB {
      * analise.
      * @return NoEsq - com os elementos menores que a chave do meio.
     */
-    public NoB getFilhoEsq() {
+    public NoBStar getFilhoEsq() {
         int i = 0;
         int tamNo = (ordemArvore-1)/2;
-        NoB noEsq = new NoB();
+        NoBStar noEsq = new NoBStar();
 
         // Copiar os primeiros elementos do No
         int pos = i;
@@ -597,9 +597,9 @@ public class NoB {
      * analise.
      * @return NoDir - com os elementos maiores que a chave do meio.
     */
-    public NoB getFilhoDir() {
+    public NoBStar getFilhoDir() {
         int i = ordemArvore/2;
-        NoB noDir = new NoB();
+        NoBStar noDir = new NoBStar();
 
         // Copiar os ultimos elementos do No
         int pos = i;
@@ -612,19 +612,19 @@ public class NoB {
     }
 
     /**
-     * Metodo para obter o No com a chave do meio do NoB analisado.
+     * Metodo para obter o No com a chave do meio do NoBStar analisado.
      * @return noMeio - com os elementos maiores que a chave do meio.
     */
-    public NoB getMeio() {
+    public NoBStar getMeio() {
         int posMeio = ((ordemArvore-1)/2);
-        NoB noMeio = new NoB(this.chave[posMeio], this.endereco[posMeio]);
+        NoBStar noMeio = new NoBStar(this.chave[posMeio], this.endereco[posMeio]);
 
         return noMeio;
     }
 
     /**
-     * Metodo para obter a chave em uma determinada posicao do NoB.
-     * @param pos - posicao da chave no NoB.
+     * Metodo para obter a chave em uma determinada posicao do NoBStar.
+     * @param pos - posicao da chave no NoBStar.
      * @return chave procurada.
     */
     public int getChave(int pos) {
@@ -637,8 +637,8 @@ public class NoB {
     }
 
     /**
-     * Metodo para obter o endereco em uma determinada posicao do NoB.
-     * @param pos - posicao do endereco no NoB.
+     * Metodo para obter o endereco em uma determinada posicao do NoBStar.
+     * @param pos - posicao do endereco no NoBStar.
      * @return endereco procurado.
     */
     public long getEndereco(int pos) {
@@ -651,10 +651,10 @@ public class NoB {
     }
 
     /**
-     * Metodo para reestruturar os ponteiros para os filhos do NoB alterado.
-     * @param newChave - nova chave no NoB adicionada.
-     * @param posEsq - posicao NoB filho da esquerda no arquivo.
-     * @param posDir - posicao NoB filho da direita no arquivo.
+     * Metodo para reestruturar os ponteiros para os filhos do NoBStar alterado.
+     * @param newChave - nova chave no NoBStar adicionada.
+     * @param posEsq - posicao NoBStar filho da esquerda no arquivo.
+     * @param posDir - posicao NoBStar filho da direita no arquivo.
     */
     public void remontarPonteiros(int newChave, long posEsq, long posDir) {
 
@@ -662,15 +662,15 @@ public class NoB {
         int i;
         for(i = 0; (i < (ordemArvore-1)/2) && (chave[i] != newChave); i++);
 
-        // Adicionar filhos do novo NoB
+        // Adicionar filhos do novo NoBStar
         noFilho[i] = posEsq;
         noFilho[i+1] = posDir;
     }
 
     /**
-     * Metodo para reestruturar os ponteiros para os filhos do NoB alterado.
-     * @param newChave - nova chave no NoB adicionada.
-     * @param posDir - posicao NoB filho da direita no arquivo.
+     * Metodo para reestruturar os ponteiros para os filhos do NoBStar alterado.
+     * @param newChave - nova chave no NoBStar adicionada.
+     * @param posDir - posicao NoBStar filho da direita no arquivo.
     */
     public void remontarPonteiros(int newChave, long posDir) {
 
@@ -678,13 +678,13 @@ public class NoB {
         int i;
         for(i = 0; (i < (ordemArvore-1)/2) && (chave[i] != newChave); i++);
 
-        // Adicionar filho direita do novo NoB
+        // Adicionar filho direita do novo NoBStar
         noFilho[i] = -1;
         noFilho[i+1] = posDir;
     }
 
     /**
-     * Metodo para indicar se o NoB esta' cheio ou nao.
+     * Metodo para indicar se o NoBStar esta' cheio ou nao.
      * @return true, se estiver cheio; false, caso contrario.
     */
     public boolean isFull() {
@@ -692,7 +692,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para indicar se o NoB tem espaco livre para insercao.
+     * Metodo para indicar se o NoBStar tem espaco livre para insercao.
      * @return true, se tiver espaco; false, caso contrario.
     */
     public boolean temEspacoLivre() {
@@ -700,7 +700,7 @@ public class NoB {
     }
 
     /**
-     * Metodo para indicar se o NoB e' uma folha da 'arvore.
+     * Metodo para indicar se o NoBStar e' uma folha da 'arvore.
      * @return true, se for folha; false, caso contrario.
     */
     public boolean isFolha() {
@@ -714,27 +714,27 @@ public class NoB {
 
     /**
      * Metodo para sobrescrever o toString do Objeto e converter os atributos
-     * da classe NoB em uma string.
+     * da classe NoBStar em uma string.
     */
     public String toString() {
 
-        String noB = "";
+        String NoBStar = "";
 
-        noB += "(" + String.format("%2d", numElementos) + "): ";
+        NoBStar += "(" + String.format("%2d", numElementos) + "): ";
 
         for(int i = 0; i < ordemArvore-1; i++) {
-            noB += "|" + String.format("%8d", noFilho[i]);
-            noB += "|" + String.format("%5d", chave[i]);
-            noB += "|" + String.format("%8d", endereco[i]);
+            NoBStar += "|" + String.format("%8d", noFilho[i]);
+            NoBStar += "|" + String.format("%5d", chave[i]);
+            NoBStar += "|" + String.format("%8d", endereco[i]);
         }
 
-        noB += "|" + String.format("%8d", noFilho[ordemArvore-1]) + "|";
+        NoBStar += "|" + String.format("%8d", noFilho[ordemArvore-1]) + "|";
 
-        return noB;
+        return NoBStar;
     }
 
     /**
-     * Metodo para determinar se, ao retirar um elemento, o NoB permanecera'
+     * Metodo para determinar se, ao retirar um elemento, o NoBStar permanecera'
      * com 50% de ocupacao, e, assim, pode-se remover um elemento.
      * @return true, se puder remover um elemento; false, caso contrario.
     */
@@ -748,7 +748,7 @@ public class NoB {
     /**
      * Metodo para realizar um deslocamento para a esquerda dos elementos.
      * @param pos - posicao de inicio do deslocamento.
-     * @param posArquivo - posicao do NoB na arvore
+     * @param posArquivo - posicao do NoBStar na arvore
     */
     public void remanejarRegistros(int pos, long posArquivo, boolean ultimoFilho) {   // pos = 2 posArq 2408
 
@@ -832,9 +832,9 @@ public class NoB {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
             // Settar valores como null
-            NoB noNull = new NoB();
+            NoBStar noNull = new NoBStar();
 
-            // Escrever noB nulo
+            // Escrever NoBStar nulo
             noNull.escreverNoB(posicaoDeletar);
 
             // Fechar arquivo
@@ -857,7 +857,7 @@ public class NoB {
     public void swap(long posAntiga, int chaveAntiga, long enderecoAntigo, 
                      long posNova,   int chaveNova,   long enderecoNovo) {
 
-        NoB noAux = new NoB();
+        NoBStar noAux = new NoBStar();
             
         // Ler primeiro No
         noAux.lerNoB(posAntiga);
@@ -889,7 +889,7 @@ public class NoB {
 
     public void trocarChave(long enderecoNo, int chaveDeletar, int newChave, long newEndereco) {
 
-        NoB noAux = new NoB();
+        NoBStar noAux = new NoBStar();
             
         // Ler primeiro No
         noAux.lerNoB(enderecoNo);
