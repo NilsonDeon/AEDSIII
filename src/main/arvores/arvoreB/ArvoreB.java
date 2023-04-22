@@ -275,6 +275,7 @@ public class ArvoreB {
      * @return posicao da chave no arquivo "AroreB.db".
      */
     public long getPosicao(int chaveProcurada) {
+        System.out.println("getRaiz();" + getRaiz());
         return getPosicao(getRaiz(), chaveProcurada);
     }
 
@@ -317,6 +318,8 @@ public class ArvoreB {
                 System.out.println("noB.chave[i] == chaveProcurada: " + noB.chave[i] + " == " + chaveProcurada);
                 if(noB.chave[i] == chaveProcurada) {
                     endereco = pos;
+
+                    System.out.println("endereco: " + endereco);
 
                 } else {
                     endereco = getPosicao(noB.noFilho[i], chaveProcurada);
@@ -501,48 +504,28 @@ public class ArvoreB {
 
             // Obter posicao da chave no arquivo
             if (isDuplicada) {
+                System.out.println("if");
                 posNo = noB.encontrarInsercao(chaveProcurada, getRaiz());
             } else {
                 posNo = getPosicao(chaveProcurada);
+                System.out.println("else");
+
             }
 
             // Ler No em que a chave esta'
             noB.lerNoB(posNo);
-
-            // Encontrar NoB pai do NoB analisado
-            NoB noPai = new NoB();
-            long posPai = noPai.encontrarPai(posNo);
-            noPai.lerNoB(posPai);
-
-            // Encontrar irmao da esquerda
-            NoB noIrmaoEsq = new NoB();
-            long posIrmaoEsq = noIrmaoEsq.encontrarIrmaoEsq(posPai, chaveProcurada);
-
-            // Encontrar irmao da direita
-            NoB noIrmaoDir = new NoB();
-            long posIrmaoDir = noIrmaoDir.encontrarIrmaoDir(posPai, chaveProcurada);
-
-            // Informacoes sobre o irmao a ser utilizado
-            NoB noIrmao;
-            long posIrmao;
-            int chaveIrmao;
-            long enderecoIrmao;
-
-            // Informacoes do pai
-            int chavePai;
-            long enderecoPai;            
+        
 
             // Se estiver em uma folha e ela mantiver 50% de ocupacao
             if(noB.isFolha() && noB.isMaisMetade()) {
                 
                 // Deletar da folha
-                delete(posNo, chaveProcurada);
+                delete(posNo, chaveProcurada, false);
 
             // Se ele nao estiver na folha, trocar pelo antecessor
             } else if(! noB.isFolha()){
 
                 // Obter antecessor
-
                 io.readLine("getPrint");
                 long posAnt = noB.encontrarInsercao(chaveProcurada, posNo);
 
@@ -568,6 +551,36 @@ public class ArvoreB {
             
             // Se ele estiver na folha e nao ceder
             } else {
+
+                // Encontrar NoB pai do NoB analisado
+                NoB noPai = new NoB();
+                long posPai = noPai.encontrarPai(posNo);
+                noPai.lerNoB(posPai);
+
+                System.out.println("posPai: " + posPai);
+
+                // Encontrar irmao da esquerda
+                NoB noIrmaoEsq = new NoB();
+                long posIrmaoEsq = noIrmaoEsq.encontrarIrmaoEsq(posPai, chaveProcurada);
+
+                // Encontrar irmao da direita
+                NoB noIrmaoDir = new NoB();
+                long posIrmaoDir = noIrmaoDir.encontrarIrmaoDir(posPai, chaveProcurada);
+
+                System.out.println("noPai: " + noPai);
+                System.out.println("posIrmaoEsq: " + noIrmaoEsq);
+                System.out.println("posIrmaoDir: " + noIrmaoDir);
+
+                // Informacoes sobre o irmao a ser utilizado
+                NoB noIrmao;
+                long posIrmao;
+                int chaveIrmao;
+                long enderecoIrmao;
+
+                // Informacoes do pai
+                int chavePai;
+                long enderecoPai;
+                long noFilhoPai;
 
                 // Selecionar o NoB com mais elementos
                 if(noIrmaoDir.numElementos >= noIrmaoEsq.numElementos) {
@@ -604,7 +617,7 @@ public class ArvoreB {
                 if(noIrmao.isMaisMetade()) {
 
                     // Apagar chave desejada
-                    delete(posNo, chaveProcurada);
+                    delete(posNo, chaveProcurada, true);
                     System.out.println("posNo: " + posNo);
                     System.out.println("chaveProcurada: " + chaveProcurada);
 
@@ -615,7 +628,6 @@ public class ArvoreB {
                     noB.lerNoB(posNo);
                     noB.inserir(posNo, chavePai, enderecoPai);
 
-
                     mostrarArquivo();
                     io.readLine();
 
@@ -625,7 +637,7 @@ public class ArvoreB {
                     io.readLine();
 
                     // Deletar antiga posicao irmao
-                    delete(posIrmao, chavePai);               
+                    delete(posIrmao, chavePai, true);               
                     mostrarArquivo();
                     io.readLine();
 
@@ -635,9 +647,13 @@ public class ArvoreB {
                     // Selecionar irmao existente
                     noIrmao = noIrmaoDir;
                     posIrmao = posIrmaoDir;
+                    System.out.println("noIrmao: " + noIrmao);
+                    System.out.println("noIrmao.numElementos: " + noIrmao.numElementos); 
 
                     // Testar se irmao da direita e' valido
                     if (noIrmao.numElementos != 0) {
+
+                        System.out.println("if noIrmao");
 
                         // Obter chave pai correspondente
                         int i;
@@ -647,7 +663,8 @@ public class ArvoreB {
 
 
                     } else {
-                            
+                        System.out.println("else noIrmao");
+
                         // Ler irmao da esquerda
                         noIrmao = noIrmaoEsq;
                         posIrmao = posIrmaoEsq;
@@ -659,6 +676,8 @@ public class ArvoreB {
                         enderecoPai = noPai.endereco[i-1];
 
                     }
+
+                    System.out.println("noIrmao: " + noIrmao);
 
                     mostrarArquivo();
                     io.readLine("ANTES:\n");
@@ -680,7 +699,7 @@ public class ArvoreB {
                     io.readLine("noB.inserir(posNo, noIrmao.chave[i], noIrmao.endereco[i])\n");
 
                     // Apagar chave procurada
-                    delete(posNo, chaveProcurada);
+                    delete(posNo, chaveProcurada, true);
                     mostrarArquivo();
                     io.readLine("delete(posicao, chaveProcurada)\n");
 
@@ -690,9 +709,23 @@ public class ArvoreB {
                     io.readLine("noIrmao.deletarNo(posIrmao)\n");
 
                     // Apagar o pai do noPai
-                    delete(posPai, chavePai);
+                    if(/*condicao para recuperar ou nao ponteiro*/) {
+                        delete(posPai, chavePai, false);
+                    } else {
+                        delete(posPai, chavePai, true);
+                    }
+
                     mostrarArquivo();
                     io.readLine("delete(posPai, chavePai)\n");
+
+                    // Testar se posicao pai esta' com 50%
+                    noPai.lerNoB(posPai);
+                    System.out.println("posPai  : " + posPai);
+                    System.out.println("chavePai: " + chavePai);
+                    if(! noPai.isMaisMetade() ) {
+                        noPai = corrigirNoB(chavePai, posPai);
+                        noPai.lerNoB(posPai);
+                    }
 
                 }
 
@@ -706,12 +739,101 @@ public class ArvoreB {
         }
     }
 
+
+    public NoB corrigirNoB (int chaveErro, long posErro) {
+        RandomAccessFile arvoreBFile = null;
+        NoB noIrmao = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Ler No com erro
+            NoB noErro = new NoB();
+            noErro.lerNoB(posErro);                                               // 20 24 32
+
+            // Encontrar NoB pai do NoB analisado
+            NoB noPai = new NoB();
+            long posPai = noPai.encontrarPai(posErro);                            // 16 36
+            noPai.lerNoB(posPai);
+
+            // Procurar irmaos
+            // Encontrar irmao da esquerda
+            NoB noIrmaoEsq = new NoB();
+            long posIrmaoEsq = noIrmaoEsq.encontrarIrmaoEsq(posPai, chaveErro);
+
+            // Encontrar irmao da direita
+            NoB noIrmaoDir = new NoB();
+            long posIrmaoDir = noIrmaoDir.encontrarIrmaoDir(posPai, chaveErro);  //[40 48 53]
+
+            // Informacoes sobre o irmao a ser utilizado
+            long posIrmao;
+            int chaveIrmao;
+            long enderecoIrmao;
+            long noFilhoIrmao;
+
+            // Informacoes do pai
+            int chavePai;
+            long enderecoPai;
+
+            // Selecionar o NoB com mais elementos (preferencialmente 'a direita)
+            if(noIrmaoDir.numElementos >= noIrmaoEsq.numElementos) {
+                noIrmao = noIrmaoDir;
+                posIrmao = posIrmaoDir;
+
+                // Primeiro registro do NoB
+                chaveIrmao = noIrmaoDir.chave[0];
+                enderecoIrmao = noIrmaoDir.endereco[0];
+                noFilhoIrmao = noIrmao.noFilho[0];
+
+                // Obter chave pai correspondente
+                int i;
+                for(i = 0; (i < noPai.numElementos) && (noPai.chave[i] < chaveErro); i++);
+                chavePai = noPai.chave[i];
+                enderecoPai = noPai.endereco[i];
+
+            // Da esquerda e' o maior
+            } else {
+                noIrmao = noIrmaoEsq;
+                posIrmao = posIrmaoEsq;
+
+                // Ultimo registro do NoB
+                chaveIrmao = noIrmaoEsq.chave[noIrmaoEsq.numElementos-1];
+                enderecoIrmao = noIrmaoEsq.endereco[noIrmaoEsq.numElementos-1];   
+                noFilhoIrmao = noIrmao.noFilho[noIrmao.numElementos-1];
+
+                // Obter chave pai correspondente
+                int i;
+                for(i = 0; (i < noPai.numElementos) && (noPai.chave[i] < chaveErro); i++);
+                chavePai = noPai.chave[i-1];
+                enderecoPai = noPai.endereco[i-1];
+            }
+
+            // Descer o pai
+            noErro.inserir(posErro, chavePai, enderecoPai, noFilhoIrmao);
+
+            // Trocar pai pelo irmao do filho
+            noErro.swap(posPai, chavePai, enderecoPai, posIrmao, chaveIrmao, enderecoIrmao);
+
+            // Apagar id duplicado
+            delete(posIrmao, chavePai, true);
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            return noIrmao;
+        }
+    }
+
     /**
      * Metodo privado para deletar uma musica na posicao desejada na arvore.
      * @param posArvore - posicao da musica na arvore.
      * @param chaveProcurada -  id da musica para se deletar.
+     * @param ultimoFilho - determinar se e' necessario salvar ultimo ponteiro de filho.
      */
-    private void delete(long posArvore, int chaveProcurada) {
+    private void delete(long posArvore, int chaveProcurada, boolean ultimoFilho) {
         RandomAccessFile arvoreBFile = null;
 
         try {
@@ -729,7 +851,7 @@ public class ArvoreB {
                 if(chaveProcurada == noB.chave[i]) {
                                        
                     // Remanejar elementos para a esquerda
-                    noB.remanejarRegistros(i, posArvore);
+                    noB.remanejarRegistros(i, posArvore, ultimoFilho);
                     System.out.println("noB.remanejarRegistros(i, posArvore): i = " + i);
 
                     // Quebrar loop

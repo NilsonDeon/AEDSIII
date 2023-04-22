@@ -485,24 +485,27 @@ public class NoB {
         // Ler NoB desejado
         NoB noB = new NoB();
         noB.lerNoB(posInserir);
-    
+
         // Se chave procurada for menor que a primeira
         if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
 
             // Se o No nao for folha, continuar recursao
             if (noB.noFilho[0] != -1) {
                 posInserir = noB.noFilho[0];
-                noB.lerNoB(posInserir);
                 posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
         
         // Senao, testar se e' maior que a ultima
         } else if ((noB.numElementos > 0) && (chaveProcurada > noB.chave[noB.numElementos-1])) {
+
+            System.out.println("\n\nnoB.chave[noB.numElementos-1]: " + noB.chave[noB.numElementos-1]);
+
+            System.out.println("\n\nelse if");
+            System.out.println("\n\nnoB.noFilho[numElementos]: " + noB.noFilho[numElementos]);
             
             // Se o No nao for folha, continuar recursao
             if (noB.noFilho[noB.numElementos] != -1) {
-                posInserir = noB.noFilho[numElementos];
-                noB.lerNoB(posInserir);
+                posInserir = noB.noFilho[noB.numElementos];
                 posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
 
@@ -516,7 +519,6 @@ public class NoB {
             // Se o No nao for folha, continuar recursao
             if (noB.noFilho[i] != -1) {
                 posInserir = noB.noFilho[i];
-                noB.lerNoB(posInserir);
                 posInserir = encontrarInsercao(chaveProcurada, posInserir);
             }
         }
@@ -754,9 +756,12 @@ public class NoB {
      * @param pos - posicao de inicio do deslocamento.
      * @param posArquivo - posicao do NoB na arvore
      */
-    public void remanejarRegistros(int pos, long posArquivo) {
+    public void remanejarRegistros(int pos, long posArquivo, boolean ultimoFilho) {   // pos = 2 posArq 2408
 
         // Shift para esquerda dos elementos, incluindo os null
+        if(ultimoFilho) {
+            noFilho[pos] = noFilho[pos+1];
+        }
         for(int i = pos; i < (ordemArvore-1)-1; i++) {
             chave[i] = chave[i+1];
             endereco[i] = endereco[i+1];
@@ -775,77 +780,55 @@ public class NoB {
     }
 
     public long encontrarIrmaoDir(long posPai, int chaveProcurada) {
-        RandomAccessFile arvoreBFile = null;
 
         long posIrmao = -1;
 
-        try {
-            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+        // Encontrar pai
+        lerNoB(posPai);
 
-            // Encontrar pai
-            lerNoB(posPai);
+        // Testar se nao tem irmao 'a direita
+        if (chave[numElementos-1] < chaveProcurada) {
+            this.numElementos = 0;
 
-            // Testar se nao tem irmao 'a direita
-            if (chave[numElementos-1] < chaveProcurada) {
-                this.numElementos = 0;
+        // Se tiver, pode-se procurar
+        } else {
 
-            // Se tiver, pode-se procurar
-            } else {
+            // Encontrar posicao do irmao
+            int i;
+            for(i = 0; (i < numElementos) && (chave[i] < chaveProcurada); i++);
+            posIrmao = noFilho[i+1];
 
-                // Encontrar posicao do irmao
-                int i;
-                for(i = 0; (i < numElementos) && (chave[i] < chaveProcurada); i++);
-                posIrmao = noFilho[i+1];
+            // Encontrar irmao da direita
+            lerNoB(posIrmao);
+        }
 
-                // Encontrar irmao da direita
-                lerNoB(posIrmao);
-            }
-
-            // Fechar arquivo
-            arvoreBFile.close();
-
-        } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            return posIrmao;
-        } 
+        return posIrmao;
     }
 
     public long encontrarIrmaoEsq(long posPai, int chaveProcurada) {
-        RandomAccessFile arvoreBFile = null;
 
         long posIrmao = -1;
 
-        try {
-            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+        // Encontrar pai
+        lerNoB(posPai);
 
-            // Encontrar pai
-            lerNoB(posPai);
+        // Testar se nao tem irmao 'a esquerda
+        if (chave[0] > chaveProcurada) {
+            this.numElementos = 0;
 
-            // Testar se nao tem irmao 'a esquerda
-            if (chave[0] > chaveProcurada) {
-                this.numElementos = 0;
+        // Se tiver, pode-se procurar
+        } else {
 
-            // Se tiver, pode-se procurar
-            } else {
+            // Encontrar posicao do irmao
+            int i;
+            for(i = 0; (i < numElementos) && (chave[i] < chaveProcurada); i++);
+            posIrmao = noFilho[i-1];
 
-                // Encontrar posicao do irmao
-                int i;
-                for(i = 0; (i < numElementos) && (chave[i] < chaveProcurada); i++);
-                posIrmao = noFilho[i];
+            // Encontrar irmao da esquerda
+            lerNoB(posIrmao);
+        }
 
-                // Encontrar irmao da esquerda
-                lerNoB(posIrmao);
-            }
-
-            // Fechar arquivo
-            arvoreBFile.close();
-
-        } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            return posIrmao;
-        }   
+        return posIrmao;
     }
 
     public void deletarNo(long posicaoDeletar) {
