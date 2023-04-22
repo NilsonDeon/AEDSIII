@@ -2,7 +2,6 @@
 package hashing;
 
 // Bibliotecas
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -10,7 +9,7 @@ import java.nio.ByteBuffer;
 /**
  * Classe Bucket responsavel por criar e manipular o bucket de armazenamento
  * para o Hashing Extensivel.
- */
+*/
 public class Bucket {
     protected int profundidadeLocal;
     protected short numElementos;
@@ -22,14 +21,14 @@ public class Bucket {
 
     /**
      * Construtor padrao da classe Bucket.
-     */
+    */
     public Bucket() {
         this(1);
     }
 
     /**
      * Construtor da classe Bucket com passagem de parametros.
-     */
+    */
     public Bucket(int profundidadeLocal) {
 
         // Gerar excecao caso a pronfundidade seja menor que 1
@@ -50,7 +49,7 @@ public class Bucket {
 
     /**
      * Metodo para criar os buckets iniciais, de acordo com a profundidade.
-     */
+    */
     public void inicializarBuckets() {
 
         // Inicializar os primeiros buckets vazios
@@ -62,7 +61,7 @@ public class Bucket {
 
     /**
      * Metodo para escrever um bucket em um arquivo binario como fluxo de bytes.
-     */
+    */
     public void criarBucket() {
         RandomAccessFile bucketFile = null;
 
@@ -104,7 +103,7 @@ public class Bucket {
      * Metodo para aumentar a profundidade de um bucket em arquivo.
      * @param posBucket - posicao do bucket em arquivo que tera' a profundidade
      * aumentada.
-     */
+    */
     public void aumentarProfundidade (long posBucket) {
         RandomAccessFile bucketFile = null;
 
@@ -132,26 +131,12 @@ public class Bucket {
     }
 
     /**
-     * Metodo privado para, a partir da posicao de inicio de um bucket, obter
-     * a primeira posicao vazia.
-     * @param posBucket - posicao do bucket que se deseja obter a posicao vazia.
-     * @return posicaoVazia - desejada.
-     */
-    private long getPosicaoVazia (long posBucket) {
-        long bytesShort = 2;          // profundidadeLocal
-        long bytesInt = 4;            // numElementos
-        long bytesChaveEndereco = 12;
-
-        return posBucket + bytesShort + bytesInt + (numElementos-1)*(bytesChaveEndereco);
-    }
-
-    /**
      * Metodo para inserir um registro em um bucket no arquivo.
      * @param posBucket - posicao do bucket, no qual se deseja inserir.
      * @param newChave - id da Musica a ser inserida.
      * @param newEndereco - posicao da Musica no arquivo "Registros.db".
      * @return true, se inserido corretamente; false, caso contrario.
-     */
+    */
     public boolean inserir (long posBucket, int newChave, long newEndereco) {
 
         boolean inserido = false;
@@ -218,7 +203,7 @@ public class Bucket {
      * @param posBucket - posicao de inicio do bucket.
      * @param posElemento - posicao do elemento que se deseja remover.
      * @return true, se removido corretamente; false, caso contrario.
-     */
+    */
     public boolean remover (long posBucket, long posElemento) {
 
         boolean removido = false;
@@ -266,7 +251,7 @@ public class Bucket {
     /**
      * Metodo para se obter a posicao final do arquivo de buckets.
      * @return finalArq - posicao final do arquivo.
-     */
+    */
     public long getFinalArquivo () {
 
         RandomAccessFile bucketFile = null;
@@ -291,7 +276,7 @@ public class Bucket {
      * Metodo para determinar se um bucket esta' cheio.
      * @param posBucket - posicao do bucket no arquivo.
      * @return true, se estiver cheio; false, caso contrario.
-     */
+    */
     public boolean isFull(long posBucket){
 
         RandomAccessFile bucketFile = null;
@@ -319,7 +304,7 @@ public class Bucket {
     /**
      * Metodo para, a partir de uma posicao, ler o bucket contido nela.
      * @param posicao - so bucket desejado.
-     */
+    */
     public void lerBucket (long posicao) {
 
         RandomAccessFile bucketFile = null;

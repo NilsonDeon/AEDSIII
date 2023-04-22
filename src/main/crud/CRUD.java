@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.text.DateFormat;
@@ -28,14 +27,14 @@ import app.IO;
 import app.Musica;
 import hashing.HashingExtensivel;
 import arvores.arvoreB.ArvoreB;
-import arvores.arvoreBestrela.ArvoreBestrela;
-import arvores.arvoreBmais.ArvoreBmais;
+//import arvores.arvoreBestrela.ArvoreBestrela;
+//import arvores.arvoreBmais.ArvoreBmais;
 import listaInvertida.ListaInvertida;
 
 /**
  * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
  * - popular a base de dados, cadastrar, pesquisar, atualizar, deletar.
- */
+*/
 public class CRUD {
 
     // Arquivo sequencial
@@ -53,12 +52,12 @@ public class CRUD {
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
     // Arvore B*
-    private static ArvoreBestrela arvoreBestrela;
-    private static final String arvoreBestrelaDB = "./src/resources/ArvoreBestrela.db";
+    //private static ArvoreBestrela arvoreBestrela;
+    //private static final String arvoreBestrelaDB = "./src/resources/ArvoreBestrela.db";
 
     // Arvore B+
-    private static ArvoreBmais arvoreBmais;
-    private static final String arvoreBmaisDB = "./src/resources/ArvoreBmais.db";
+    //private static ArvoreBmais arvoreBmais;
+    //private static final String arvoreBmaisDB = "./src/resources/ArvoreBmais.db";
 
     // Lista invertida
     private static ListaInvertida lista;
@@ -68,12 +67,12 @@ public class CRUD {
 
     /**
      * Construtor padrao da classe CRUD.
-     */
+    */
     public CRUD () {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
-        arvoreBestrela = new ArvoreBestrela();
+        //arvoreBestrela = new ArvoreBestrela();
         //arvoreBmais = new ArvoreBmais();
         lista = new ListaInvertida();
     }
@@ -81,7 +80,7 @@ public class CRUD {
     /**
      * Metodo para carregar todas as musicas do arquivo csv e salva-las em
      * arquivo.
-     */
+    */
     public void carregarCSV() {
         BufferedReader csvFile = null;
         RandomAccessFile dbFile = null;
@@ -132,9 +131,9 @@ public class CRUD {
                 arvoreB.inicializarArvoreB();
 
                 // Apagar antiga "ArvoreBestrela.db"
-                File antigaArvoreBestrela = new File(arvoreBestrelaDB);
+                /* File antigaArvoreBestrela = new File(arvoreBestrelaDB);
                 antigaArvoreBestrela.delete();
-                arvoreBestrela.inicializarArvoreB();
+                arvoreBestrela.inicializarArvoreB();*/
 
                 // Apagar antiga "ArvoreBmais.db"
                 //File antigaArvoreBmais = new File(arvoreBmaisDB);
@@ -182,7 +181,7 @@ public class CRUD {
                     dbFile.write(byteArray);
 
                     // Inserir, utilizando hashing
-                    //hash.inserir(musica, posRegistro);
+                    hash.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B
                     arvoreB.inserir(musica, posRegistro);
@@ -194,7 +193,7 @@ public class CRUD {
                     //arvoreBmais.inserir(musica, posRegistro);
 
                     // Inserir nas listas invertidas
-                    //lista.inserir(musica, posRegistro);
+                    lista.inserir(musica, posRegistro);
                 }
 
                 // Mostrar barra de progresso completa
@@ -210,12 +209,13 @@ public class CRUD {
 
                 System.out.println("\nArquivo \"" + registroDB + 
                                 "\" criado com sucesso!");
-            
+                // Fechar arquivo
+                dbFile.close();
             }
 
             // Fechar arquivos
             csvFile.close();
-            dbFile.close();
+            
 
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: O arquivo \""+ arquivoCSV + 
@@ -228,7 +228,7 @@ public class CRUD {
 
     /**
      * Metodo para cadastrar uma nova musica no banco de dados.
-     */
+    */
     public void create () {
         RandomAccessFile dbFile = null;
 
@@ -291,7 +291,7 @@ public class CRUD {
     /**
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
      * @return true, se a música foi encontrada; false, caso contrario.
-     */
+    */
 
     public void read () {
         
@@ -342,7 +342,7 @@ public class CRUD {
     /**
      * Metodo para obter horario atual.
      * @return timestamp atual em milissegundos
-     */
+    */
     private long now() {
       return System.currentTimeMillis();
     }
@@ -352,14 +352,14 @@ public class CRUD {
      * @param inicio - horario de inicio da busca.
      * @param fim - horario que a busca terminou.
      * @return tempo relativo em segundos.
-     */
+    */
     private String getTempoBusca(long inicio, long fim) {
         return ((fim - inicio) / 1000.0 + " segundos");
     }
 
     /**
      * Metodo para procurar um Id em todas as estrututuras cadastradas.
-     */
+    */
     private void procurarId() {
 
         int idProcurado = 0;
@@ -454,7 +454,7 @@ public class CRUD {
                 dbFile.seek(posicao);
 
                 // Ler informacoes do registro
-                boolean lapide = dbFile.readBoolean();
+                dbFile.readBoolean();
                 int tamRegistro = dbFile.readInt();
 
                 // Ler e criar novo Objeto musica
@@ -476,7 +476,7 @@ public class CRUD {
                     dbFile.seek(posicao);
 
                     // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
+                    dbFile.readBoolean();
                     int tamRegistro = dbFile.readInt();
 
                     // Ler e criar novo Objeto musica
@@ -501,7 +501,7 @@ public class CRUD {
                         dbFile.seek(posicao);
 
                         // Ler informacoes do registro
-                        boolean lapide = dbFile.readBoolean();
+                        dbFile.readBoolean();
                         int tamRegistro = dbFile.readInt();
 
                         // Ler e criar novo Objeto musica
@@ -599,7 +599,7 @@ public class CRUD {
                 dbFile.seek(posicao);
 
                 // Ler informacoes do registro
-                boolean lapide = dbFile.readBoolean();
+                dbFile.readBoolean();
                 int tamRegistro = dbFile.readInt();
 
                 // Ler e criar novo Objeto musica
@@ -621,7 +621,7 @@ public class CRUD {
                     dbFile.seek(posicao);
 
                     // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
+                    dbFile.readBoolean();
                     int tamRegistro = dbFile.readInt();
 
                     // Ler e criar novo Objeto musica
@@ -646,7 +646,7 @@ public class CRUD {
                         dbFile.seek(posicao);
 
                         // Ler informacoes do registro
-                        boolean lapide = dbFile.readBoolean();
+                        dbFile.readBoolean();
                         int tamRegistro = dbFile.readInt();
 
                         // Ler e criar novo Objeto musica
@@ -760,7 +760,7 @@ public class CRUD {
                 dbFile.seek(posicao);
 
                 // Ler informacoes do registro
-                boolean lapide = dbFile.readBoolean();
+                dbFile.readBoolean();
                 int tamRegistro = dbFile.readInt();
 
                 // Ler e criar novo Objeto musica
@@ -782,7 +782,7 @@ public class CRUD {
                     dbFile.seek(posicao);
 
                     // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
+                    dbFile.readBoolean();
                     int tamRegistro = dbFile.readInt();
 
                     // Ler e criar novo Objeto musica
@@ -807,7 +807,7 @@ public class CRUD {
                         dbFile.seek(posicao);
 
                         // Ler informacoes do registro
-                        boolean lapide = dbFile.readBoolean();
+                        dbFile.readBoolean();
                         int tamRegistro = dbFile.readInt();
 
                         // Ler e criar novo Objeto musica
@@ -851,7 +851,7 @@ public class CRUD {
     /**
      * Metodo para excluir uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
-     */
+    */
     public boolean delete () {
 
         boolean delete = false;
@@ -879,7 +879,7 @@ public class CRUD {
             delete = delete(idProcurado);
 
             // Deletar no hashing extensivel
-            //hash.delete(idProcurado);
+            hash.delete(idProcurado);
 
             // Deletar na Arvore B
             System.out.println("\nEntrou pra deletar");
@@ -901,7 +901,7 @@ public class CRUD {
     /**
      * Metodo para atualizar uma musica a partir do seu ID.
      * @return true, se a música foi atualizada; false, caso contrario.
-     */
+    */
     public boolean update () {
         int idProcurado = 0;
 
@@ -924,7 +924,7 @@ public class CRUD {
      * ID.
      * @param idProcurado - id para ser a chave de busca.
      * @return posArquivo - posicao do registro no arquivo.
-     */
+    */
     private long read (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
@@ -942,7 +942,7 @@ public class CRUD {
 
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
-                int ultimoId = dbFile.readInt();
+                dbFile.readInt();
                 long posicaoAtual = dbFile.getFilePointer();
 
                 while (dbFile.length() != posicaoAtual && find == false) {
@@ -986,15 +986,15 @@ public class CRUD {
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
-        } finally {
-            return posArquivo;
         }
+            
+        return posArquivo;
     }
 
     /**
      * Metodo privado para excluir uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
-     */
+    */
     private boolean delete (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
@@ -1012,7 +1012,7 @@ public class CRUD {
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
-                int tamArquivo = dbFile.readInt();
+                dbFile.readInt();
 
                 while (dbFile.length() != posicaoAtual && find == false) {
                     
@@ -1042,7 +1042,7 @@ public class CRUD {
                             find = true;
 
                             // Deletar na lista
-                            //lista.delete(musica);
+                            lista.delete(musica);
 
                             // Retornar ponteiro para final do registro
                             dbFile.seek(posicaoFinal);
@@ -1074,15 +1074,14 @@ public class CRUD {
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + dbFile + "\"\n");
-        } finally {
-            return find;
         }
+        return find; 
     }
 
     /**
      * Metodo privado para atualizar uma musica a partir do seu ID.
      * @return true, se a música foi excluida; false, caso contrario.
-     */
+    */
     private boolean update (int idProcurado) {
         RandomAccessFile dbFile = null;
         boolean find = false;
@@ -1101,8 +1100,7 @@ public class CRUD {
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
-                int tamArquivo = dbFile.readInt();
-                int ultimoId = tamArquivo;
+                dbFile.readInt();
 
                 while (dbFile.length() != posicaoAtual && find == false) {
                     
@@ -1211,9 +1209,9 @@ public class CRUD {
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + dbFile + "\"\n");
-        } finally {
-            return find;
         }
+            
+        return find;
     }
 
     /**
@@ -1240,7 +1238,7 @@ public class CRUD {
     /**
      * Metodo privado para exibir as informacoes de uma musica a partir do seu
      * ID.
-     */
+    */
     public void abrirMusica (int idProcurado) {
 
         RandomAccessFile dbFile = null;
@@ -1258,14 +1256,14 @@ public class CRUD {
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
-                int ultimoId = dbFile.readInt();
+                dbFile.readInt();
 
                 while (dbFile.length() != posicaoAtual && find == false) {
                     
                     musica = new Musica();
 
                     // Ler informacoes do registro
-                    long posicaoInicio = dbFile.getFilePointer();
+                    dbFile.getFilePointer();
                     lapide = dbFile.readBoolean();
                     tamRegistro = dbFile.readInt();
 
@@ -1345,7 +1343,7 @@ public class CRUD {
 
     /**
      * Metodo privado para salvar todo banco de dados em arquivo txt.
-     */
+    */
     public void saveTXT () {
         RandomAccessFile dbFile = null;
         BufferedWriter dbFileTXT = null;
@@ -1367,7 +1365,7 @@ public class CRUD {
                 // Obter ultimo ID adicionado
                 dbFile.seek(0);
                 long posicaoAtual = dbFile.getFilePointer();
-                int ultimoId = dbFile.readInt();
+                dbFile.readInt();
 
                 while (dbFile.length() != posicaoAtual) {
                                         
@@ -1440,9 +1438,9 @@ public class CRUD {
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + dbFile + "\"\n");
-        } finally {
-            return musicaProcurada;
         }
+
+        return musicaProcurada;
     }
 
 }

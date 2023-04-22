@@ -3,9 +3,6 @@ package listaInvertida;
 
 // Bibliotecas
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Date;
 
@@ -15,7 +12,7 @@ import app.Musica;
 /**
  * Classe responsavel por criar e manipular as listas invertidas do banco de
  * dados com os atributos de Musica: ano de lancamento e nome do artista.
- */
+*/
 public class ListaInvertida {
 
     // Instancias da lista
@@ -26,19 +23,16 @@ public class ListaInvertida {
     private static String pastaAnoLancamento = "./src/resources/listaInvertida_AnoLancamento";
     private static String pastaNomeArtista = "./src/resources/listaInvertida_Artistas";
 
-    // Endereco do arquivo "Registro.db"
-    private static final String registroDB = "./src/resources/Registro.db";
-
     /**
      * Construtor padrao da ListaInvertida.
-     */
+    */
     public ListaInvertida() {}
 
     /**
      * Metodo para inserir uma musica nas duas invertidas.
      * @param musica - a ser inserida.
      * @param endereco - posicao dela no arquivo "Registros.db".
-     */
+    */
     public void inserir(Musica musica, long endereco) {
         listaAnosLancamento.inserir(musica, endereco);
         listaArtistas.inserir(musica, endereco);
@@ -47,7 +41,7 @@ public class ListaInvertida {
     /**
      * Metodo para inserir uma musica nas duas invertidas.
      * @param musica - a ser inserida.
-     */
+    */
     public void delete(Musica musica) {
         listaAnosLancamento.delete(musica);
         listaArtistas.delete(musica);
@@ -60,7 +54,7 @@ public class ListaInvertida {
 
     /**
      * Metodo para criar as pastas para armazenar as listas invertidas.
-     */
+    */
     public void inicializarListas() {
         
         // Cria um objeto File para representar a pasta
@@ -83,7 +77,7 @@ public class ListaInvertida {
     /**
      * Metodo para deletar as pastas e o conteudo delas, apagando, assim, as
      * litas invertidas.
-     */
+    */
     public void delete() {
 
         // Obter arquivo correspondente
@@ -119,7 +113,7 @@ public class ListaInvertida {
      * Metodo para pesquisar na lista pelos artistas.
      * @param artistaBusca - texto correspondente ao nome do artista procurado.
      * @return Array list de enderecos para aqueles nomes.
-     */
+    */
     public List<Long> readArtistas(String artistaBusca) {
         return listaArtistas.read(artistaBusca);
     }
@@ -128,7 +122,7 @@ public class ListaInvertida {
      * Metodo para pesquisar na lista pela data.
      * @param dataBusca - cada correspondente 'as musicas procuradas.
      * @return Array list de enderecos para aqueles nomes.
-     */
+    */
     public List<Long> readAnosLancamento(Date dataBusca) {
         return listaAnosLancamento.read(dataBusca);
     }
@@ -138,7 +132,7 @@ public class ListaInvertida {
      * convertendo as letras em minusculo.
      * @param texto - a ser normalizado.
      * @return nova string com caracteres corretos para a busca eficiente.
-     */
+    */
     public String normalizarString(String texto) {
         return listaArtistas.normalizarString(texto);
     }

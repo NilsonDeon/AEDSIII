@@ -4,13 +4,10 @@ package listaInvertida;
 // Bibliotecas
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.text.DateFormat;
 import java.text.Normalizer;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +17,12 @@ import app.*;
 /**
  * Classe responsavel por criar e manipular uma lista invertida sobre o atributo
  * nome do artista da musica presente no banco de dados.
- */
+*/
 public class ListaInvertida_Artistas {
 
     /**
      * Construtor padrao da ListaInvertida_Artistas.
-     */
+    */
     public ListaInvertida_Artistas() {}
 
     /**
@@ -33,7 +30,7 @@ public class ListaInvertida_Artistas {
      * lista de palavras.
      * @param musica - a ser inserida.
      * @param endereco - posicao da musica no "Registro.db".
-     */
+    */
     public void inserir(Musica musica, long endereco) {
 
         String nomeArtistas = musica.getArtistas();
@@ -53,7 +50,7 @@ public class ListaInvertida_Artistas {
      * @param musica - a ser inserida.
      * @param newArista - nome do artista.
      * @param endereco - posicao da musica no "Registro.db".
-     */
+    */
     private void inserir(Musica musica, String newArtista, long endereco) {
 
         // Obter nome do arquivo
@@ -110,7 +107,7 @@ public class ListaInvertida_Artistas {
      * converter as letrar para letra minuscula.
      * @param texto - a ser normalizado
      * @return strNormalizada - contendo a string pronta para ser utilizada.
-     */
+    */
     protected String normalizarString(String texto) {
 
         // Remover os acentos da string
@@ -136,7 +133,7 @@ public class ListaInvertida_Artistas {
      * Metodo para pesquisar uma musica a partir do artista.
      * @param chaveBusca - da musica para se pesquisar.
      * @return Array List com os enderecos das musicas desejadas.
-     */
+    */
     public List<Long> read(String chaveBusca) {
 
         List<Long> enderecos = new ArrayList<>();
@@ -179,16 +176,16 @@ public class ListaInvertida_Artistas {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivo + "\"\n");
 
-        } finally {
-            return enderecos;
         }
+
+        return enderecos;
     }
 
     /**
      * Metodo para remover uma musica na lista invertida a partir de uma 
      * lista de palavras.
      * @param musica - a ser removida.
-     */
+    */
     public void delete(Musica musica) {
 
         int chave = musica.getId();
@@ -208,7 +205,7 @@ public class ListaInvertida_Artistas {
      * uma unica palavra.
      * @param nomeArtista - nome Artista a se remover.
      * @param chaveProcurada - id da musica a se remover.
-     */
+    */
     private void delete(String nomeArtista, int chaveProcurada) {
 
         boolean find = false;
@@ -271,18 +268,11 @@ public class ListaInvertida_Artistas {
      * arquivo correspondente.
      * @param musicaAntiga - musica antes da atualizacao no arquivo 
      * "Registro.db".
-     * @param musicaNova - musica depois da atualizacao no arquivo 
+     * @param newMusica - musica depois da atualizacao no arquivo 
      * "Registro.db".
      * @param newEndereco - na posicao da musica.
-     */
+    */
     public void update (Musica musicaAntiga, Musica newMusica, long newEndereco) {
-
-        // Obter nomes dos artistas        
-        String nomeAntigo = musicaAntiga.getArtistas();
-        String nomeNovo = newMusica.getArtistas();
-
-        // Chave para se atualizar
-        int chave = musicaAntiga.getId();
         
         // Deletar nome antigo
         delete(musicaAntiga);

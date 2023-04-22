@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 /**
  * Classe Bucket responsavel por criar e manipular o diretorio de armazenamento
  * para o Hashing Extensivel.
- */
+*/
 public class Diretorio {
 
     private static final String diretorioDB = "./src/resources/Diretorio.db";
@@ -20,7 +20,7 @@ public class Diretorio {
        p'  + numElementos + 1136 * (chave  + endereco)
        int + short        + 1136 * (int    + long)
        4   + 2            + 1136 * (4 + 8)   = 13638
-    */
+   */
     private static final long tamTotalBucket = 13638;
 
     protected int profundidadeGlobal;
@@ -29,7 +29,7 @@ public class Diretorio {
 
     /**
      * Construtor padrao da classe Diretorio.
-     */
+    */
     public Diretorio () {
         this(1);
     }
@@ -38,7 +38,7 @@ public class Diretorio {
      * Construtor da classe Diretorio com passagem de parametros.
      * @param profundidadeGlobal - profundidade para se inicializar o diretorio.
      * @throws Exception Se ocorrer algum erro ao manipular o arquivo.
-     */
+    */
     public Diretorio (int profundidadeGlobal) {
 
         // Gerar excecao caso a pronfundidade global seja menor que 1
@@ -59,7 +59,7 @@ public class Diretorio {
 
     /**
      * Metodo para escrever o diretorio em arquivo, como fluxo de bytes.
-     */
+    */
     public void salvarDiretorio() {
         RandomAccessFile diretorioFile = null;
 
@@ -88,7 +88,7 @@ public class Diretorio {
 
     /**
      * Metodo para ler o diretorio de arquivo, como fluxo de bytes.
-     */
+    */
     public void lerDiretorio() {
         RandomAccessFile diretorioFile = null;
 
@@ -118,7 +118,7 @@ public class Diretorio {
      * Metodo para aumentar a profundidade do diretorio em arquivo.
      * @param finalArquivoBucket - posicao final do arquivo de bucket, na qual
      * deve-se inserir o novo bucket.
-     */
+    */
     public void aumentarProfundidade(long finalArquivoBucket) {
         RandomAccessFile diretorioFile = null;
 
@@ -170,7 +170,7 @@ public class Diretorio {
      * aumentar o diretorio.
      * @param posicao - posicao do arquivo de hash, na qual o bucket colidido
      * se encontra.
-     */
+    */
     public void redistribuir(long posicao) {
 
         RandomAccessFile bucketFile = null;
@@ -188,7 +188,7 @@ public class Diretorio {
 
             // Testar se valores do bucket estao de acordo com nova profundidade
             int cont = 0;
-            while(cont < bucket.tamBucket) {
+            while(cont < Bucket.tamBucket) {
 
                 long posicaoAtual = bucketFile.getFilePointer();
 
@@ -224,7 +224,7 @@ public class Diretorio {
      * @param id - codigo da Musica que, ao tentar ser inserida, deu erro.
      * @param posicaoBucket - posicao do novo bucket inserido no arquivo "Bucket.db".
      * @param profundidade - profundidade antiga do bucket que colidiu.
-     */
+    */
     public void atualizarPonteiro(int id, long posicaoBucket, int profundidade) {
         RandomAccessFile diretorioFile = null;
 
@@ -261,7 +261,7 @@ public class Diretorio {
     /**
      * Metodo para sobrescrever o toString do Objeto e converter os atributos
      * da classe Diretorio em uma string.
-     */
+    */
     public String toString() {
         String diretorio = "Diretorio = [";
         for(int i = 0; i < tamDiretorio; i++) {

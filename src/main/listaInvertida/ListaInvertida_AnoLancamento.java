@@ -4,12 +4,9 @@ package listaInvertida;
 // Bibliotecas
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.text.DateFormat;
-import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,12 +18,12 @@ import app.Musica;
 /**
  * Classe responsavel por criar e manipular uma lista invertida sobre o atributo
  * ano de lancamento da musica presente no banco de dados.
- */
+*/
 public class ListaInvertida_AnoLancamento {
 
     /**
      * Construtor padrao da ListaInvertida_AnoLancamento.
-     */
+    */
     public ListaInvertida_AnoLancamento() {}
 
     /**
@@ -34,7 +31,7 @@ public class ListaInvertida_AnoLancamento {
      * artista.
      * @param musica - a ser inserida.
      * @param endereco - posicao da musica no "Registro.db".
-     */
+    */
     public void inserir(Musica musica, long endereco) {
 
         // Obter data de lancamento da musica
@@ -93,7 +90,7 @@ public class ListaInvertida_AnoLancamento {
      * Metodo para pesquisar uma musica a partir do ano de lancamento.
      * @param dataBusca - data de lancamento da musica para se pesquisar.
      * @return Array List com os enderecos das musicas desejadas.
-     */
+    */
     public List<Long> read(Date dataBusca) {
 
         List<Long> enderecos = new ArrayList<>();
@@ -138,16 +135,16 @@ public class ListaInvertida_AnoLancamento {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivo + "\"\n");
 
-        } finally {
-            return enderecos;
         }
+            
+        return enderecos;
     }
 
     /**
      * Metodo privado para remover uma musica na lista invertida a partir do ano
      * de lancamento. 
      * @param musica - a ser removida.
-     */
+    */
     public void delete(Musica musica) {
 
         // Obter data de lancamento da musica
@@ -169,7 +166,7 @@ public class ListaInvertida_AnoLancamento {
      * de lancamento. 
      * @param anoDeletar - ano em que a musica desejada foi lancada
      * @param chaveProcurada - id da musica a se remover.
-     */
+    */
     private void delete(String anoDeletar, int chaveProcurada) {
 
         boolean find = false;
@@ -231,29 +228,15 @@ public class ListaInvertida_AnoLancamento {
      * arquivo correspondente.
      * @param musicaAntiga - musica antes da atualizacao no arquivo 
      * "Registro.db".
-     * @param musicaNova - musica depois da atualizacao no arquivo 
+     * @param newMusica - musica depois da atualizacao no arquivo 
      * "Registro.db".
      * @param newEndereco - na posicao da musica.
-     */
-    public void update (Musica musicaAntiga, Musica musicaNova, long newEndereco) {
-
-        SimpleDateFormat date = new SimpleDateFormat("yyyy");
-
-        // Obter data antiga cadastrada
-        Date dataAntiga = musicaAntiga.getDataLancamento();
-        String anoAntigo = date.format(dataAntiga);
-
-        // Obter nova data para se cadastradar      
-        Date dataNova = musicaNova.getDataLancamento();
-        String anoNovo = date.format(dataNova);
-
-        // Chave para se atualizar
-        int chave = musicaAntiga.getId();
-            
+    */
+    public void update (Musica musicaAntiga, Musica newMusica, long newEndereco) {
         // Deletar nome antigo
         delete(musicaAntiga);
 
         // Reinserir com posicao e nome corretos
-        inserir(musicaNova, newEndereco);
+        inserir(newMusica, newEndereco);
     }
 }

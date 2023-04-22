@@ -583,19 +583,19 @@ public class Musica {
             lapide = false;
             id = dis.readInt();
 
-            short tamNome = dis.readShort();
+            dis.readShort();
             nome = dis.readUTF();
 
-            short tamArtistas = dis.readShort();
+            dis.readShort();
             artistas = dis.readUTF();
 
-            short tamNomeAlbum = dis.readShort();
+            dis.readShort();
             nomeAlbum = dis.readUTF();
 
             short tamImagens = dis.readShort();
             imagens = new String[tamImagens];
             for (int i = 0; i < tamImagens; i++) {
-                short tmp = dis.readShort();
+                dis.readShort();
                 imagens[i] = dis.readUTF();
             }
 
@@ -611,7 +611,7 @@ public class Musica {
             vivacidade = dis.readInt();
             popularidade = dis.readInt();
 
-            short tamUri = dis.readShort();
+            dis.readShort();
             uri = dis.readUTF();
 
        } catch (IOException e) {

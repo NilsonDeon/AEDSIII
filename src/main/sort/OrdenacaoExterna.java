@@ -2,14 +2,10 @@
 package sort;
 
 // Bibliotecas
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
-import java.util.Collections;
 import java.util.InputMismatchException;
 
 // Bibliotecas proprias
@@ -135,7 +131,7 @@ public class OrdenacaoExterna {
     /**
      * Metodo para refazer e ordenar todas as estruturas a partir da ordenacao
      * do "Registros.db".
-     */
+    */
     private void ordenarEstruturas() {
         RandomAccessFile dbFile = null;
 
@@ -171,7 +167,7 @@ public class OrdenacaoExterna {
                     io.gerarBarraProgresso(tamanhoArqDB, (int)posicaoAtual);
 
                     // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
+                    dbFile.readBoolean();
                     int tamRegistro = dbFile.readInt();
 
                     // Trazer musica para memoria primaria

@@ -16,14 +16,14 @@ public class ArvoreB {
 
     /**
      * Construtor padrao da classe ArvoreB
-     */
+    */
     public ArvoreB() {
         raiz = new NoB();
     }
 
     /**
      * Metodo para inicializar o arquivo "ArvoreB.db", inicializando a raiz.
-     */
+    */
     public void inicializarArvoreB() {
         RandomAccessFile arvoreBFile = null;
 
@@ -51,7 +51,7 @@ public class ArvoreB {
 
     /**
      * Metodo para obter posicao da raiz no arquivo de 'arvore
-     */
+    */
     private long getRaiz() {
         RandomAccessFile arvoreBFile = null;
         long posRaiz = -1;
@@ -67,9 +67,10 @@ public class ArvoreB {
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            return posRaiz; // não completa
         }
+
+        return posRaiz;
+        
     }
 
     /**
@@ -77,7 +78,7 @@ public class ArvoreB {
      * insercao.
      * @param newMusica - musica a se inserir.
      * @param newEndereco - endereco da musica no arquivo "Registro.db".
-     */
+    */
     public void inserir(Musica newMusica, long newEndereco) {
         NoB noB = new NoB();
         long posInserir = noB.encontrarInsercao(newMusica.getId(), getRaiz());
@@ -92,7 +93,7 @@ public class ArvoreB {
      * @param filhoEsq - posicao filho 'a esquerda que esta' sendo inserido.
      * @param filhoDir - posicao filho 'a direita que esta' sendo inserido.
      * contrario.
-     */
+    */
     private void inserir(long posInserir, Musica newMusica, long newEndereco, long filhoEsq, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
 
@@ -142,7 +143,7 @@ public class ArvoreB {
     /**
      * Metodo para realizar o split da arvore durante a insercao.
      * @param posSplit - posicao do arquivo, no qual deve-se realizar o split.
-     */
+    */
     private void split (long posSplit) {
         RandomAccessFile arvoreBFile = null;
 
@@ -214,7 +215,7 @@ public class ArvoreB {
      * Metodo para procurar uma chave na arvore.
      * @param chaveProcurada - id da chave que se deseja encontrar.
      * @return posicao da chave no arquivo "Registro.db".
-     */
+    */
     public long read(int chaveProcurada) {
         return read(getRaiz(), chaveProcurada);
     }
@@ -224,7 +225,7 @@ public class ArvoreB {
      * @param pos - posicao a ser analisada se a chava esta' inclusa ou nao.
      * @param chaveProcurada - id da chave que se deseja encontrar.
      * @return posicao da chave no arquivo "Registro.db".
-     */
+    */
     private long read(long pos, int chaveProcurada) {
 
         long endereco = -1;
@@ -270,7 +271,7 @@ public class ArvoreB {
      * Metodo para procurar uma chave na arvore.
      * @param chaveProcurada - id da chave que se deseja encontrar.
      * @return posicao da chave no arquivo "AroreB.db".
-     */
+    */
     public long getPosicao(int chaveProcurada) {
         System.out.println("getRaiz();" + getRaiz());
         return getPosicao(getRaiz(), chaveProcurada);
@@ -281,7 +282,7 @@ public class ArvoreB {
      * @param pos - posicao a ser analisada se a chava esta' inclusa ou nao.
      * @param chaveProcurada - id da chave que se deseja encontrar.
      * @return posicao da chave no arquivo "AroreB.db".
-     */
+    */
     private long getPosicao(long pos, int chaveProcurada) {
 
         long endereco = -1;
@@ -333,7 +334,7 @@ public class ArvoreB {
      * representando um NoB da arvore.
      * Estrutura:
      * Pos[ &arqArvore] : | &filho | chave | &arqRegistro | ... 
-     */
+    */
     public void mostrarArquivo() {
         RandomAccessFile arvoreBFile = null;
 
@@ -361,7 +362,7 @@ public class ArvoreB {
                 aux.numElementos = arvoreBFile.readShort();
 
                 // Ler informacoes do No
-                for (int i = 0; i < aux.ordemArvore-1; i++) {
+                for (int i = 0; i < NoB.ordemArvore-1; i++) {
                     
                     // Ler ponteiro para filho da esquerda da posicao i
                     aux.noFilho[i] = arvoreBFile.readLong();
@@ -374,7 +375,7 @@ public class ArvoreB {
                 }
 
                 // Ler ultimo ponteiro 'a direita
-                aux.noFilho[aux.ordemArvore-1] = arvoreBFile.readLong();
+                aux.noFilho[NoB.ordemArvore-1] = arvoreBFile.readLong();
                 posAtual = arvoreBFile.getFilePointer();
 
                 //Printar
@@ -394,7 +395,7 @@ public class ArvoreB {
      * Metodo para obter o total de chaves que estao, de fato, inseridas na
      * arvore.
      * @return total de chaves inseridas.
-     */
+    */
     public int contarChaves() {
         RandomAccessFile arvoreBFile = null;
         int total = 0;
@@ -419,7 +420,7 @@ public class ArvoreB {
                 total += aux.numElementos;
 
                 // Ler informacoes do No
-                for (int i = 0; i < aux.ordemArvore-1; i++) {
+                for (int i = 0; i < NoB.ordemArvore-1; i++) {
                     
                     // Ler ponteiro para filho da esquerda da posicao i
                     aux.noFilho[i] = arvoreBFile.readLong();
@@ -432,7 +433,7 @@ public class ArvoreB {
                 }
 
                 // Ler ultimo ponteiro 'a direita
-                aux.noFilho[aux.ordemArvore-1] = arvoreBFile.readLong();
+                aux.noFilho[NoB.ordemArvore-1] = arvoreBFile.readLong();
 
                 posAtual = arvoreBFile.getFilePointer();
             }
@@ -442,9 +443,9 @@ public class ArvoreB {
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            return total; // não completa
         }
+
+        return total;
     }
 
     /**
@@ -452,7 +453,7 @@ public class ArvoreB {
      * @param idProcurado - id da musica para atualizar endereco.
      * @param newEndereco - novo endereco da musica.
      * @return true, se a música foi altualizada; false, caso contrario.
-     */
+    */
     public boolean update(int idProcurado, long newEndereco) {
         boolean find = false;
 
@@ -487,7 +488,7 @@ public class ArvoreB {
      * @param chaveProcurada - id da musica a ser deletada.
      * @param isDuplicada - boolean para indicar se a chave que e sera' 
      * removida foi duplicada.
-     */
+    */
     private void delete (int chaveProcurada, boolean isDuplicada) {
         RandomAccessFile arvoreBFile = null;
                     IO io = new IO();
@@ -576,7 +577,7 @@ public class ArvoreB {
                 // Informacoes do pai
                 int chavePai;
                 long enderecoPai;
-                long noFilhoPai;
+        
 
                 // Selecionar o NoB com mais elementos
                 if(noIrmaoDir.numElementos >= noIrmaoEsq.numElementos) {
@@ -818,9 +819,9 @@ public class ArvoreB {
 
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + arvoreBDB + "\"\n");
-        } finally {
-            return noIrmao; // não completa
         }
+            
+        return noIrmao;
     }
 
     /**
@@ -828,7 +829,7 @@ public class ArvoreB {
      * @param posArvore - posicao da musica na arvore.
      * @param chaveProcurada -  id da musica para se deletar.
      * @param ultimoFilho - determinar se e' necessario salvar ultimo ponteiro de filho.
-     */
+    */
     private void delete(long posArvore, int chaveProcurada, boolean ultimoFilho) {
         RandomAccessFile arvoreBFile = null;
 

@@ -2,7 +2,7 @@
  * Main - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
  * @version 1.0 03/2023
- */
+*/
 
 // Bibliotecas
 import java.util.InputMismatchException;
@@ -18,7 +18,7 @@ class Main {
      * Metodo principal do sistema, capaz de unir todas as classes instansiadas
      * e inicializar um banco de dados capaz de realizar CRUD e Ordenacao
      * Externa.
-     */
+    */
     public static void main (String args[]) {
 
         OrdenacaoExterna sort = new OrdenacaoExterna();
@@ -84,7 +84,7 @@ class Main {
     /**
      * Mostra uma mensagem de erro informando que a opcao digitada nao e'
      * valida.
-     */
+    */
     public static void mostrarErro() {
         System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
                            "1 a 8.");

@@ -15,7 +15,7 @@ import sort.auxiliar.MinHeap;
 /**
  * SelecaoPorSubstituicaoSort - Classe responsavel por realizar a Intercalcao 
  * Balanceada com Selecao por Substituicao
- */
+*/
 public class SelecaoPorSubstituicaoSort {
 
     private static final String registroDB = "./src/resources/Registro.db";
@@ -34,7 +34,7 @@ public class SelecaoPorSubstituicaoSort {
 
     /**
      * Construtor padrao da classe SelecaoPorSubstituicaoSort.
-     */
+    */
     public SelecaoPorSubstituicaoSort(){
         this(1500, 4);
     }
@@ -45,7 +45,7 @@ public class SelecaoPorSubstituicaoSort {
      * primaria.
      * @param n - numero de caminhos, correspondendo a quantos arquivos os
      * registros serao divididos.
-     */
+    */
     public SelecaoPorSubstituicaoSort(int m, int n){
         if (m > 0 && n > 2) {
             NUM_REGISTROS = m;
@@ -68,7 +68,7 @@ public class SelecaoPorSubstituicaoSort {
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
      * sao chamadas.
      * @param atributo - a ser usado na ordenacao.
-     */
+    */
     public void ordenar(int atributo) {
 
         boolean paridade = true;
@@ -106,7 +106,7 @@ public class SelecaoPorSubstituicaoSort {
      * @param atributo - a ser usado na ordenacao.
      * @return true, se distribuicao ocorreu corretamente; false, caso 
      * contrario.
-     */
+    */
     private boolean distribuicao(int atributo) {
 
 
@@ -244,34 +244,40 @@ public class SelecaoPorSubstituicaoSort {
                                 temp = new RandomAccessFile (arquivoTemp + k + ".db", "rw");
                                 temp.seek(temp.length());
                                 temp.write(bytes);
-
+                                temp.close();
                             }catch(Exception e) {
                                 System.out.println("\nERRO: Ocorreu um erro na escrita do " +
                                 "arquivo \"" + arquivoTemp + "\"" + k + ".db -> " + e +"\n");
-                            }finally{
-                                temp.close();
                             }
+                            
+                            
+                            
                         }
                     }
 
                 }
 
             } else {
-            distribuicaoOK = false;
-            System.out.println("\nERRO: Registro vazio!" +
-                               "\n      Tente carregar os dados iniciais primeiro!\n");
+                distribuicaoOK = false;
+                System.out.println("\nERRO: Registro vazio!" +
+                                "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
             // Fechar arquivo
             dbFile.close();
 
-       } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
                 System.out.println("\nERRO: Registro nao encontrado!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
                 distribuicaoOK = false;
-       } finally {
-            return distribuicaoOK;
-       }
+        } catch (IOException e) {
+                System.out.println("\nERRO: Ocorreu um erro de leitura no arquivo \"" +
+                                   registroDB + "\"\n");
+                distribuicaoOK = false;
+            e.printStackTrace();
+        }
+        return distribuicaoOK;
+       
     }
 
     /**
@@ -280,7 +286,7 @@ public class SelecaoPorSubstituicaoSort {
      * @param paridade - indicador para saber se e' uma intercalacao par ou
      * impar, implicando em qual arquivo sera' leitura e qual, escrita
      * @return numArquivos - numero de arquivos que foram criados.
-     */
+    */
     public int intercalacao (int atributo, boolean paridade) {
 
         RandomAccessFile newTemp = null;
@@ -336,7 +342,6 @@ public class SelecaoPorSubstituicaoSort {
 
                 // Controle se intercalacao acabou
                 boolean todosArquivosCompletos = false;
-                boolean intercalacaoCompleta = false;
 
                 // Garantir que a primeira leitura passe por todos os arquivos
                 boolean carregamentoInicial = true;
@@ -394,7 +399,7 @@ public class SelecaoPorSubstituicaoSort {
                                     if (posAtual[i] < tamArq[i]) {
                                             
                                         // Ler atributos iniciais do registro
-                                        boolean lapide = arqTemp[i].readBoolean();
+                                        arqTemp[i].readBoolean();
                                         int tamRegistro = arqTemp[i].readInt();
 
                                         // Ler registro
@@ -479,18 +484,18 @@ public class SelecaoPorSubstituicaoSort {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever nos arquivos temporarios\n");
 
-        } finally {
-            // Corrigir valor, do contador do numero de arquivos criados
-            if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
+        }
 
-            return numArquivos;
-       } 
+        // Corrigir valor, do contador do numero de arquivos criados
+        if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
+
+        return numArquivos;
     }
 
     /**
      * Metodo para obter a Musica de menor Data de Lancamento.
      * @return menorMusica pela Data de Lancamento.
-     */
+    */
     private Musica getMenorData() {
         Musica menorMusica = null;
 
@@ -514,7 +519,7 @@ public class SelecaoPorSubstituicaoSort {
     /**
      * Metodo para obter a Musica de menor Nome.
      * @return menorMusica pelo Nome.
-     */
+    */
     private Musica getMenorNome() {
         Musica menorMusica = null;
 
@@ -538,7 +543,7 @@ public class SelecaoPorSubstituicaoSort {
     /**
      * Metodo para obter a Musica de menor ID.
      * @return menorMusica pelo ID.
-     */
+    */
     private Musica getMenorId() {
         Musica menorMusica = null;
 
@@ -562,7 +567,7 @@ public class SelecaoPorSubstituicaoSort {
     /**
      * Metodo para testar se ainda tem arquivo para ser lido.
      * @return true, se tiver; false, caso contrario.
-     */
+    */
     private boolean tiverArquivoParaLer() {
         boolean resp = false;
         for (int i = 0; i < NUM_CAMINHOS; i++) {
@@ -575,7 +580,7 @@ public class SelecaoPorSubstituicaoSort {
     /**
      * Metodo para testar os arquivos a serem lidos existem.
      * @return true, se existirem; false, caso contrario.
-     */
+    */
     private boolean arquivosExistirem() {
         boolean resp = false;
         for (int i = 0; i < NUM_CAMINHOS; i++) {
@@ -591,7 +596,7 @@ public class SelecaoPorSubstituicaoSort {
      * @param musica - musica lida anteriormente.
      * @param atributo - escohlido.
      * @return true, se estiver ordenado; false, caso contrario.
-     */
+    */
     private boolean isOrdenado (int atributo, Musica musicaTmp, Musica musica) {
         boolean resp = false;
 
@@ -606,7 +611,7 @@ public class SelecaoPorSubstituicaoSort {
 
     /**
      * Metodo para settar array de verificadores de arquivo para true.
-     */
+    */
     private void setArqOK() {
         for (int i = 0; i < NUM_CAMINHOS; i++) {
             arqOK[i] = true;
@@ -615,7 +620,7 @@ public class SelecaoPorSubstituicaoSort {
 
     /**
      * Metodo para settar array de Musicas para new Musica().
-     */
+    */
     private void setMusicas() {
         for (int i = 0; i < NUM_CAMINHOS; i++) {
             musicas[i] = new Musica();
