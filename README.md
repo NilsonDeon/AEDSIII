@@ -1,12 +1,34 @@
 # Trabalho Pratico - AEDSIII
 
-#### Gabriel Vargas Bento de Souza
-#### Nilson Deon Cordeiro Filho
+* [Gabriel Vargas Bento de Souza](https://github.com/gabrielvargas00)
+* [Nilson Deon Cordeiro Filho](https://github.com/NilsonDeon/)
 
-Para compilar e executar o programa, basta o seguinte comando no terminal: "make run"
+## Parte 01 - CRUD e Ordenações
 
-Link GitHub:https://github.com/NilsonDeon/AEDSIII/tree/dev
+[TP01_Relatorio.pdf](https://github.com/NilsonDeon/AEDSIII/raw/main/TP01_Relatorio.pdf)<br>
+[Vídeo Explicativo](https://youtu.be/kb8gb98yIVY)
 
-Link video explicativo: https://youtu.be/kb8gb98yIVY
+## Parte 02 - Arquivos de Índices
 
-O arquivo "TP01_Relatorio.pdf" explica um pouco melhor a dinamica de criacao das classes e dos metodos.
+## Parte 03 - Compreção Huffman e LZW
+
+## Parte 04 - EM BREVE
+
+## Parte 05 - EM BREVE
+
+## Como Testar
+
+1. Pegando o código<br>
+  I. [Baixando diretamente do GitHub](https://github.com/NilsonDeon/AEDSIII/archive/refs/heads/main.zip)<br>
+  II. Ou no terminal insira o comando `git clone https://github.com/NilsonDeon/AEDSIII.git`
+    
+2. Executando<br>
+  I. Abra o terminal na pasta AEDSIII<br>
+  II. Digite no terminal `make run`
+
+
+
+
+
+
+
