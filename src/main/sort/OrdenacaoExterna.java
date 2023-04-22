@@ -2,16 +2,36 @@
 package sort;
 
 // Bibliotecas
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.LineNumberReader;
+import java.io.RandomAccessFile;
+import java.util.Collections;
 import java.util.InputMismatchException;
 
 // Bibliotecas proprias
-import app.IO;
+import app.*;
 import hashing.HashingExtensivel;
+import arvores.arvoreB.ArvoreB;
+import listaInvertida.ListaInvertida;
 
 public class OrdenacaoExterna {
 
     private static final String registroDB = "./src/resources/Registro.db";
+    private static IO io;
+    private static HashingExtensivel hash;
+    private static ArvoreB arvoreB;
+    private static ListaInvertida lista;
+
+    public OrdenacaoExterna() {
+        io = new IO();
+        hash = new HashingExtensivel();
+        arvoreB = new ArvoreB();
+        lista = new ListaInvertida();
+    }
 
     public void ordenarArquivo () {
 
@@ -21,21 +41,18 @@ public class OrdenacaoExterna {
         // Se existir, fazer a busca
         if (arquivoRegistro.exists()) {
             
-            IO io = new IO();
-            HashingExtensivel hash = new HashingExtensivel();
-
             int opcao = 0;
             int atributo = 0;
             int numCaminhos = 0;
             int numRegistros = 0;
 
             String menu1 = "\n+------------------------------------------+" +
-                          "\n|    Escolha o atributo para ordenacao:    |" +
-                          "\n|------------------------------------------|" +
-                          "\n| 1 - Id                                   |" +
-                          "\n| 2 - Nome                                 |" +
-                          "\n| 3 - Data de lancamento                   |" +
-                          "\n+------------------------------------------+";    
+                           "\n|    Escolha o atributo para ordenacao:    |" +
+                           "\n|------------------------------------------|" +
+                           "\n| 1 - Id                                   |" +
+                           "\n| 2 - Nome                                 |" +
+                           "\n| 3 - Data de lancamento                   |" +
+                           "\n+------------------------------------------+";    
 
             String menu2 = "\n+------------------------------------------+" +
                            "\n|        MENU INTECALACAO BALANCEADA       |" +
@@ -77,7 +94,6 @@ public class OrdenacaoExterna {
 
             do {
                 try {
-
                         System.out.println(menu2);
                         opcao = io.readInt("\nDigite a ordenacao desejada: ");
 
@@ -105,8 +121,7 @@ public class OrdenacaoExterna {
 
             // Se foi ordenado
             if (opcao == 1 || opcao == 2 || opcao == 3) {
-                hash.remontarHash();
-                System.out.println("\nArquivo \"" + registroDB + "\" ordenado com sucesso!");
+                ordenarEstruturas();
             }
 
         // Senao, mensagem de erro
@@ -114,6 +129,88 @@ public class OrdenacaoExterna {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         
+        }
+    }
+
+    /**
+     * Metodo para refazer e ordenar todas as estruturas a partir da ordenacao
+     * do "Registros.db".
+     */
+    private void ordenarEstruturas() {
+        RandomAccessFile dbFile = null;
+
+        // Ler diretorio do Hash
+        hash.getDiretorio().lerDiretorio();
+
+        // Apagar listas antigas
+        lista.delete();
+
+        // Mostrar mensagem de ordenacao
+        System.out.println("\nOrdenando registros: ");
+
+        try {
+            dbFile = new RandomAccessFile (registroDB, "rw");
+
+            if (dbFile.length() > 0) {
+
+                Musica musica = null;
+
+                // Ler ultimo ID adicionado
+                dbFile.seek(0);
+                dbFile.readInt();
+                long posicaoAtual = dbFile.getFilePointer();
+
+                long tamanhoArqDB = dbFile.length();
+
+                while (posicaoAtual != tamanhoArqDB) {
+                    
+                    // Resetar musica
+                    musica = new Musica();
+
+                    // Mostrar barra progresso
+                    io.gerarBarraProgresso(tamanhoArqDB, (int)posicaoAtual);
+
+                    // Ler informacoes do registro
+                    boolean lapide = dbFile.readBoolean();
+                    int tamRegistro = dbFile.readInt();
+
+                    // Trazer musica para memoria primaria
+                    byte[] registro = new byte[tamRegistro];
+                    dbFile.read(registro);
+                    musica.fromByteArray(registro);
+
+                    // Atualizar no Hash
+                    hash.update(musica.getId(), posicaoAtual);
+
+                    // Atualizar na arvore B
+                    arvoreB.update(musica.getId(), posicaoAtual);
+
+                    // Atualizar nas listas                   
+                    lista.inserir(musica, posicaoAtual);
+
+                    // Atualizar ponteiro
+                    posicaoAtual = dbFile.getFilePointer();
+                }
+
+                // Mostrar barra de progresso completa
+                io.gerarBarraProgresso(tamanhoArqDB, (int)posicaoAtual);
+
+                System.out.println("\n\nArquivo \"" + registroDB + 
+                                   "\" ordenado com sucesso!");
+
+            } else {
+                System.out.println("\nERRO: Registro vazio!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            }
+
+            // Fechar arquivos
+            dbFile.close();
+
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Registro nao encontrado!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
     }
 }

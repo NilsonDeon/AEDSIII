@@ -493,7 +493,7 @@ public class NoB {
 
         // Ler NoB desejado
         noB.lerNoB(posInserir);
-     
+    
         // Se chave procurada for menor que a primeira
         if ((noB.numElementos > 0) && (chaveProcurada < noB.chave[0])) {
 
@@ -535,7 +535,7 @@ public class NoB {
     /**
      * Metodo para encontrar a posicao do pai de um NoB.
      * @param posFilho - posicao do filho em arquivo
-     * @return posInserir - endereco de insercao no arquivo.
+     * @return posInserir - endereco do pai no arquivo.
      */
     public long encontrarPai(long posFilho) {
 
@@ -750,10 +750,172 @@ public class NoB {
      * com 50% de ocupacao, e, assim, pode-se remover um elemento.
      * @return true, se puder remover um elemento; false, caso contrario.
      */
-    public boolean podeDeletar() {
+    public boolean isMaisMetade() {
         int novoNumElementos = numElementos-1;
         int metadeNoB = (ordemArvore-1)/2;
-        
-        return novoNumElementos > metadeNoB;
+
+        return novoNumElementos >= metadeNoB;
+    }
+
+    /**
+     * Metodo para realizar um deslocamento para a esquerda dos elementos.
+     * @param pos - posicao de inicio do deslocamento.
+     * @param posArquivo - posicao do NoB na arvore
+     */
+    public void remanejarRegistros(int pos, long posArquivo) {
+
+        // Shift para esquerda dos elementos, incluindo os null
+        for(int i = pos; i < (ordemArvore-1)-1; i++) {
+            chave[i] = chave[i+1];
+            endereco[i] = endereco[i+1];
+            noFilho[i+1] = noFilho[i+2];
+        }
+
+        chave[(ordemArvore-1)-1] = -1;
+        endereco[(ordemArvore-1)-1] = -1;
+        noFilho[ordemArvore-1] = -1;
+
+        // Atualizar numero de elementos
+        numElementos--;
+
+        // Salvar no arquivo
+        escreverNoB(posArquivo);
+    }
+
+    public long encontrarIrmaoDir(long posPai, int chaveProcurada) {
+        RandomAccessFile arvoreBFile = null;
+
+        long posIrmao = -1;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Encontrar pai
+            lerNoB(posPai);
+
+            // Testar se nao tem irmao 'a direita
+            if (chave[numElementos-1] < chaveProcurada) {
+                this.numElementos = 0;
+
+            // Se tiver, pode-se procurar
+            } else {
+
+                // Encontrar posicao do irmao
+                int i;
+                for(i = 0; (i < numElementos) && (chave[i] < chaveProcurada); i++);
+                posIrmao = noFilho[i+1];
+
+                // Encontrar irmao da direita
+                lerNoB(posIrmao);
+            }
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            return posIrmao;
+        } 
+    }
+
+    public long encontrarIrmaoEsq(long posPai, int chaveProcurada) {
+        RandomAccessFile arvoreBFile = null;
+
+        long posIrmao = -1;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Encontrar pai
+            lerNoB(posPai);
+
+            // Testar se nao tem irmao 'a esquerda
+            if (chave[0] > chaveProcurada) {
+                this.numElementos = 0;
+
+            // Se tiver, pode-se procurar
+            } else {
+
+                // Encontrar posicao do irmao
+                int i;
+                for(i = 0; (i < numElementos) && (chave[i] < chaveProcurada); i++);
+                posIrmao = noFilho[i];
+
+                // Encontrar irmao da esquerda
+                lerNoB(posIrmao);
+            }
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
+        } finally {
+            return posIrmao;
+        }   
+    }
+
+    public void deletarNo(long posicaoDeletar) {
+        RandomAccessFile arvoreBFile = null;
+
+        try {
+            arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
+
+            // Settar valores como null
+            NoB noNull = new NoB();
+
+            // Escrever noB nulo
+            noNull.escreverNoB(posicaoDeletar);
+
+            // Fechar arquivo
+            arvoreBFile.close();
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arvoreBDB + "\"\n");
+        }
+    }
+
+    /**
+     * Metodo para trocar dois elementos em um No, sem alterar os ponteiros.
+     * @param posAntiga - posicao de inicio para escrita no arquivo.
+     * @param chaveAntiga - chave a se apagar.
+     * @param enderecoAntigo - endereco a se apagar.
+     * @param posNova - posicao de inicio para escrita no arquivo novo.
+     * @param chaveNova - nova chave a se inserir.
+     * @param enderecoNovo - novo endereco a se inserir.
+     */
+    public void swap(long posAntiga, int chaveAntiga, long enderecoAntigo, 
+                     long posNova,   int chaveNova,   long enderecoNovo) {
+        RandomAccessFile arvoreBFile = null;
+
+        NoB noAux = new NoB();
+            
+        // Ler primeiro No
+        noAux.lerNoB(posAntiga);
+
+        // Localizar local de insercao no No
+        int i;
+        for(i = 0; (i < noAux.numElementos) && (noAux.chave[i] < chaveAntiga); i++);
+
+        // Trocar elementos
+        noAux.chave[i] = chaveNova;
+        noAux.endereco[i] = enderecoNovo;
+
+        // Salvar em arquivo
+        noAux.escreverNoB(posAntiga);
+
+        // Ler segundo No
+        noAux.lerNoB(posNova);
+
+        // Localizar local de insercao no No
+        for(i = 0; (i < noAux.numElementos) && (noAux.chave[i] < chaveNova); i++);
+
+        // Trocar elementos
+        noAux.chave[i] = chaveAntiga;
+        noAux.endereco[i] = enderecoAntigo;
+
+        // Salvar em arquivo
+        noAux.escreverNoB(posNova);
     }
 }

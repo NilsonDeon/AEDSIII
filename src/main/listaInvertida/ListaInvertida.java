@@ -26,6 +26,9 @@ public class ListaInvertida {
     private static String pastaAnoLancamento = "./src/resources/listaInvertida_AnoLancamento";
     private static String pastaNomeArtista = "./src/resources/listaInvertida_Artistas";
 
+    // Endereco do arquivo "Registro.db"
+    private static final String registroDB = "./src/resources/Registro.db";
+
     /**
      * Construtor padrao da ListaInvertida.
      */
@@ -138,5 +141,5 @@ public class ListaInvertida {
      */
     public String normalizarString(String texto) {
         return listaArtistas.normalizarString(texto);
-    } 
+    }
 }

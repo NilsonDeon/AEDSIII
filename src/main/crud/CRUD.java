@@ -170,7 +170,7 @@ public class CRUD {
                 while ((linhaLida = csvFile.readLine()) != null) {
 
                     // Mostrar barra progresso
-                    gerarBarraProgresso(tamanhoArqCSV, count);
+                    io.gerarBarraProgresso(tamanhoArqCSV, count);
                     count++;
 
                     // Obter posicao do registro no arquivo
@@ -180,8 +180,6 @@ public class CRUD {
                     musica = new Musica (linhaLida, ultimoId);
                     byte[] byteArray = musica.toByteArray();
                     dbFile.write(byteArray);
-
-//                    io.readLine("ok ID: " + ultimoId);
 
                     // Inserir, utilizando hashing
                     hash.inserir(musica, posRegistro);
@@ -200,7 +198,10 @@ public class CRUD {
                 }
 
                 // Mostrar barra de progresso completa
-                gerarBarraProgresso(tamanhoArqCSV, count);
+                io.gerarBarraProgresso(tamanhoArqCSV, count);
+
+                System.out.println("\n");
+                arvoreB.mostrarArquivo();
                               
                 // Atualizar ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
@@ -343,7 +344,7 @@ public class CRUD {
      * @return timestamp atual em milissegundos
      */
     private long now() {
-      return new Date().getTime();
+      return System.currentTimeMillis();
     }
 
     /**
@@ -852,23 +853,49 @@ public class CRUD {
      * @return true, se a música foi excluida; false, caso contrario.
      */
     public boolean delete () {
-        int idProcurado = 0;
 
-       do {
-           System.out.print("\nDigite o ID procurado: ");
-           try {
-               idProcurado = io.readInt();
-           } catch (InputMismatchException e) {
-               io.readLine();
-               System.out.println("\nERRO: ID invalido!\n");
-               idProcurado = 0;
-           }
-       } while (idProcurado == 0);
+        boolean delete = false;
 
-        // Deletar no hashing extensivel
-        hash.delete(idProcurado);
+        // Testar se arquivo existe
+        File arquivoRegistro = new File(registroDB);
+        
+        // Se existir, fazer a busca
+        if (arquivoRegistro.exists()) {
 
-       return delete(idProcurado);
+            int idProcurado = 0;
+
+            do {
+                System.out.print("\nDigite o ID procurado: ");
+                try {
+                    idProcurado = io.readInt();
+                } catch (InputMismatchException e) {
+                    io.readLine();
+                    System.out.println("\nERRO: ID invalido!\n");
+                    idProcurado = 0;
+                }
+            } while (idProcurado == 0);
+
+            // Deletar sequencialmente
+            delete = delete(idProcurado);
+
+            // Deletar no hashing extensivel
+            //hash.delete(idProcurado);
+
+            // Deletar na Arvore B
+            System.out.println("\nEntrou pra deletar");
+            arvoreB.delete(idProcurado);
+
+            System.out.println("\ndeletou");
+            arvoreB.mostrarArquivo();
+            System.out.println("\nsucesso"); 
+
+        // Senao, mensagem de erro
+        } else {
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        }
+
+       return delete;
     }
 
     /**
@@ -1015,7 +1042,7 @@ public class CRUD {
                             find = true;
 
                             // Deletar na lista
-                            lista.delete(musica);
+                            //lista.delete(musica);
 
                             // Retornar ponteiro para final do registro
                             dbFile.seek(posicaoFinal);
@@ -1383,20 +1410,6 @@ public class CRUD {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
         }
-    }
-
-    private void gerarBarraProgresso(long tamanhoArqCSV, int linhaAtual) {
-        int progresso = (int) ((double) linhaAtual / tamanhoArqCSV * 100);
-        int barras = progresso / 2;
-        String barra = "[";
-        for (int i = 0; i < barras; i++) {
-            barra += "/";
-        }
-        for (int i = barras; i < 50; i++) {
-            barra += " ";
-        }
-        barra += "] " + progresso + "%";
-        System.out.print("\r" + barra);
     }
 
     private Musica lerMusica(long posicaoProcurada) {

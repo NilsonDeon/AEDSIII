@@ -289,6 +289,5 @@ public class ListaInvertida_Artistas {
 
         // Reinserir com posicao e nome corretos
         inserir(newMusica, newEndereco);
-    }
-    
+    }    
 }

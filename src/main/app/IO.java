@@ -92,4 +92,24 @@ public class IO {
       }
       return readLine();
    }
+   
+   /**
+    * Metodo para gerar barra de progresso, sendo utilizada durante as
+    * insercoes.
+    * @param tamanhoArq - tamanho do arquivo total
+    * @param linhaAtual - posicao atual de leitura.
+    */
+   public void gerarBarraProgresso(long tamanhoArq, int linhaAtual) {
+      int progresso = (int) ((double) linhaAtual / tamanhoArq * 100);
+      int barras = progresso / 2;
+      String barra = "[";
+      for (int i = 0; i < barras; i++) {
+         barra += "|";
+      }
+      for (int i = barras; i < 50; i++) {
+         barra += " ";
+      }
+      barra += "] " + progresso + "%";
+      System.out.print("\r" + barra);
+    }
 }

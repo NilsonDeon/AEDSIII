@@ -321,61 +321,8 @@ public class HashingExtensivel {
         return find;
     }
 
-    /**
-     * Metodo para refazer hashing, utilizado apos as ordenacoes. De forma a
-     * trocar os enderecos antigos pelos novos.
-     */
-    public void remontarHash() {
-        RandomAccessFile dbFile = null;
-
-        // Ler diretorio
-        diretorio.lerDiretorio();
-
-        try {
-            dbFile = new RandomAccessFile (registroDB, "rw");
-
-            if (dbFile.length() > 0) {
-
-                Musica musica = null;
-
-                // Ler ultimo ID adicionado
-                dbFile.seek(0);
-                dbFile.readInt();
-                long posicaoAtual = dbFile.getFilePointer();
-
-                while (dbFile.length() != posicaoAtual) {
-                                        
-                    musica = new Musica();
-
-                    // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
-                    int tamRegistro = dbFile.readInt();
-
-                    // Trazer musica para memoria primaria
-                    byte[] registro = new byte[tamRegistro];
-                    dbFile.read(registro);
-                    musica.fromByteArray(registro);
-
-                    // Atualizar endereco da musica
-                    update(musica.getId(), posicaoAtual);                       
-
-                    // Atualizar ponteiro
-                    posicaoAtual = dbFile.getFilePointer();
-                }
-            } else {
-                System.out.println("\nERRO: Registro vazio!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-            }
-
-            // Fechar arquivos
-            dbFile.close();
-
-        } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Registro nao encontrado!" +
-                                   "\n      Tente carregar os dados iniciais primeiro!\n");
-        } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
-        }
+    public Diretorio getDiretorio() {
+        return this.diretorio;
     }
 
 }
