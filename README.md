@@ -12,7 +12,7 @@
 
 [TP02]() <br>
 [TP02_Relatorio.pdf]()<br>
-[Vídeo Explicativo]()
+[Vídeo Explicativo](https://discord.com/channels/1040626088008753214/1040670896362373281/1099529048142659674)
 
 ## Parte 03 - Compreção Huffman e LZW
 
