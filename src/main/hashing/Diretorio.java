@@ -82,7 +82,7 @@ public class Diretorio {
             diretorioFile.close();
 
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + diretorioFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + diretorioDB + "\"\n");
         }
     }
 
@@ -110,7 +110,7 @@ public class Diretorio {
             diretorioFile.close();
 
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + diretorioFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + diretorioDB + "\"\n");
         }
     }
 
@@ -161,7 +161,7 @@ public class Diretorio {
             diretorioFile.close();
 
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + diretorioFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler/escrever o arquivo \"" + diretorioDB + "\"\n");
         }
     }
 
@@ -214,7 +214,7 @@ public class Diretorio {
             bucketFile.close();
 
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + bucketDB + "\"\n");
         }
 
     }
@@ -254,7 +254,7 @@ public class Diretorio {
             diretorioFile.close();
 
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + diretorioFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + diretorioDB + "\"\n");
         }
     }
 

@@ -226,15 +226,11 @@ public class HashingExtensivel {
                     dbFile.seek(endereco);
 
                     // Ler informacoes do registro
-                    boolean lapide = dbFile.readBoolean();
+                    dbFile.readBoolean();
                     dbFile.readInt();
 
-                    // Testar se registro e' valido
-                    if (lapide == false) {
-
-                        // Deletar musica
-                        bucket.remover(posicao, posElemento);
-                    }
+                    // Deletar musica
+                    bucket.remover(posicao, posElemento);
 
                 }
                 cont++;

@@ -453,28 +453,40 @@ public class ArvoreB {
 
         // Procurar id desejado
         long posArvore = getPosicao(idProcurado);
-        NoB noB = new NoB();
-        noB.lerNoB(posArvore);
 
-        // Localizar id na posicao encontrada
-        for(int i = 0; i < noB.numElementos; i++) {
-
-            // Alterar novo endereco
-            if(idProcurado == noB.chave[i]) {
-                noB.endereco[i] = newEndereco;
-                i = noB.numElementos;
-                find = true;
+        // Se nao encontrar, id nao esta' cadastrado
+        if(posArvore != -1) {
+            NoB noB = new NoB();
+            noB.lerNoB(posArvore);
+    
+            // Localizar id na posicao encontrada
+            for(int i = 0; i < noB.numElementos; i++) {
+    
+                // Alterar novo endereco
+                if(idProcurado == noB.chave[i]) {
+                    noB.endereco[i] = newEndereco;
+                    i = noB.numElementos;
+                    find = true;
+                }
             }
+            
+            // Alterar em arquivo
+            noB.escreverNoB(posArvore);
         }
-        
-        // Alterar em arquivo
-        noB.escreverNoB(posArvore);
 
         return find;
     }
 
+    /**
+     * Metodo para deletar uma musica da arvore, a apartir de seu id.
+     * @param chaveProcurada - id da chave pra se deletar.
+     */
     public void delete(int chaveProcurada) {
-        delete(chaveProcurada, false);
+
+        // Deletar somente se a chave existr
+        if (read(chaveProcurada) != -1){
+            delete(chaveProcurada, false);
+        }   
     }
 
     /**
@@ -654,9 +666,13 @@ public class ArvoreB {
 
                     // Testar se posicao pai esta' com 50%
                     noPai.lerNoB(posPai);
-                    if(! noPai.isMaisMetade() ) {
+
+                    // Repetir busca tantos quantos irmaos existirem
+                    int count = 0;
+                    while (!isRaiz(posPai) && !noPai.isMaisMetade() && count < NoB.ordemArvore) {
                         noPai = corrigirNoB(chavePai, posPai);
                         noPai.lerNoB(posPai);
+                        count++;
                     }
 
                 }
@@ -671,7 +687,22 @@ public class ArvoreB {
         }
     }
 
+    /**
+     * Metodo para determinar se uma certa posicao do arquivo pertence a uma raiz.
+     * @param posicaoNo - posicao do No para se analizar.
+     * @return true, se for raiz; false, caso contrario.
+     */
+    private boolean isRaiz(long posicaoNo) {
+        return posicaoNo == getRaiz();
+    }
 
+    /**
+     * Metodo para corrigir um No caso ele possua a quantidade de chavez menor
+     * que 50% de ocupacao.
+     * @param chaveErro - chave no No que esta' errado.
+     * @param posErro - posicao do No em arquivo que esta' errado.
+     * @return NoB atualizado.
+     */
     public NoB corrigirNoB (int chaveErro, long posErro) {
         RandomAccessFile arvoreBFile = null;
         NoB noIrmao = null;

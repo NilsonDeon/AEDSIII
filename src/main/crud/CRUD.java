@@ -205,8 +205,8 @@ public class CRUD {
             System.out.println("\nERRO: O arquivo \""+ arquivoCSV + 
                                "\"não encontrado!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + csvFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + registroDB + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + arquivoCSV + "\"\n");
         }
     }
 
@@ -959,6 +959,9 @@ public class CRUD {
         boolean find = false;
         long posArquivo = -1;
 
+        // Atualizar diretorio do hash
+        hash.lerDiretorio();
+
         try {
             dbFile = new RandomAccessFile (registroDB, "rw");
 
@@ -1013,7 +1016,7 @@ public class CRUD {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
             
         return posArquivo;
@@ -1088,6 +1091,11 @@ public class CRUD {
                     }
                     posicaoAtual = dbFile.getFilePointer();
                 }
+                
+                if (find == false) {
+                    System.out.println("\nMusica de ID (" + idProcurado + ") nao esta cadastrada!");
+                }
+
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
@@ -1334,7 +1342,7 @@ public class CRUD {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + dbFile + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         } finally {
             if (find == true) {
                 abrirMusica (musica.getUri());

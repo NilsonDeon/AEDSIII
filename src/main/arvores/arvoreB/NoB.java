@@ -115,36 +115,14 @@ public class NoB {
     */
     public long escreverNoB() {
         RandomAccessFile arvoreBFile = null;
-        long posEscrita = -1;
+        long fimArquivo = -1;
 
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
-            // Posicionar na primeira posicao valida
-            arvoreBFile.seek(8);
-            long posLeitura = arvoreBFile.getFilePointer();
-
-            // Procurar primeira posicao vazia ou fim de arquivo
-            boolean findPosicao = false;
-            while(! findPosicao && posLeitura != arvoreBFile.length()) {
-                
-                // Ler No na posicao
-                NoB noB = new NoB();
-                noB.lerNoB(posLeitura);
-
-                // Testar se a posicao e' vazia
-                if (noB.numElementos == 0) {
-                    findPosicao = true;
-                
-                // Movimentar ponteiro
-                } else {
-                    posLeitura += tamNoB;
-                    arvoreBFile.seek(posLeitura);
-                }
-            }
-
-            // Atualizar posicao para escrita
-            posEscrita = posLeitura;
+            // Posicionar ponteiro no fim do arquivo
+            fimArquivo = arvoreBFile.length();
+            arvoreBFile.seek(fimArquivo);
 
             // Escrever numero de elementos no No
             byte[] numElementosBytes = ByteBuffer.allocate(2).putShort(numElementos).array();
@@ -177,7 +155,7 @@ public class NoB {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arvoreBDB + "\"\n");
         }
             
-        return posEscrita;
+        return fimArquivo;
     }
 
     /**
