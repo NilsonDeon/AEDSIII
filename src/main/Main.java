@@ -2,11 +2,12 @@
  * Main - Trabalho Pratico 01 de Algoritmos e Estruturas de Dados III
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
  * @version 1.0 03/2023
- */
+*/
 
-// bibliotecas
+// Bibliotecas
 import java.util.InputMismatchException;
 
+// Bibliotecas proprias
 import app.IO;
 import crud.CRUD;
 import sort.OrdenacaoExterna;
@@ -17,18 +18,18 @@ class Main {
      * Metodo principal do sistema, capaz de unir todas as classes instansiadas
      * e inicializar um banco de dados capaz de realizar CRUD e Ordenacao
      * Externa.
-     */
-    public static void main (String args[]) throws Exception {
+    */
+    public static void main (String args[]) {
 
         OrdenacaoExterna sort = new OrdenacaoExterna();
         IO io = new IO();
         CRUD crud = new CRUD();
 
-       String intro = "\n        Trabalho Pratico 01 - TP01         " +
+       String intro = "\n        Trabalho Pratico 02 - TP02         " +
                       "\n    Algoritmos e Estruturas de Dados III   " + 
                       "\n       Gabriel Vargas e Nilson Deon        " +
                       "\n     Base de dados: Musicas do Spotify     " +
-                      "\n                  03/2023                  ";
+                      "\n                  04/2023                  ";
 
        String menu = "\n+------------------------------------------+" +
                      "\n|              MENU PRINCIPAL              |" +
@@ -67,6 +68,14 @@ class Main {
            } catch (InputMismatchException e) {
                mostrarErro();
                io.readLine();
+           } finally {
+               
+               // Fazer um break para ser possivel ler os resultados obtidos
+               if(opcao >= 2 && opcao <= 9) {
+                   System.out.println("\nPressione ENTER para continuar");
+                   io.readLine();
+               }
+
            }
        } while (opcao != 1);
 
@@ -75,7 +84,7 @@ class Main {
     /**
      * Mostra uma mensagem de erro informando que a opcao digitada nao e'
      * valida.
-     */
+    */
     public static void mostrarErro() {
         System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
                            "1 a 8.");

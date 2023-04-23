@@ -1,5 +1,7 @@
+// Package
 package sort.auxiliar;
 
+// Biblioteca propria
 import app.Musica;
 
 public class MinHeap {
@@ -43,11 +45,10 @@ public class MinHeap {
      * @param atributo - atributo para se ordenar.
      * @param musica - a ser inserida.
      * @param cargaInicial - booleano para indicar se e' a carga do heap
-     * @throws Exception - Caso o heap estiver cheio.
      */
-    public void inserir (int atributo, Musica musica, boolean cargaInicial) throws Exception {
+    public void inserir (int atributo, Musica musica, boolean cargaInicial)  {
         if (isFull()) {
-            throw new Exception ("\nERRO: MinHeap.inserir() -> heap cheio!\n");
+            throw new IllegalStateException ("\nERRO: MinHeap.inserir() -> O heap esta' cheio! Capacidade máxima: " + heap.length + ", tamanho atual: " + size + "\n");
         }
 
         // Atualizo atributo
@@ -119,11 +120,10 @@ public class MinHeap {
     /**
      * Metodo para remover Musica do heap.
      * @return removed - musica de menor que foi removida.
-     * @throws Exception - Caso o heap estiver vazio.
      */
-    public Musica remover () throws Exception {
+    public Musica remover () {
         if (isEmpty()) {
-            throw new Exception ("\nERRO: MinHeap.remover() -> heap vazio!\n");
+            throw new IllegalStateException ("\nERRO: MinHeap.remover() -> heap vazio!\n");
         }
 
         Musica removed = heap[0];

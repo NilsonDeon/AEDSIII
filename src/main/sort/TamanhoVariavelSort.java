@@ -1,6 +1,7 @@
+// Package
 package sort;
 
-// bibliotecas
+// Bibliotecas
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -8,13 +9,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import sort.auxiliar.QuickSort;
+// Bibliotecas proprias
 import app.Musica;
+import sort.auxiliar.QuickSort;
 
 /**
  * TamanhoVariavelSort - Classe responsavel por realizar a Intercalcao 
  * Balanceada com Tamanho Variavel.
- */
+*/
 public class TamanhoVariavelSort {
 
     private static final String registroDB = "./src/resources/Registro.db";
@@ -31,7 +33,7 @@ public class TamanhoVariavelSort {
 
     /**
      * Construtor padrao da classe TamanhoVariavelSort.
-     */
+    */
     public TamanhoVariavelSort(){
         this(1500, 4);
     }
@@ -42,7 +44,7 @@ public class TamanhoVariavelSort {
      * primaria.
      * @param n - numero de caminhos, correspondendo a quantos arquivos os
      * registros serao divididos.
-     */
+    */
     public TamanhoVariavelSort(int m, int n){
         if (m > 0 && n > 2) {
             NUM_REGISTROS = m;
@@ -63,9 +65,8 @@ public class TamanhoVariavelSort {
      * Metodo principal de ordenacao, no qual a distribuicao e as intercalacoes
      * sao chamadas.
      * @param atributo - a ser usado na ordenacao.
-     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
-     */
-    public void ordenar(int atributo) throws IOException {
+    */
+    public void ordenar(int atributo) {
 
         boolean paridade = true;
         int numArquivos = 0;
@@ -93,8 +94,6 @@ public class TamanhoVariavelSort {
                 File file = new File(arquivoTemp + i + ".db");
                 file.delete();
             }
-
-            System.out.println("\nArquivo \"" + registroDB + "\" ordenado com sucesso!");
         }
     }
 
@@ -104,9 +103,8 @@ public class TamanhoVariavelSort {
      * @param atributo - a ser usado na ordenacao.
      * @return true, se distribuicao ocorreu corretamente; false, caso 
      * contrario.
-     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
-     */
-    private boolean distribuicao(int atributo) throws IOException {
+    */
+    private boolean distribuicao(int atributo) {
 
         RandomAccessFile arqTemp = null;
         RandomAccessFile dbFile = null;
@@ -205,14 +203,19 @@ public class TamanhoVariavelSort {
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
             }
+
+            // Fechar arquivo
+            dbFile.close();
+
        } catch (FileNotFoundException e) {
                 System.out.println("\nERRO: Registro nao encontrado!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
                 distribuicaoOK = false;
-       } finally {
-            if (dbFile != null) dbFile.close();
-            return distribuicaoOK;
+       } catch (IOException e) {
+           System.out.println("\nERRO: " + e.getMessage() + " ao ler no arquivo \"" + registroDB + "\"\n");
        }
+        
+       return distribuicaoOK;
     }
 
     /**
@@ -221,9 +224,8 @@ public class TamanhoVariavelSort {
      * @param paridade - indicador para saber se e' uma intercalacao par ou
      * impar, implicando em qual arquivo sera' leitura e qual, escrita
      * @return numArquivos - numero de arquivos que foram criados.
-     * @throws IOException Caso haja erro de leitura ou escrita com os arquivos.
-     */
-    public int intercalacao (int atributo, boolean paridade) throws IOException {
+    */
+    public int intercalacao (int atributo, boolean paridade) {
 
         RandomAccessFile newTemp = null;
         int numArquivos = 0;
@@ -278,7 +280,6 @@ public class TamanhoVariavelSort {
 
                 // Controle se intercalacao acabou
                 boolean todosArquivosCompletos = false;
-                boolean intercalacaoCompleta = false;
 
                 // Garantir que a primeira leitura passe por todos os arquivos
                 boolean carregamentoInicial = true;
@@ -336,7 +337,7 @@ public class TamanhoVariavelSort {
                                     if (posAtual[i] < tamArq[i]) {
                                             
                                         // Ler atributos iniciais do registro
-                                        boolean lapide = arqTemp[i].readBoolean();
+                                        arqTemp[i].readBoolean();
                                         int tamRegistro = arqTemp[i].readInt();
 
                                         // Ler registro
@@ -409,24 +410,29 @@ public class TamanhoVariavelSort {
             } else {
                System.out.println("\nERRO: Arquivos temporarios estao vazios\n");
             }
-        } catch (FileNotFoundException e) {
-                System.out.println("\nERRO: Arquivos temporarios nao encontrados\n");
-        } finally {
+
+            // Fechar arquivos
             for (int i = 0; i < NUM_CAMINHOS; i++){
                 if (arqTemp[i] != null) arqTemp[i].close();
             }
 
-            // Corrigir valor, do contador do numero de arquivos criados
-            if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
+        } catch (FileNotFoundException e) {
+                System.out.println("\nERRO: Arquivos temporarios nao encontrados\n");
 
-            return numArquivos;
-       } 
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever nos arquivos temporarios\n");
+        }
+
+        // Corrigir valor, do contador do numero de arquivos criados
+        if (numArquivos > NUM_CAMINHOS) numArquivos-= NUM_CAMINHOS;
+
+        return numArquivos;
     }
 
     /**
      * Metodo para obter a Musica de menor Data de Lancamento.
      * @return menorMusica pela Data de Lancamento.
-     */
+    */
     private Musica getMenorData() {
         Musica menorMusica = null;
 
@@ -450,7 +456,7 @@ public class TamanhoVariavelSort {
     /**
      * Metodo para obter a Musica de menor Nome.
      * @return menorMusica pelo Nome.
-     */
+    */
     private Musica getMenorNome() {
         Musica menorMusica = null;
 
@@ -474,7 +480,7 @@ public class TamanhoVariavelSort {
     /**
      * Metodo para obter a Musica de menor ID.
      * @return menorMusica pelo ID.
-     */
+    */
     private Musica getMenorId() {
         Musica menorMusica = null;
 
@@ -498,7 +504,7 @@ public class TamanhoVariavelSort {
     /**
      * Metodo para testar se ainda tem arquivo para ser lido.
      * @return true, se tiver; false, caso contrario.
-     */
+    */
     private boolean tiverArquivoParaLer() {
         boolean resp = false;
         for (int i = 0; i < NUM_CAMINHOS; i++) {
@@ -511,7 +517,7 @@ public class TamanhoVariavelSort {
     /**
      * Metodo para testar os arquivos a serem lidos existem.
      * @return true, se existirem; false, caso contrario.
-     */
+    */
     private boolean arquivosExistirem() {
         boolean resp = false;
         for (int i = 0; i < NUM_CAMINHOS; i++) {
@@ -527,7 +533,7 @@ public class TamanhoVariavelSort {
      * @param musica - musica lida anteriormente.
      * @param atributo - escohlido.
      * @return true, se estiver ordenado; false, caso contrario.
-     */
+    */
     private boolean isOrdenado (int atributo, Musica musicaTmp, Musica musica) {
         boolean resp = false;
 
@@ -550,7 +556,7 @@ public class TamanhoVariavelSort {
 
     /**
      * Metodo para settar array de verificadores de arquivo para true.
-     */
+    */
     private void setArqOK() {
         for (int i = 0; i < NUM_CAMINHOS; i++) {
             arqOK[i] = true;
@@ -559,7 +565,7 @@ public class TamanhoVariavelSort {
 
     /**
      * Metodo para settar array de Musicas para new Musica().
-     */
+    */
     private void setMusicas() {
         for (int i = 0; i < NUM_CAMINHOS; i++) {
             musicas[i] = new Musica();
