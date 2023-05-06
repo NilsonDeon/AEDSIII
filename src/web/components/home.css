@@ -1,0 +1,14 @@
+#home > div{
+    margin-left: 25em;
+}
+
+.music-btn {
+    margin-top: 2em;
+    display: flex;
+    justify-content: space-around;
+}
+
+.music-btn span {
+    font-size: 2em;
+    cursor: pointer;
+}

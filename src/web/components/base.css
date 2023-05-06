@@ -1,0 +1,29 @@
+:root {
+    --cor1:#191414;
+    --cor2:#1DB954;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 1em;
+    color: var(--cor2);
+}
+
+body {
+    background-color: var(--cor1);
+}
+
+h1 {
+    font-size: calc(1rem * 4.618);
+}
+
+h2 {
+    font-size: calc(1rem * 2.618);
+    color: whitesmoke;
+}
+
+h3 {
+    font-size: calc(1rem * 1.618);
+}

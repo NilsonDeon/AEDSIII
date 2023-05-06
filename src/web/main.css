@@ -1,29 +1,5 @@
-* {
-    margin: 0;
-    padding: 0;
-}
-
-h1 {
-    font-size: 5em;
-    color: whitesmoke;
-}
-
-.c1{
-    background-color: #264653;
-}
-
-.c2{
-    background-color: #2a9d8f;
-}
-
-.c3{
-    background-color: #e9c46a;
-}
-
-.c4{
-    background-color: #f4a261;
-}
-
+@import url(components/home.css);
+@import url(components/base.css);
 
 section {
     width: 100vw;
@@ -36,20 +12,19 @@ section {
 .side-scroller {
     display: flex;
     flex-direction: row;
-    width: 300vw;
+    width: 400vw;
     height: 100vh;
 
     transform: rotate(90deg) translateY(-100vh);
     transform-origin: top left;
-
-    scroll-snap-align: start;
+    
 }
 
 .out-wrapper {
-    width: 100vh;
+    width: calc(100vh - 10em);
     height: 100vw;
 
-    transform: rotate(-90deg) translateX(-100vh);
+    transform: rotate(-90deg) translateX(calc(-100vh + 10em));
     transform-origin: top left;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -57,16 +32,33 @@ section {
 
     scrollbar-width: none;
     -ms-overflow-style: none;
-
-    scroll-snap-type: y mandatory;
 }
 
 .vertical-scroller {
     overflow-x: scroll;
     scrollbar-width: none;
-    -ms-overflow-style: none;
+    -ms-overflow-style: none; 
+    
 }
 
 ::-webkit-scrollbar {
     display: none;
+}
+
+header {
+    height: 5em;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5em;
+}
+
+footer{
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
