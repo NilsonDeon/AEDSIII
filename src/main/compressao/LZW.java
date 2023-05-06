@@ -155,12 +155,12 @@ public class LZW {
             File arquivo = new File(nomeArquivoAntigo);
             arquivo.delete();
 
-        } catch (FileNotFoundException e1) {
-            System.out.println("\nERRO: " + e1.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
-            System.out.println("\nERRO: " + e1.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
-        } catch (IOException e2) {
-            System.out.println("\nERRO: " + e2.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
-            System.out.println("\nERRO: " + e2.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
         }        
     }
     
