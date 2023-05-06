@@ -26,7 +26,7 @@ import java.util.Locale;
 import app.IO;
 import app.Musica;
 import arvores.arvoreB.ArvoreB;
-import arvores.arvoreBStar.ArvoreBStar;
+//import arvores.arvoreBStar.ArvoreBStar;
 import hashing.HashingExtensivel;
 import listaInvertida.ListaInvertida;
 
@@ -51,8 +51,8 @@ public class CRUD {
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
     // Arvore B*
-    private static ArvoreBStar arvoreBStar;
-    private static final String arvoreBStarDB = "./src/resources/ArvoreBStar.db";
+    //private static ArvoreBStar arvoreBStar;
+    //private static final String arvoreBStarDB = "./src/resources/ArvoreBStar.db";
 
     // Lista invertida
     private static ListaInvertida lista;
@@ -67,7 +67,7 @@ public class CRUD {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
-        arvoreBStar = new ArvoreBStar();
+        //arvoreBStar = new ArvoreBStar();
         lista = new ListaInvertida();
     }
     
@@ -125,9 +125,9 @@ public class CRUD {
                 arvoreB.inicializarArvoreB();
 
                 // Apagar antiga "ArvoreBStar.db"
-                File antigaArvoreBStar = new File(arvoreBStarDB);
-                antigaArvoreBStar.delete();
-                arvoreBStar.inicializarArvoreB();
+                //File antigaArvoreBStar = new File(arvoreBStarDB);
+                //antigaArvoreBStar.delete();
+                //arvoreBStar.inicializarArvoreB();
 
                 // Apagar antigas listas invertidas
                 lista.delete();
@@ -176,7 +176,7 @@ public class CRUD {
                     arvoreB.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B*
-                    arvoreBStar.inserir(musica, posRegistro);
+                    //arvoreBStar.inserir(musica, posRegistro);
 
                     // Inserir nas listas invertidas
                     lista.inserir(musica, posRegistro);
@@ -250,7 +250,7 @@ public class CRUD {
                 arvoreB.inserir(musica, finalRegistro);
 
                 // Inserir na arvore B*
-                arvoreBStar.inserir(musica, finalRegistro);
+                //arvoreBStar.inserir(musica, finalRegistro);
 
                 // Inserir nas listas invertidas
                 lista.inserir(musica, finalRegistro);
@@ -387,15 +387,15 @@ public class CRUD {
         long arvoreBFim = now();
 
         // Procurar na Arvore B*
-        long arvoreBStarInicio = now();
-        long posicaoArvoreBStar = arvoreBStar.read(idProcurado);
-        long arvoreBStarFim = now();
+        //long arvoreBStarInicio = now();
+        //long posicaoArvoreBStar = arvoreBStar.read(idProcurado);
+        //long arvoreBStarFim = now();
 
         // Verificar se todas as estruturas encontraram a mesma musica com sucesso
         boolean find = (posicaoSequencial != -1)                &&
                        (posicaoSequencial == posicaoHash)       && 
-                       (posicaoSequencial == posicaoArvoreB)    && 
-                       (posicaoSequencial == posicaoArvoreBStar);
+                       (posicaoSequencial == posicaoArvoreB); //&& 
+                       //(posicaoSequencial == posicaoArvoreBStar);
         
         if(find) {
             // Mostrar musica
@@ -410,22 +410,22 @@ public class CRUD {
         String tempoSeq  = getTempoBusca(sequencialInicio, sequencialFim);
         String tempoHash = getTempoBusca(hashInicio, hashFim);
         String tempoB    = getTempoBusca(arvoreBInicio, arvoreBFim);
-        String tempoStar = getTempoBusca(arvoreBStarInicio, arvoreBStarFim);
+        //String tempoStar = getTempoBusca(arvoreBStarInicio, arvoreBStarFim);
 
         // Obter posicao no arquivo sequencial
         String posSeq  = getPosicao(posicaoSequencial);
         String posHash = getPosicao(posicaoHash);
         String posB    = getPosicao(posicaoArvoreB);
-        String posStar = getPosicao(posicaoArvoreBStar);
+        //String posStar = getPosicao(posicaoArvoreBStar);
 
         // Mostrar tempos de busca
         String temposBusca = "\n ________________________________________________"  +
-                             "\n|    Estruturas    |   Tempo Busca   |  Posicao  |" +
+                             "\n|    Estrutura     |   Tempo Busca   |  Posicao  |" +
                              "\n|------------------|-----------------|-----------|" +
                              "\n| Sequencialmente  | " + tempoSeq +" |"+posSeq +"|" +
                              "\n| Hash Estensivel  | " + tempoHash+" |"+posHash+"|" +
                              "\n| Arvore B         | " + tempoB   +" |"+posB   +"|" +
-                             "\n| Arvore B*        | " + tempoStar+" |"+posStar+"|" +
+                           //"\n| Arvore B*        | " + tempoStar+" |"+posStar+"|" +
                              "\n|__________________|_________________|___________|";
         System.out.println(temposBusca);
         
@@ -916,7 +916,7 @@ public class CRUD {
             arvoreB.delete(idProcurado);
 
             // Deletar na Arvore B*
-            arvoreBStar.delete(idProcurado);
+            //arvoreBStar.delete(idProcurado);
 
         // Senao, mensagem de erro
         } else {
@@ -1208,7 +1208,7 @@ public class CRUD {
                                arvoreB.update(idProcurado, finalArquivo);
 
                                // Atualizar na ArvoreB*
-                               arvoreBStar.update(idProcurado, finalArquivo);
+                               //arvoreBStar.update(idProcurado, finalArquivo);
 
                                // Atualizar nas listas invertidas
                                lista.update(musica, newMusica, finalArquivo);

@@ -12,7 +12,7 @@ import java.util.InputMismatchException;
 import app.*;
 import hashing.HashingExtensivel;
 import arvores.arvoreB.ArvoreB;
-import arvores.arvoreBStar.ArvoreBStar;
+//import arvores.arvoreBStar.ArvoreBStar;
 import listaInvertida.ListaInvertida;
 
 public class OrdenacaoExterna {
@@ -21,14 +21,14 @@ public class OrdenacaoExterna {
     private static IO io;
     private static HashingExtensivel hash;
     private static ArvoreB arvoreB;
-    private static ArvoreBStar arvoreBStar;
+    //private static ArvoreBStar arvoreBStar;
     private static ListaInvertida lista;
 
     public OrdenacaoExterna() {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
-        arvoreBStar = new ArvoreBStar();
+        //arvoreBStar = new ArvoreBStar();
         lista = new ListaInvertida();
     }
 
@@ -185,7 +185,7 @@ public class OrdenacaoExterna {
                     arvoreB.update(musica.getId(), posicaoAtual);
 
                     // Atualizar na arvore B*
-                    arvoreBStar.update(musica.getId(), posicaoAtual);
+                    //arvoreBStar.update(musica.getId(), posicaoAtual);
                     
                     // Atualizar nas listas                   
                     lista.inserir(musica, posicaoAtual);
