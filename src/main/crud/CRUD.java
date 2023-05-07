@@ -29,6 +29,7 @@ import arvores.arvoreB.ArvoreB;
 //import arvores.arvoreBStar.ArvoreBStar;
 import hashing.HashingExtensivel;
 import listaInvertida.ListaInvertida;
+import compressao.*;
 
 /**
  * CRUD - Classe responsavel por realizar as operacoes de manipulacao do arquivo
@@ -57,9 +58,12 @@ public class CRUD {
     // Lista invertida
     private static ListaInvertida lista;
 
+    // Compressao de dados
+    private static LZW lzw;
+    
     // IO
     private static IO io;
-
+    
     /**
      * Construtor padrao da classe CRUD.
     */
@@ -69,6 +73,7 @@ public class CRUD {
         arvoreB = new ArvoreB();
         //arvoreBStar = new ArvoreBStar();
         lista = new ListaInvertida();
+        lzw = new LZW();
     }
     
     /**
@@ -1447,6 +1452,69 @@ public class CRUD {
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
         }
+    }
+    
+    public void comprimir() {
+
+        int opcao = 0;
+        int numCompressoes = 0;
+
+        String menu = "\n+------------------------------------------+" +
+                      "\n|   Escolha o algoritmo para compressao:   |" +
+                      "\n|------------------------------------------|" +
+                      "\n| 1 - Huffman                              |" +
+                      "\n| 2 - LZW                                  |" +
+                      "\n+------------------------------------------+";
+        
+        // Obter opcao desejada
+        do {
+            try {
+                System.out.println(menu);
+                opcao = io.readInt("\nDigite o atributo desejado: ");
+
+                if (opcao < 1 || opcao > 2) {
+                    System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 2.");
+                }
+
+            } catch (InputMismatchException e) {
+                System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 2.");
+                io.readLine();
+            }
+        } while (opcao < 1 || opcao > 2);
+
+        // Obter numero de compressoes desejadas
+        do {
+            try {
+                numCompressoes = io.readInt("\nDigite o numero de compressoes desejadas: ");
+
+                if (numCompressoes <= 0) {
+                    System.out.println("\nERRO: Por favor, digite um valor positivo.");
+                }
+
+            } catch (InputMismatchException e) {
+                System.out.println("\nERRO: Por favor, digite um numero positivo.");
+                io.readLine();
+            }
+        } while (numCompressoes <= 0);
+
+        // Executar compressao
+        String nomeArquivo = "";
+        
+        switch (opcao){
+            case 1:                                            ; break;
+            case 2: nomeArquivo = lzw.comprimir(numCompressoes); break;
+        }
+
+        // Mensagem de sucesso
+        System.out.println("Arquivo comprimido com sucesso: \"" + nomeArquivo + "\"\n");
+
+    }
+
+    public void descomprimir() {
+        String nomeArquivo = lzw.descomprimir(1);
+
+        // Mensagem de sucesso
+        System.out.println("Arquivo comprimido com sucesso: \"" + nomeArquivo + "\"\n");
     }
 
     /**
