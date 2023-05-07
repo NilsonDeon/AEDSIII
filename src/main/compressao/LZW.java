@@ -195,11 +195,12 @@ public class LZW {
 
                 for(int k = 0; k < arrayByte.length; k++) {
                     byte b = arrayByte[k];
-                    String bits = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
-                    System.out.print(bits + "\t");
+                    String hex = String.format("%02X", b & 0xFF);
+                    System.out.print(hex + " ");
                 }
             }
             System.out.println("\n");
+
 
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
@@ -267,6 +268,7 @@ public class LZW {
 
             // Escrever no arquivo
             arqNovo.write(bytesLido);
+            //io.readLine("ENTER");
 
             // Atualizar ponteiro
             long posAtual = arqAntigo.getFilePointer();
@@ -276,27 +278,6 @@ public class LZW {
 
                 // Ler proxima posicao
                 posDicionario = arqAntigo.readInt();
-                
-                // Testar se a posicao esta' incompleta
-                if(posDicionario == ultimaPosicao) {
-
-                    // Duplicar valor faltante
-                    /*
-                    byte[] tmp = dicionario.get(ultimaPosicao);
-                    int tamanho = tmp.length;
-                    dicionario.remove(ultimaPosicao);
-
-                    byte[] bytesDuplicado = new byte[2*tamanho];
-                    for(int i = 0; i < tamanho; i++) {
-                        bytesDuplicado[i] = tmp[i];
-                    }
-                    for(int i = tamanho; i < 2*tamanho; i++) {
-                        bytesDuplicado[i] = tmp[i-tamanho];
-                    }
-
-                    dicionario.add(bytesDuplicado);
-                    */
-                }
 
                 // Obter proxima posicao do array
                 bytesLido = dicionario.get(posDicionario);
@@ -304,10 +285,31 @@ public class LZW {
                 // Escrever no arquivo
                 arqNovo.write(bytesLido);
 
-                // Atualizar ultima posicao dicionario
-                for (int i = 0; i < bytesLido.length; i++) {
-                    bytesAntigo.add(bytesLido[i]);
+                // Testar se a posicao esta' incompleta
+                if(posDicionario == ultimaPosicao) {
+
+                    // Duplicar valor faltante
+                    arqNovo.write(bytesLido);
                 }
+
+                //io.readLine("ENTER");
+
+                // Atualizar ultima posicao dicionario
+                boolean stop = false;
+                for (int i = 0; i < bytesLido.length && stop == false; i++) {
+
+                    // Testar se posicao ja existe no dicionario
+                    int posTeste = getPosicaoDicionario(bytesAntigo);
+                    if(posTeste != -1) {
+                        bytesAntigo.add(bytesLido[i]);
+                    
+                    // Se posicao ainda nao existir, parar de adicionar
+                    } else {
+                        stop = true;
+                    }
+                    
+                }
+
                 dicionario.remove(ultimaPosicao);
                 dicionario.add(toByteArray(bytesAntigo));
 
@@ -326,6 +328,21 @@ public class LZW {
             // Fechar arquivos
             arqAntigo.close();
             arqNovo.close();
+
+            // Mostrar dicionario
+            System.out.println("\nDicionario:");
+            for(int i = 0; i < dicionario.size(); i++) {
+                System.out.print(String.format("\npos %3d: ", i));
+
+                byte[] arrayByte = dicionario.get(i);
+
+                for(int k = 0; k < arrayByte.length; k++) {
+                    byte b = arrayByte[k];
+                    String hex = String.format("%02X", b & 0xFF);
+                    System.out.print(hex + " ");
+                }
+            }
+            System.out.println("\n");
 
             // Apagar arquivo antigo
             File arquivo = new File(nomeArquivoAntigo);
