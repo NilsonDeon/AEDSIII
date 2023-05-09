@@ -18,8 +18,8 @@ public class LZW {
     private static final String registroDB = "./src/resources/Registro.db";
 
     private ArrayList<byte[]> dicionario;
-    private int versaoAtual;
-    private String nomeArquivo;
+    protected int versaoAtual;
+    protected String nomeArquivo;
 
     IO io = new IO();
 
@@ -85,126 +85,142 @@ public class LZW {
             // Inicializar o dicionario
             inicializarDicionario();
 
+            // Abrir a pasta se nao existir
+            File pasta = new File(caminhoPasta);
+            if (!pasta.exists()) {
+                pasta.mkdirs();
+            }
+
             // Abrir arquivo antigo
             arqAntigo = new RandomAccessFile (nomeArquivoAntigo, "rw");
             arqAntigo.seek(0);
 
-            // Abrir arquivo novo
-            versaoAtual++;
-            nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
-            arqNovo = new RandomAccessFile (nomeArquivo, "rw");
-            arqNovo.seek(0);
+            // Somente comprimir se houver arquivo
+            if (arqAntigo.length() > 0) {
 
-            // Variaveis para leitura
-            long posAtual = arqAntigo.getFilePointer();
-            ArrayList<Byte> bytesLido;
+                // Abrir arquivo novo
+                versaoAtual++;
+                nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
+                arqNovo = new RandomAccessFile (nomeArquivo, "rw");
+                arqNovo.seek(0);
 
-            // Comprimir até o fim do arquivo
-            while (posAtual != arqAntigo.length()) {
+                // Variaveis para leitura
+                long posAtual = arqAntigo.getFilePointer();
+                ArrayList<Byte> bytesLido;
 
-                // Resetar bytes lidos
-                bytesLido = new ArrayList<>();
+                // Obter tamanho do arquivo original
+                File arquivoOriginal = new File(nomeArquivoAntigo);
+                long tamArquivoOriginal = arquivoOriginal.length();
 
-                // Ler e adicionar byte
-                bytesLido.add(arqAntigo.readByte());
-               
-                // Obter posicao do byte[] no dicionario
-                int posDicionario = getPosicaoDicionario(bytesLido);
-                //System.out.println("\nposDicionario" + posDicionario);
-                //io.readLine("");
+                // Mostrar barra de progresso
+                System.out.println("\nComprimindo arquivo: ");
 
-                // Comparar se array esta' presente no dicionario, ate' encontrar um que nao esteja
-                while (posDicionario != -1) {
+                // Comprimir até o fim do arquivo
+                while (posAtual != arqAntigo.length()) {
 
-                    byte proximoByte;
+                    // Mostrar barra progresso
+                    io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
 
-                    // Obter posicao atual
-                    posAtual = arqAntigo.getFilePointer();
+                    // Resetar bytes lidos
+                    bytesLido = new ArrayList<>();
 
-                    // Ler somente se nao for fim de arquivo
-                    if (posAtual != arqAntigo.length()) {
+                    // Ler e adicionar byte
+                    bytesLido.add(arqAntigo.readByte());
+                
+                    // Obter posicao do byte[] no dicionario
+                    int posDicionario = getPosicaoDicionario(bytesLido);
 
-                        // Obter proximo byte
-                        proximoByte = arqAntigo.readByte();
+                    // Comparar se array esta' presente no dicionario, ate' encontrar um que nao esteja
+                    while (posDicionario != -1) {
 
-                        // Adicionar mais um byte
-                        bytesLido.add(proximoByte);
+                        byte proximoByte;
 
-                        // Testar se, ao ler o proximo byte, o array ainda existe no dicionario
-                        int newPosDicionario = getPosicaoDicionario(bytesLido);
+                        // Obter posicao atual
+                        posAtual = arqAntigo.getFilePointer();
 
-                        // Se existir, continuar busca
-                        if (newPosDicionario != -1) {
+                        // Ler somente se nao for fim de arquivo
+                        if (posAtual != arqAntigo.length()) {
+
+                            // Obter proximo byte
+                            proximoByte = arqAntigo.readByte();
+
+                            // Adicionar mais um byte
+                            bytesLido.add(proximoByte);
+
+                            // Testar se, ao ler o proximo byte, o array ainda existe no dicionario
+                            int newPosDicionario = getPosicaoDicionario(bytesLido);
+
+                            // Se existir, continuar busca
+                            if (newPosDicionario != -1) {
+                            
+                                // Atualizar ponteiro
+                                posAtual = arqAntigo.getFilePointer();
+                            
+                            // Senao, inserir no arquivo novo o byte codificado
+                            } else {
+                            
+                                // Inserir no novo arquivo a posicao no dicionario como inteiro
+                                byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
+                                arqNovo.write(posDicionarioBytes);
+
+                                // Atualizar dicionario
+                                byte[] byteArray = toByteArray(bytesLido);
+                                dicionario.add(byteArray);
+
+                                // Voltar ponteiro
+                                arqAntigo.seek(posAtual);
+                            }
+
+                            // Atualizar posicao
+                            posDicionario = newPosDicionario;
                         
-                            // Atualizar ponteiro
-                            posAtual = arqAntigo.getFilePointer();
-                        
-                        // Senao, inserir no arquivo novo o byte codificado
+                        // Se foi fim de arquivo, salvar o valor ja encontrado
                         } else {
-                           
+
                             // Inserir no novo arquivo a posicao no dicionario como inteiro
                             byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
                             arqNovo.write(posDicionarioBytes);
+                            posDicionario = -1;
 
                             // Atualizar dicionario
                             byte[] byteArray = toByteArray(bytesLido);
                             dicionario.add(byteArray);
-
-                            // Voltar ponteiro
-                            arqAntigo.seek(posAtual);
                         }
-
-                        // Atualizar posicao
-                        posDicionario = newPosDicionario;
-                    
-                    // Se foi fim de arquivo, salvar o valor ja encontrado
-                    } else {
-
-                        // Inserir no novo arquivo a posicao no dicionario como inteiro
-                        byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
-                        arqNovo.write(posDicionarioBytes);
-                        posDicionario = -1;
-
-                        // Atualizar dicionario
-                        byte[] byteArray = toByteArray(bytesLido);
-                        dicionario.add(byteArray);
-
-                    } 
-                    
+                    }
                 }
-            
-            System.out.println(posAtual + " / " + arqAntigo.length());
+
+                // Mostrar barra progresso completa
+                io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
+
+                // Fechar arquivo novo
+                arqNovo.close();
+
+                // Obter tamanho do arquivo novo
+                File arquivoComprimido = new File(nomeArquivo);
+                long tamArquivoComprimido = arquivoComprimido.length();
+
+                // Mostrar compressão
+                double compressao = (double)(tamArquivoOriginal - tamArquivoComprimido) / tamArquivoOriginal * 100;
+                System.out.println(String.format("\nTaxa compressao: %.2f%%", compressao));
+
+            // Solicitar que carregue dados iniciais
+            } else {
+                System.out.println("\nERRO: Registro vazio!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
             }
 
-            // Fechar arquivos
+            // Fechar arquivo antigo
             arqAntigo.close();
-            arqNovo.close();
 
             // Apagar arquivo antigo se nao for a base de dados
             if(! nomeArquivoAntigo.equals(registroDB)) {
                 File arquivo = new File(nomeArquivoAntigo);
                 arquivo.delete();
             }
-
-            // Mostrar dicionario
-            System.out.println("\nDicionario:");
-            for(int i = 0; i < dicionario.size(); i++) {
-                System.out.print(String.format("\npos %3d: ", i));
-
-                byte[] arrayByte = dicionario.get(i);
-
-                for(int k = 0; k < arrayByte.length; k++) {
-                    byte b = arrayByte[k];
-                    String hex = String.format("%02X", b & 0xFF);
-                    System.out.print(hex + " ");
-                }
-            }
-            System.out.println("\n");
-
-
+            
         } catch (FileNotFoundException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
-            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
@@ -235,140 +251,137 @@ public class LZW {
             arqAntigo = new RandomAccessFile (nomeArquivoAntigo, "rw");
             arqAntigo.seek(0);
 
-            // Atualizar versao
-            versaoAtual--;
+            // Somente descomprimir se houver arquivo
+            if (arqAntigo.length() > 0) {
 
-            // Se versao atual for a zero, significa que esta' voltando ao original
-            if(versaoAtual == 0) {
-                nomeArquivo = registroDB;
+                // Atualizar versao
+                versaoAtual--;
 
-                // Apagar Registro antigo
-                File arquivo = new File(nomeArquivo);
-                arquivo.delete();
-            
-            // Se for mais que zero, ainda esta comprimido
-            } else {
-                nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
-            }
+                // Se versao atual for a zero, significa que esta' voltando ao original
+                if(versaoAtual == 0) {
+                    nomeArquivo = registroDB;
 
-            // Abrir arquivo
-            arqNovo = new RandomAccessFile (nomeArquivo, "rw");
-            arqNovo.seek(0);
+                    // Apagar Registro antigo
+                    File arquivo = new File(nomeArquivo);
+                    arquivo.delete();
+                
+                // Se for mais que zero, ainda esta comprimido
+                } else {
+                    nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
+                }
 
-            // Ler primeira posicao
-            int posDicionario = arqAntigo.readInt();
+                // Abrir arquivo
+                arqNovo = new RandomAccessFile (nomeArquivo, "rw");
+                arqNovo.seek(0);
 
-            // Obter array na posicao lida
-            byte[] bytesLido = dicionario.get(posDicionario);
-            ArrayList<Byte> bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
+                // Ler primeira posicao
+                int posDicionario = arqAntigo.readInt();
 
-            // Adicionar no dicionario
-            dicionario.add(dicionario.get(posDicionario));
-            int ultimaPosicao = dicionario.size() - 1;
+                // Obter array na posicao lida
+                byte[] bytesLido = dicionario.get(posDicionario);
+                ArrayList<Byte> bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
 
-            // Escrever no arquivo
-            arqNovo.write(bytesLido);
-            //io.readLine("ENTER");
-
-            // Atualizar ponteiro
-            long posAtual = arqAntigo.getFilePointer();
-
-            // Descomprimir ate' acabar arquivo
-            while (posAtual != arqAntigo.length()) {
-
-                // Ler proxima posicao
-                posDicionario = arqAntigo.readInt();
-
-                // Obter proxima posicao do array
-                bytesLido = dicionario.get(posDicionario);
+                // Adicionar no dicionario
+                dicionario.add(dicionario.get(posDicionario));
+                int ultimaPosicao = dicionario.size() - 1;
 
                 // Escrever no arquivo
                 arqNovo.write(bytesLido);
 
-                // Testar se a posicao esta' incompleta
-                if(posDicionario == ultimaPosicao) {
-
-                    // Duplicar valor faltante
-                    arqNovo.write(bytesLido);
-                }
-
-                //io.readLine("ENTER");
-
-                // Atualizar ultima posicao dicionario
-                boolean stop = false;
-                for (int i = 0; i < bytesLido.length && stop == false; i++) {
-
-                    // Testar se posicao ja existe no dicionario
-                    int posTeste = getPosicaoDicionario(bytesAntigo);
-                    if(posTeste != -1) {
-                        bytesAntigo.add(bytesLido[i]);
-                    
-                    // Se posicao ainda nao existir, parar de adicionar
-                    } else {
-                        stop = true;
-                    }
-                    
-                }
-
-                dicionario.remove(ultimaPosicao);
-                dicionario.add(toByteArray(bytesAntigo));
-
-                // Atualizar array antigo
-                bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
-
-                // Atualizar posicao nova dicionario
-                dicionario.add(bytesLido);
-                ultimaPosicao++;
-
                 // Atualizar ponteiro
-                posAtual = arqAntigo.getFilePointer();
+                long posAtual = arqAntigo.getFilePointer();
 
-                System.out.println(posAtual + " / " + arqAntigo.length());
-            }
-            // Fechar arquivos
-            arqAntigo.close();
-            arqNovo.close();
+                // Obter tamanho do arquivo original
+                File arquivoOriginal = new File(nomeArquivoAntigo);
+                long tamArquivoOriginal = arquivoOriginal.length();
 
-            // Mostrar dicionario
-            System.out.println("\nDicionario:");
-            for(int i = 0; i < dicionario.size(); i++) {
-                System.out.print(String.format("\npos %3d: ", i));
+                // Descomprimir ate' acabar arquivo
+                while (posAtual != arqAntigo.length()) {
 
-                byte[] arrayByte = dicionario.get(i);
+                    // Mostrar barra progresso
+                    io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
 
-                for(int k = 0; k < arrayByte.length; k++) {
-                    byte b = arrayByte[k];
-                    String hex = String.format("%02X", b & 0xFF);
-                    System.out.print(hex + " ");
+                    // Ler proxima posicao
+                    posDicionario = arqAntigo.readInt();
+
+                    // Obter proxima posicao do array
+                    bytesLido = dicionario.get(posDicionario);
+
+                    // Atualizar ultima posicao dicionario
+                    boolean stop = false;
+                    for (int i = 0; i < bytesLido.length && stop == false; i++) {
+
+                        // Testar se posicao ja existe no dicionario
+                        int posTeste = getPosicaoDicionario(bytesAntigo);
+                        if(posTeste != -1) {
+                            bytesAntigo.add(bytesLido[i]);
+                        
+                        // Se posicao ainda nao existir, parar de adicionar
+                        } else {
+                            stop = true;
+                        }
+                        
+                    }
+                    dicionario.remove(ultimaPosicao);
+                    dicionario.add(toByteArray(bytesAntigo));
+
+                    // Atualizar posicao do array
+                    bytesLido = dicionario.get(posDicionario);
+
+                    // Escrever no arquivo
+                    arqNovo.write(bytesLido);
+
+                    // Atualizar array antigo
+                    bytesAntigo = toByteArrayList(bytesLido);
+
+                    // Atualizar posicao nova dicionario
+                    dicionario.add(bytesLido);
+                    ultimaPosicao++;
+
+                    // Atualizar ponteiro
+                    posAtual = arqAntigo.getFilePointer();
                 }
+
+                // Mostrar barra progresso completa
+                io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
+
+                // Fechar arquivo novo
+                arqNovo.close();
             }
-            System.out.println("\n");
+
+            // Fechar arquivo antigo
+            arqAntigo.close();
 
             // Apagar arquivo antigo
             File arquivo = new File(nomeArquivoAntigo);
             arquivo.delete();
 
-            // Se voltou ao original, apagar pasta tambem
+            // Se voltou ao original e so tinha esse arquivo, apagar pasta tambem
             if (versaoAtual == 0) {
 
                 // Abrir pasta de compressao
                 File pasta = new File(caminhoPasta);
                 
-                // Se pasta existir, procurar versao existente
+                // Verificar se e' uma pasta existente
                 if (pasta.exists() && pasta.isDirectory()) {
 
-                    // Apagar pasta
-                    pasta.delete();
-                }    
-            }
+                    // Verificar se a pasta esta' vazia
+                    File[] arquivos = pasta.listFiles();
+                    if (arquivos == null || arquivos.length == 0) {
+
+                        // Apagar pasta
+                        pasta.delete();
+                    }
+                }
+            }   
 
         } catch (FileNotFoundException e) {
-            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
-            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
         } catch (IOException e) {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
-        }       
+        }     
 
         return nomeArquivo;
 
@@ -486,11 +499,6 @@ public class LZW {
 
         // Se pasta nao existir, o arquivo ainda nao foi comprimido
         } else {
-
-            // Abrir a pasta
-            if (!pasta.exists()) {
-                pasta.mkdirs();
-            }
 
             // Nao definir nova versao comprimida ainda
             versaoAtual = 0;

@@ -24,6 +24,9 @@ public class OrdenacaoExterna {
     //private static ArvoreBStar arvoreBStar;
     private static ListaInvertida lista;
 
+    /**
+     * Construtor padrao da classe Ordenacao Externa.
+     */
     public OrdenacaoExterna() {
         io = new IO();
         hash = new HashingExtensivel();
