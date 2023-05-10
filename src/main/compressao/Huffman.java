@@ -1,148 +1,474 @@
+// Package
 package compressao;
 
+// Bibliotecas
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+// Bibliotecas proprias
+import app.IO;
+
 public class Huffman {
-    
-    // classe interna para representar um no na arvore de Huffman
-    private static class No implements Comparable<No> {
-        byte valor;
-        int frequencia;
-        No esquerda;
-        No direita;
-        
-        public No(byte valor, int frequencia) {
-            this.valor = valor;
-            this.frequencia = frequencia;
-        }
 
-        public No(byte valor) {
-            this.valor = valor;
-            this.esquerda = null;
-            this.direita = null;
-        }
+    // Caminhos para arquivos
+    private static final String caminhoPasta = "./src/resources/compressao";
+    private static final String caminhoPastaArvore = "./src/resources/compressao/arvoreHuffman";
+    private static final String registroDB = "./src/resources/Registro.db";
 
-        public No(No esquerda, No direita) {
-            this.valor = 0;
-            this.esquerda = esquerda;
-            this.direita = direita;
-        }
-        
-        // compara os nos com base em sua frequencia, para a construcão da fila de prioridade
-        public int compareTo(No other) {
-            return this.frequencia - other.frequencia;
-        }
+    private No raiz;
+    protected int versaoAtual;
+    protected String nomeArquivo;
+    protected String nomeArquivoArvore;
+
+    IO io = new IO();
+
+    /**
+     * Construtor padrao da classe Huffman.
+     */
+    public Huffman() {
+        raiz = null;
+
+        // Atualizar versao e nome arquivos atuais
+        updateVersaoAtual();
     }
-    
-    // retorna um mapa com a recorrencia de cada byte no arquivo
-    public static Map<Byte, Integer> recorrenciaDeBytes(String caminhoArquivo) throws IOException {
+
+    /**
+     * Metodo para comprimir um arquivo binario, utilizando o algoritmo Huffman.
+     * @param numCompressoes - numero de compressoes a serem realizadas.
+     * @return nomeArquivo gerado.
+     */
+    public String comprimir(int numCompressoes) {
+
+        String nomeArquivo = "";
+        while (numCompressoes > 0) {
+            nomeArquivo = comprimir();
+            numCompressoes--;
+        }
+
+        return nomeArquivo;
+    }
+
+    /**
+     * Metodo para descomprimir um arquivo binario, utilizando o algoritmo 
+     * Huffman.
+     * @param numDescompressoes - numero de descompressoes a serem realizadas.
+     * @return nomeArquivo gerado.
+     */
+    public String descomprimir(int numDescompressoes) {
+        
+        String nomeArquivo = "";
+        while (numDescompressoes > 0) {
+            nomeArquivo = descomprimir();
+            numDescompressoes--;
+        }
+
+        return nomeArquivo;
+    }
+
+    /**
+     * Metodo privado para comprimir um arquivo binario, utilizando o algoritmo
+     * Huffman.
+     * @return nomeArquivo gerado.
+     */
+    private String comprimir() {
+
+        RandomAccessFile inputFile = null;
+        RandomAccessFile outputFile = null;
+
+        // Atualizar nome arquivo
+        String nomeArquivoAntigo = nomeArquivo;
+
+        try {
+
+            // Abrir a pasta se nao existir
+            File pasta = new File(caminhoPasta);
+            if (!pasta.exists()) {
+                pasta.mkdirs();
+            }
+
+            // Abrir a pasta para arvore se nao existir
+            File pastaArvore = new File(caminhoPastaArvore);
+            if (!pastaArvore.exists()) {
+                pastaArvore.mkdirs();
+            }
+
+            // Abrir arquivo antigo
+            inputFile = new RandomAccessFile (nomeArquivoAntigo, "rw");
+            inputFile.seek(0);
+
+            // Somente comprimir se houver arquivo
+            if (inputFile.length() > 0) {
+
+                // Abrir arquivo novo
+                versaoAtual++;
+                nomeArquivo = caminhoPasta + "/RegistroHuffmanCompressao" + versaoAtual + ".db";
+                outputFile = new RandomAccessFile (nomeArquivo, "rw");
+                outputFile.seek(0);
+
+                // Obter tamanho do arquivo original
+                File arquivoOriginal = new File(nomeArquivoAntigo);
+                long tamArquivoOriginal = arquivoOriginal.length();
+
+                // Mostrar barra de progresso
+                System.out.println("\nComprimindo arquivo: ");
+
+                // Obter frequencia de cada byte no arquivo
+                Map<Byte, Integer> frequencias = recorrenciaDeBytes(nomeArquivoAntigo);
+
+                // Gerar arvore Huffman e salvar em arquivo
+                gerarArvoreHuffman(frequencias);
+
+                // Gravar arvore em arquivo
+                nomeArquivoArvore = caminhoPastaArvore + "/ArvoreHuffmanCompressao" + versaoAtual + ".db";
+                RandomAccessFile output = new RandomAccessFile(nomeArquivoArvore, "rw");
+                escreverArvore(raiz, output);
+                output.close();
+
+                // Criar o mapa de codigos para cada byte da arvore de Huffman
+                Map<Byte, String> codigos = gerarCodigos();
+
+                // String para os codigos gerados
+                StringBuilder bits = new StringBuilder();
+
+                // Percorrer ate' fim de arquivo
+                long posAtual = inputFile.getFilePointer();
+                while (posAtual != inputFile.length()) {
+
+                    // Mostrar barra progresso
+                    io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
+
+                    // Ler byte
+                    byte byteLido = inputFile.readByte();
+                    
+                    // Adicionar codigo do bit lido
+                    String codigo = codigos.get(byteLido);
+                    bits.append(codigo);
+
+                    // Se tiver 4 caracteres ou mais
+                    while (bits.length() >= 8) {
+
+                        // Escrever como 8 bits (1 byte)
+                        String byteStr = bits.substring(0, 8);
+                        byte byteCompleto = (byte)Integer.parseInt(byteStr, 2);
+                        outputFile.write(byteCompleto);
+                        bits.delete(0, 8);
+
+                    }
+
+                    // Atualizar ponteiro
+                    posAtual = inputFile.getFilePointer();
+                }
+        
+                // Se faltou bits, escreve-los no arquivo
+                if (bits.length() > 0) {
+
+                    // Completar com zeros no fim
+                    String byteStr = String.format("%-8d", Integer.parseInt(bits.toString(), 2)).replace(' ', '0');
+                    byte byteCompleto = (byte)Integer.parseInt(byteStr, 2);
+
+                    // Escrever em arquivo
+                    outputFile.write(byteCompleto);
+                }
+
+                // Fechar arquivos
+                inputFile.close();
+                outputFile.close();
+
+                // Mostrar barra progresso completa
+                io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
+
+                // Obter tamanho do arquivo novo
+                File arquivoComprimido = new File(nomeArquivo);
+                long tamArquivoComprimido = arquivoComprimido.length();
+
+                // Mostrar compressão
+                double compressao = (double)(tamArquivoOriginal - tamArquivoComprimido) / tamArquivoOriginal * 100;
+                System.out.println(String.format("\nTaxa compressao: %.2f%%", compressao));
+
+                // Apagar arquivo antigo se nao for a base de dados
+                if(! nomeArquivoAntigo.equals(registroDB)) {
+                    File arquivo = new File(nomeArquivoAntigo);
+                    arquivo.delete();
+                }
+                
+            // Solicitar que carregue dados iniciais
+            } else {
+                System.out.println("\nERRO: Registro vazio!" +
+                                   "\n      Tente carregar os dados iniciais primeiro!\n");
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+        }
+        
+        return nomeArquivo;
+    }
+
+    /**
+     * Metodo privado para descomprimir um arquivo binario, utilizando o algoritmo
+     * LZW.
+     * @return nomeArquivo gerado.
+     */
+    private String descomprimir() {
+        
+        RandomAccessFile arqAntigo = null;
+        RandomAccessFile arqNovo = null;
+        RandomAccessFile arqArvore = null;
+
+        // Atualizar nome arquivo
+        String nomeArquivoAntigo = nomeArquivo;
+
+        try {
+
+            // Abrir arquivo antigo
+            arqAntigo = new RandomAccessFile (nomeArquivoAntigo, "rw");
+            arqAntigo.seek(0);
+
+            // Somente descomprimir se houver arquivo
+            if (arqAntigo.length() > 0) {
+
+                // Carregar arvore atual de compressao
+                nomeArquivoArvore = caminhoPastaArvore + "/ArvoreHuffmanCompressao" + versaoAtual + ".db";
+                arqArvore = new RandomAccessFile(nomeArquivoArvore, "r");
+                raiz = lerArvore(arqArvore);
+                arqArvore.close();
+
+                // Atualizar versao
+                versaoAtual--;
+
+                // Se versao atual for a zero, significa que esta' voltando ao original
+                if(versaoAtual == 0) {
+                    nomeArquivo = registroDB;
+
+                    // Apagar Registro antigo
+                    File arquivo = new File(nomeArquivo);
+                    arquivo.delete();
+                
+                // Se for mais que zero, ainda esta comprimido
+                } else {
+                    nomeArquivo = caminhoPasta + "/RegistroHuffmanCompressao" + versaoAtual + ".db";
+                }
+
+                // Abrir arquivo
+                arqNovo = new RandomAccessFile (nomeArquivo, "rw");
+                arqNovo.seek(0);
+
+                // Obter tamanho do arquivo original
+                File arquivoOriginal = new File(nomeArquivoAntigo);
+                long tamArquivoOriginal = arquivoOriginal.length();
+
+                // Mostrar barra de progresso
+                System.out.println("\nComprimindo arquivo: ");
+
+                // String para os codigos gerados
+                StringBuilder bits = new StringBuilder();
+
+                // Percorrer ate' fim de arquivo
+                long posAtual = arqAntigo.getFilePointer();
+                while (posAtual != arqAntigo.length()) {
+
+                    // Mostrar barra progresso
+                    io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
+
+                    // Ler byte
+                    byte byteLido = arqAntigo.readByte();
+
+                    // Converter para string binaria
+                    String byteStr = String.format("%8s", Integer.toBinaryString(byteLido & 0xFF)).replace(' ', '0');
+                    bits.append(byteStr);
+
+                    // Percorrer string binaria procurando codigo valido
+                    boolean findByte = true;
+                    while (findByte) {
+                        int pos = 0;
+                        No no = raiz;
+                        while (pos < bits.length() && no != null && !isFolha(no)) {
+
+                            // Procurar No folha com codigo valido
+                            char bit = bits.charAt(pos);
+                            pos++;
+
+                            if (bit == '0') {
+                                no = no.esquerda;
+                            } else {
+                                no = no.direita;
+                            }
+                        }
+
+                        // Testar se encontrou o codigo
+                        findByte = pos != bits.length();
+
+                        if (findByte) {
+
+                            // Obter valor do byte codificado e salvar
+                            byte byteOriginal = no.valor;
+                            arqNovo.write(byteOriginal);
+
+                            // Deletar String utilizada
+                            bits.delete(0, pos);
+                        }
+                    }
+
+                    // Atualizar ponteiro
+                    posAtual = arqAntigo.getFilePointer();
+
+                }
+                
+                // Mostrar barra progresso completa
+                io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
+                
+                // Fechar arquivos
+                arqAntigo.close();
+                arqNovo.close();
+
+                // Apagar arquivos antigos
+                File arquivo = new File(nomeArquivoAntigo);
+                File arquivoArvore = new File(nomeArquivoArvore);
+                arquivo.delete();
+                arquivoArvore.delete();
+
+                // Se voltou ao original e so tinha esse arquivo, apagar pasta tambem
+                if (versaoAtual == 0) {
+
+                    // Abrir pasta de compressao
+                    File pasta = new File(caminhoPasta);
+                    File pastaArvore = new File(caminhoPastaArvore);
+
+                    // Verificar se pasta das arvores existe
+                    if (pastaArvore.exists() && pastaArvore.isDirectory()) {
+
+                        // Verificar se a pasta esta' vazia
+                        File[] arquivos = pastaArvore.listFiles();
+                        if (arquivos == null || arquivos.length == 0) {
+
+                            // Apagar pasta
+                            pastaArvore.delete();
+                        }
+                    }
+
+                    // Verificar se e' uma pasta existente
+                    if (pasta.exists() && pasta.isDirectory()) {
+
+                        // Verificar se a pasta esta' vazia
+                        File[] arquivos = pasta.listFiles();
+                        if (arquivos == null || arquivos.length == 0) {
+
+                            // Apagar pasta
+                            pasta.delete();
+                        }
+                    }
+                }   
+
+            // Solicitar que carregue dados iniciais
+            } else {
+                System.out.println("\nERRO: Registro vazio!" +
+                                "\n      Tente carregar os dados iniciais primeiro!\n");
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: Registro vazio!" +
+                            "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoAntigo + "\"\n");
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivo + "\"\n");
+        }
+        
+        return nomeArquivo;
+    }
+
+    /**
+     * Metodo para obter um mapeamento com a recorrencia de cada byte no arquivo.
+     * @param caminhoArquivo - para arquivo que se deseja comprimir.
+     * @return mapa com a recorrencia desejada.
+     */
+    private Map<Byte, Integer> recorrenciaDeBytes(String caminhoArquivo) {
         Map<Byte, Integer> recorrencia = new HashMap<>();
 
         try (RandomAccessFile arquivo = new RandomAccessFile(caminhoArquivo, "r")) {
-            byte[] buffer = new byte[1024];
-            int bytesLidos;
 
-            while ((bytesLidos = arquivo.read(buffer)) != -1) {
-                for (int i = 0; i < bytesLidos; i++) {
-                    byte b = buffer[i];
-                    if (recorrencia.containsKey(b)) {
-                        recorrencia.put(b, recorrencia.get(b) + 1);
-                    } else {
-                        recorrencia.put(b, 1);
-                    }
+            // Obter posicao arquivo
+            long posAtual = arquivo.getFilePointer();
+
+            // Percorrer ate' fim de arquivo
+            while (posAtual != arquivo.length()) {
+                byte byteLido = arquivo.readByte();
+
+                // Adicionar ao mapa, aumentando a frequencia se existir
+                if (recorrencia.containsKey(byteLido)) {
+                    recorrencia.put(byteLido, recorrencia.get(byteLido) + 1);
+                } else {
+                    recorrencia.put(byteLido, 1);
                 }
+
+                posAtual = arquivo.getFilePointer();
             }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("\nERRO: Registro vazio!" +
+                               "\n      Tente carregar os dados iniciais primeiro!\n");
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + caminhoArquivo + "\"\n");
         }
 
         return recorrencia;
     }
-    
-    public static void imprimirRecorrenciaDeBytes(Map<Byte, Integer> recorrencia) {
-        for (Map.Entry<Byte, Integer> entry : recorrencia.entrySet()) {
-            byte b = entry.getKey();
-            int ocorrencias = entry.getValue();
-            System.out.printf("Byte 0x%02X: %d ocorrencias%n", b & 0xFF, ocorrencias);
-        }
-    }
 
-    // constroi a arvore de Huffman a partir do mapa de recorrencia de bytes
-    public static No construirArvore(Map<Byte, Integer> recorrencia) {
-        PriorityQueue<No> fila = new PriorityQueue<>();
-        
-        // adicionar cada byte como um no na fila de prioridade
-        for (Map.Entry<Byte, Integer> entry : recorrencia.entrySet()) {
-            fila.offer(new No(entry.getKey(), entry.getValue()));
-        }
-        
-        // combinar os nos com menor frequencia ate que haja apenas um no restante na fila
-        while (fila.size() > 1) {
-            No esquerda = fila.poll();
-            No direita = fila.poll();
-            No pai = new No((byte) 0, esquerda.frequencia + direita.frequencia);
-            pai.esquerda = esquerda;
-            pai.direita = direita;
-            fila.offer(pai);
-        }
-        
-        // o ultimo no restante na fila e a raiz da arvore de Huffman
-        return fila.poll();
-    }
+    /**
+     * Metodo para gerar a arvore de Huffman, a partir da frequencia de cada
+     * byte.
+     * @param frequencias - mapeamento da frequencia de cada byte no arquivo.
+     */
+    private void gerarArvoreHuffman(Map<Byte, Integer> frequencias) {
 
-    // escreve a arvore de Huffman em um arquivo binario
-    public static void escreverArvore(No no, DataOutputStream out) throws IOException {
-        if (no == null) {
-            return;
-        }
-
-        if (no.esquerda == null && no.direita == null) {
-            // escreve um byte 0 seguido do valor do byte
-            out.writeByte(0);
-            out.writeByte(no.valor);
-        } else {
-            // escreve um byte 1
-            out.writeByte(1);
-            escreverArvore(no.esquerda, out);
-            escreverArvore(no.direita, out);
-        }
-    }
-
-    public static No gerarArvoreHuffman(Map<Byte, Integer> frequencias) {
-        // cria uma fila de prioridade com os nós folha
+        // Cria uma fila de prioridade com os Nos folha
         PriorityQueue<No> fila = new PriorityQueue<>();
         for (Map.Entry<Byte, Integer> entry : frequencias.entrySet()) {
             No no = new No(entry.getKey(), entry.getValue());
             fila.offer(no);
         }
     
-        // cria a arvore de Huffman a partir da fila de prioridade
+        // Cria a arvore de Huffman a partir da fila de prioridade
         while (fila.size() > 1) {
-            // remove os dois nós com menor frequência
+
+            // Remove os dois Nos com menor frequência
             No noEsquerda = fila.poll();
             No noDireita = fila.poll();
     
-            // cria um novo nó interno com a soma das frequências dos nós removidos
-            No novoNo = new No((byte) 0, noEsquerda.frequencia + noDireita.frequencia);
-            novoNo.esquerda = noEsquerda;
-            novoNo.direita = noDireita;
+            // Cria um novo No interno com a soma das frequências dos nós removidos
+            int novaFrequencia = noEsquerda.frequencia + noDireita.frequencia;
+            No novoNo = new No(novaFrequencia, noEsquerda, noDireita);
     
-            // adiciona o novo nó à fila
+            // Adiciona o novo No 'a fila
             fila.offer(novoNo);
         }
     
-        // retorna a raiz da arvore de Huffman
-        return fila.poll();
+        // Adiciona o No 'a raiz da arvore de Huffman
+        raiz = fila.poll();
     }
 
-    public static Map<Byte, String> gerarCodigos(No raiz) {
+    /**
+     * Metodo para gerar os codigos para cada byte da arvore Huffman.
+     * @return - String com o codigo gerado de zeros e uns.
+     */
+    private Map<Byte, String> gerarCodigos() {
         Map<Byte, String> codigos = new HashMap<>();
         gerarCodigosRecursivo(raiz, "", codigos);
         return codigos;
     }
     
-    private static void gerarCodigosRecursivo(No no, String codigoAtual, Map<Byte, String> codigos) {
+    /**
+     * Metodo recursivo para gerar os codigos da arvore Huffman.
+     * @param no - No atual em analise.
+     * @param codigoAtual - String com o codigo atual em desenvolvimento.
+     * @param codigos - Mapeamento do codigo para cada byte.
+     */
+    private void gerarCodigosRecursivo(No no, String codigoAtual, Map<Byte, String> codigos) {
         if (no == null) {
             return;
         }
@@ -154,132 +480,149 @@ public class Huffman {
             gerarCodigosRecursivo(no.direita, codigoAtual + "1", codigos);
         }
     }
-    
-    public static void comprimir(String caminhoArquivo, String caminhoArquivoComprimido, No raiz) throws IOException {
 
-        // cria um mapa de códigos para cada byte da arvore de Huffman
-        Map<Byte, String> codigos = gerarCodigos(raiz);
+    /**
+     * Metodo para escrever a arvore Huffman gerada em arquivo.
+     * @param no - No atual em analise.
+     * @param output - Ponteiro para o arquivo da arvore.
+     */
+    private void escreverArvore(No no, RandomAccessFile output) {
 
-        try (RandomAccessFile inputFile = new RandomAccessFile(caminhoArquivo, "r");
-             RandomAccessFile outputFile = new RandomAccessFile(caminhoArquivoComprimido, "rw")) {
-    
-            // cria um buffer para armazenar os bytes do arquivo original
-            byte[] buffer = new byte[1024];
-            int bytesLidos;
-    
-            // escreve os bytes comprimidos no arquivo de saída
-            StringBuilder bits = new StringBuilder();
-            long posicaoArquivo = 0;
-            while ((bytesLidos = inputFile.read(buffer)) != -1) {
-                for (int i = 0; i < bytesLidos; i++) {
-                    byte b = buffer[i];
-                    String codigo = codigos.get(b);
-                    bits.append(codigo);
-                    while (bits.length() >= 8) {
-                        String byteStr = bits.substring(0, 8);
-                        int byteInt = Integer.parseInt(byteStr, 2);
-                        outputFile.seek(posicaoArquivo);
-                        outputFile.write(byteInt);
-                        posicaoArquivo++;
-                        bits.delete(0, 8);
-                    }
-                }
-            }
-    
-            // se houver bits não utilizados, escreve o ultimo byte no arquivo de saída
-            if (bits.length() > 0) {
-                String byteStr = bits.toString();
-                while (byteStr.length() < 8) {
-                    byteStr += "0";
-                }
-                int byteInt = Integer.parseInt(byteStr, 2);
-                outputFile.seek(posicaoArquivo);
-                outputFile.write(byteInt);
-            }
-        }
-
-        escreverArvore(raiz, new DataOutputStream(new FileOutputStream("arvore.db")));
-    }
-    
-    public static No lerArvore(DataInputStream in) throws IOException {
-        int bit = in.readByte();
-        if (bit == 0) {
-            byte valor = in.readByte();
-            return new No(valor);
-        } else {
-            No esquerda = lerArvore(in);
-            No direita = lerArvore(in);
-            return new No(esquerda, direita);
-        }
-    }
-
-    public static void descomprimir(String caminhoArquivoComprimido, String caminhoArquivoOriginal) throws IOException {
-        
-        try (RandomAccessFile inputFile = new RandomAccessFile(caminhoArquivoComprimido, "r");
-             FileOutputStream outputFile = new FileOutputStream(caminhoArquivoOriginal)) {
-            
-            // Lê a árvore de Huffman a partir do arquivo "arvore.db"
-            No raiz = lerArvore(new DataInputStream(new FileInputStream("arvore.db")));
-
-            // Cria um buffer para armazenar os bytes do arquivo comprimido
-            byte[] buffer = new byte[1024];
-            int bytesLidos;
-            
-            // Decodifica os bytes e escreve no arquivo de saída
-            StringBuilder bits = new StringBuilder();
-            while ((bytesLidos = inputFile.read(buffer)) != -1) {
-                for (int i = 0; i < bytesLidos; i++) {
-                    int byteInt = buffer[i] & 0xFF;
-                    String byteStr = Integer.toBinaryString(byteInt);
-                    while (byteStr.length() < 8) {
-                        byteStr = "0" + byteStr;
-                    }
-                    bits.append(byteStr);
-                }
-                while (bits.length() >= 8) {
-                    No no = raiz;
-                    while (no.esquerda != null && no.direita != null) {
-                        char bit = bits.charAt(0);
-                        bits.deleteCharAt(0);
-                        if (bit == '0') {
-                            no = no.esquerda;
-                        } else {
-                            no = no.direita;
-                        }
-                    }
-                    byte b = no.valor;
-                    outputFile.write(b);
-                }
-            }
-        }
-    }
-
-    public static void main(String[] args) {
         try {
-            // caminho do arquivo de entrada
-            String caminhoArquivo = "Registro.db";
+            // Escrever enquanto No diferente de null
+            if (no != null) {
 
-            // obtém a frequência de cada byte no arquivo
-            Map<Byte, Integer> frequencias = recorrenciaDeBytes(caminhoArquivo);
-
-            // gera a arvore de Huffman
-            No raiz = gerarArvoreHuffman(frequencias);
-
-            // abre o arquivo para escrita
-            FileOutputStream fileOut = new FileOutputStream("arvore.db");
-            DataOutputStream dataOut = new DataOutputStream(fileOut);
-
-            // escreve a arvore de Huffman no arquivo
-            escreverArvore(raiz, dataOut);
-
-            comprimir(caminhoArquivo, "arquivoComprimido.db", raiz);
-            descomprimir("arquivoComprimido.db", "arquivoDescomprimido.db");
-            System.out.println("Taxa de compressão: " + (1 - (double) new File("arquivoComprimido.db").length() / new File("Registro.db").length()));
-
-            // fecha o arquivo
-            dataOut.close();
+                // Se for folha, marcar com o byte 0 (parar)
+                if (isFolha(no)) {
+                    output.writeByte(0);
+                    output.writeByte(no.valor);
+                
+                // Se nao for, marcar com byte 1 (continuar)
+                } else {
+                    output.writeByte(1);
+                    escreverArvore(no.esquerda, output);
+                    escreverArvore(no.direita, output);
+                }
+                
+            }
+        
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + nomeArquivoArvore + "\"\n");
         }
     }
+
+    /**
+     * Metodo para ler a arvore Huffman gerada de arquivo.
+     * @param input - Ponteiro para o arquivo da arvore.
+     * @return a raiz da arvore Huffman.
+     */
+    public No lerArvore(RandomAccessFile input) {
+
+        No novoNo = null;
+
+        try {
+        
+            // Ler byte
+            byte bitMarcador = input.readByte();
+
+            // Se for folha, gerar novo No
+            if (bitMarcador == 0) {
+                byte valor = input.readByte();
+                novoNo = new No(valor);
+            
+            // Se nao for, continuar
+            } else {
+                No esquerda = lerArvore(input);
+                No direita = lerArvore(input);
+                novoNo = new No(esquerda, direita);
+            }
+
+        } catch (IOException e) {
+            System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + nomeArquivoArvore + "\"\n");
+        }
+
+        return novoNo;
+    }
+
+
+    /**
+     * Metodo para determinar se um No e' ou nao uma folha
+     * @param no - No para analisar
+     * @return true, se for; false, caso contrario.
+     */
+    private boolean isFolha (No no) {
+        return (no.esquerda == null && no.direita == null);
+    } 
+
+    /**
+     * Metodo para atualizar a versao e o nome do arquivo atual.
+     */
+    private void updateVersaoAtual () {
+
+        // Abrir pasta de compressao
+        File pasta = new File(caminhoPasta);
+        File pastaArvore = new File(caminhoPastaArvore);
+        
+        // Se pastas existirem, procurar versao existente
+        if (pasta.exists() && pasta.isDirectory() &&
+            pastaArvore.exists() && pastaArvore.isDirectory()) {
+            
+            boolean find = false;
+
+            // Percorrer todas as possibilidades de compressao para encontrar
+            for(int i = 1; i <= Integer.MAX_VALUE && find == false; i++) {
+
+                // Obter nome arquivo atual
+                versaoAtual = i;
+                nomeArquivo = caminhoPasta + "/RegistroHuffmanCompressao" + versaoAtual + ".db";
+                nomeArquivoArvore = caminhoPastaArvore + "/ArvoreHuffmanCompressao" + versaoAtual + ".db";
+                File arquivo = new File(nomeArquivo);
+
+                // Verificar se existe
+                if (arquivo.exists()) {
+                    find = true;
+                }
+            }
+
+            // Se ocorrer o erro de chegar ao fim do loop e nao encontrar, resetar arquivo
+            if (find == false) {
+
+                // Apagar conteudo pasta
+                File[] arquivos = pasta.listFiles();
+                for (File arquivo : arquivos) {
+                   arquivo.delete();
+                }
+
+                // Redefinir versao para comprimir
+                versaoAtual = 0;
+                nomeArquivo = registroDB;
+                nomeArquivoArvore = caminhoPastaArvore + "/ArvoreHuffmanCompressao1.db";
+            }
+
+        // Se pasta nao existir, o arquivo ainda nao foi comprimido
+        } else {
+
+            // Nao definir nova versao comprimida ainda
+            versaoAtual = 0;
+            nomeArquivo = registroDB;
+            nomeArquivoArvore = caminhoPasta + "/ArvoreHuffman/ArvoreHuffmanCompressao1.db";
+        }
+    }
+
+    private void imprimirRecorrenciaDeBytes(Map<Byte, Integer> recorrencia) {
+        for (Map.Entry<Byte, Integer> entry : recorrencia.entrySet()) {
+            byte b = entry.getKey();
+            int ocorrencias = entry.getValue();
+            System.out.printf("Byte 0x%02X: %d ocorrencias%n", b & 0xFF, ocorrencias);
+        }
+    }
+
+    private void imprimirCodigos(Map<Byte, String> codigos) {
+        for (Map.Entry<Byte, String> entry : codigos.entrySet()) {
+            byte b = entry.getKey();
+            String codigo = entry.getValue();
+            System.out.printf("Byte 0x%02X: %s%n", b & 0xFF, codigo);
+        }
+    }
+    
 }

@@ -10,10 +10,12 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.ArrayList;
 
+// Bibliotecas proprias
 import app.IO;
 
 public class LZW {
 
+    // Caminhos para arquivos
     private static final String caminhoPasta = "./src/resources/compressao";
     private static final String registroDB = "./src/resources/Registro.db";
 
@@ -53,7 +55,7 @@ public class LZW {
 
     /**
      * Metodo para descomprimir um arquivo binario, utilizando o algoritmo LZW.
-     * @param numCompressoes - numero de descompressoes a serem realizadas.
+     * @param numDescompressoes - numero de descompressoes a serem realizadas.
      * @return nomeArquivo gerado.
      */
     public String descomprimir(int numDescompressoes) {
