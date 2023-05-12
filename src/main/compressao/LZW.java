@@ -114,6 +114,10 @@ public class LZW {
                 File arquivoOriginal = new File(nomeArquivoAntigo);
                 long tamArquivoOriginal = arquivoOriginal.length();
 
+                // Obter tamanho do arquivo "Registro.db"
+                File arquivoRegistroDB = new File(registroDB);
+                long tamArquivoRegistroDB = arquivoRegistroDB.length();
+
                 // Mostrar barra de progresso
                 System.out.println("\nComprimindo arquivo: ");
 
@@ -201,8 +205,8 @@ public class LZW {
                 File arquivoComprimido = new File(nomeArquivo);
                 long tamArquivoComprimido = arquivoComprimido.length();
 
-                // Mostrar compressão
-                double compressao = (double)(tamArquivoOriginal - tamArquivoComprimido) / tamArquivoOriginal * 100;
+                // Mostrar compressao
+                double compressao = (double)(tamArquivoRegistroDB - tamArquivoComprimido) / tamArquivoRegistroDB * 100;
                 System.out.println(String.format("\nTaxa compressao: %.2f%%", compressao));
 
             // Solicitar que carregue dados iniciais
@@ -296,6 +300,9 @@ public class LZW {
                 // Obter tamanho do arquivo original
                 File arquivoOriginal = new File(nomeArquivoAntigo);
                 long tamArquivoOriginal = arquivoOriginal.length();
+
+                // Mostrar barra de progresso
+                System.out.println("\nDescomprimindo arquivo: ");
 
                 // Descomprimir ate' acabar arquivo
                 while (posAtual != arqAntigo.length()) {
@@ -469,30 +476,41 @@ public class LZW {
         // Se pasta existir, procurar versao existente
         if (pasta.exists() && pasta.isDirectory()) {
             
+            // Listar arquivos na pasta compressao
+            File[] arquivos = pasta.listFiles();
+
+            // Percorrer os arquivos de compressao para encontrar
             boolean find = false;
+            int i;
+            for (i = 0; i < arquivos.length && find == false; i++) {               
 
-            // Percorrer todas as possibilidades de compressao para encontrar
-            for(int i = 1; i <= Integer.MAX_VALUE && find == false; i++) {
+                // Verificar se tamanho e' valido (quando invalido significa que e' a pasta da arvore)
+                if(arquivos[i].isFile()) {
 
-                // Obter nome arquivo atual
-                versaoAtual = i;
-                nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
-                File arquivo = new File(nomeArquivo);
-
-                // Verificar se existe
-                if (arquivo.exists()) {
-                    find = true;
+                    // Testar se e' arquivo LZW
+                    String nomeCompressao = arquivos[i].getName().substring(8, 11);
+                    find = nomeCompressao.equals("LZW");
                 }
             }
 
-            // Se ocorrer o erro de chegar ao fim do loop e nao encontrar, resetar arquivo
-            if (find == false) {
+            // Se encontrar renomear atributos da classe se encontrar
+            if (find) {
 
-                // Apagar conteudo pasta
-                File[] arquivos = pasta.listFiles();
-                for (File arquivo : arquivos) {
-                   arquivo.delete();
-                }
+                // Posicionar ponteiro no nome do arquivo
+                String nomeCompressao = "RegistroLZWCompressao";
+                String arqEncontrado = arquivos[i-1].getName();
+                int posInicio = arqEncontrado.indexOf(nomeCompressao) + nomeCompressao.length();
+                int posFim = arqEncontrado.indexOf(".db");
+
+                // Encontrar versao atual
+                String versaoAtualStr = arqEncontrado.substring(posInicio, posFim);
+                System.out.println("versaoAtualStr: " + versaoAtualStr);
+
+                versaoAtual = Integer.parseInt(versaoAtualStr);
+                nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
+
+            // Se ocorrer o erro de chegar ao fim do loop e nao encontrar, resetar arquivo
+            } else {
 
                 // Redefinir versao para comprimir
                 versaoAtual = 0;

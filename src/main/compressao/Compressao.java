@@ -156,9 +156,11 @@ public class Compressao {
                     opcao = 2;
                 }
             }
+
             // Obter numero de descompressoes desejadas se necessario
             if(versaoAtual != 1) {
                 boolean isNumValido = false;
+                mostrarArquivoAtual(opcao);
                 do {
                     try {
                         numDescompressoes = io.readInt("\nDigite o numero de descompressoes desejadas: ");
@@ -192,8 +194,7 @@ public class Compressao {
 
         // Senao, mensagem de erro
         } else {
-            System.out.println("\nERRO: Registro vazio!" +
-                                "\n      Tente carregar os dados iniciais primeiro!\n");
+            System.out.println("\nERRO: Tente carregar e comprimir o registro primeiro!\n");
 
         }
 
@@ -228,8 +229,8 @@ public class Compressao {
         // Se existir os dois
         } else {
             menu = "\nArquivos para descomprimir:" +
-                   "\n1- \"" + huffman.nomeArquivo + "\"" +
-                   "\n2- \"" + lzw.nomeArquivo + "\"";
+                   "\n1 - \"" + huffman.nomeArquivo + "\"" +
+                   "\n2 - \"" + lzw.nomeArquivo + "\"";
             System.out.println(menu);
         }
 

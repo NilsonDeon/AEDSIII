@@ -2,7 +2,10 @@
 package compressao;
 
 // Bibliotecas
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
@@ -107,6 +110,10 @@ public class Huffman {
                 outputFile = new RandomAccessFile (nomeArquivo, "rw");
                 outputFile.seek(0);
 
+                // Obter tamanho do arquivo "Registro.db"
+                File arquivoRegistroDB = new File(registroDB);
+                long tamArquivoRegistroDB = arquivoRegistroDB.length();
+
                 // Obter tamanho do arquivo original
                 File arquivoOriginal = new File(nomeArquivoAntigo);
                 long tamArquivoOriginal = arquivoOriginal.length();
@@ -165,7 +172,7 @@ public class Huffman {
                 if (bits.length() > 0) {
 
                     // Completar com zeros no fim
-                    String byteStr = String.format("%-8d", Integer.parseInt(bits.toString(), 2)).replace(' ', '0');
+                    String byteStr = bits.toString();
                     byte byteCompleto = (byte)Integer.parseInt(byteStr, 2);
 
                     // Escrever em arquivo
@@ -183,8 +190,8 @@ public class Huffman {
                 File arquivoComprimido = new File(nomeArquivo);
                 long tamArquivoComprimido = arquivoComprimido.length();
 
-                // Mostrar compressão
-                double compressao = (double)(tamArquivoOriginal - tamArquivoComprimido) / tamArquivoOriginal * 100;
+                // Mostrar compressao
+                double compressao = (double)(tamArquivoRegistroDB - tamArquivoComprimido) / tamArquivoRegistroDB * 100;
                 System.out.println(String.format("\nTaxa compressao: %.2f%%", compressao));
 
                 // Apagar arquivo antigo se nao for a base de dados
@@ -264,7 +271,7 @@ public class Huffman {
                 long tamArquivoOriginal = arquivoOriginal.length();
 
                 // Mostrar barra de progresso
-                System.out.println("\nComprimindo arquivo: ");
+                System.out.println("\nDescomprimindo arquivo: ");
 
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
@@ -567,31 +574,41 @@ public class Huffman {
         if (pasta.exists() && pasta.isDirectory() &&
             pastaArvore.exists() && pastaArvore.isDirectory()) {
             
+            // Listar arquivos na pasta compressao
+            File[] arquivos = pasta.listFiles();
+
+            // Percorrer os arquivos de compressao para encontrar
             boolean find = false;
+            int i;
+            for (i = 0; i < arquivos.length && find == false; i++) {
 
-            // Percorrer todas as possibilidades de compressao para encontrar
-            for(int i = 1; i <= Integer.MAX_VALUE && find == false; i++) {
+                // Verificar se tamanho e' valido (quando invalido significa que e' a pasta da arvore)
+                if(arquivos[i].isFile()) {
 
-                // Obter nome arquivo atual
-                versaoAtual = i;
-                nomeArquivo = caminhoPasta + "/RegistroHuffmanCompressao" + versaoAtual + ".db";
-                nomeArquivoArvore = caminhoPastaArvore + "/ArvoreHuffmanCompressao" + versaoAtual + ".db";
-                File arquivo = new File(nomeArquivo);
-
-                // Verificar se existe
-                if (arquivo.exists()) {
-                    find = true;
+                    // Testar se e' arquivo Huffman
+                    String nomeCompressao = arquivos[i].getName().substring(8, 15);
+                    find = nomeCompressao.equals("Huffman");
                 }
             }
 
-            // Se ocorrer o erro de chegar ao fim do loop e nao encontrar, resetar arquivo
-            if (find == false) {
+            // Se encontrar renomear atributos da classe se encontrar
+            if (find) {
 
-                // Apagar conteudo pasta
-                File[] arquivos = pasta.listFiles();
-                for (File arquivo : arquivos) {
-                   arquivo.delete();
-                }
+                // Posicionar ponteiro no nome do arquivo
+                String nomeCompressao = "RegistroHuffmanCompressao";
+                String arqEncontrado = arquivos[i-1].getName();
+                int posInicio = arqEncontrado.indexOf(nomeCompressao) + nomeCompressao.length();
+                int posFim = arqEncontrado.indexOf(".db");
+ 
+                // Encontrar versao atual
+                String versaoAtualStr = arqEncontrado.substring(posInicio, posFim);
+                System.out.println("versaoAtualStr: " + versaoAtualStr);
+
+                versaoAtual = Integer.parseInt(versaoAtualStr);
+                nomeArquivo = caminhoPasta + "/RegistroHuffmanCompressao" + versaoAtual + ".db";
+            
+                // Se ocorrer o erro de chegar ao fim do loop e nao encontrar, resetar arquivo
+            } else {
 
                 // Redefinir versao para comprimir
                 versaoAtual = 0;
@@ -608,21 +625,4 @@ public class Huffman {
             nomeArquivoArvore = caminhoPasta + "/ArvoreHuffman/ArvoreHuffmanCompressao1.db";
         }
     }
-
-    private void imprimirRecorrenciaDeBytes(Map<Byte, Integer> recorrencia) {
-        for (Map.Entry<Byte, Integer> entry : recorrencia.entrySet()) {
-            byte b = entry.getKey();
-            int ocorrencias = entry.getValue();
-            System.out.printf("Byte 0x%02X: %d ocorrencias%n", b & 0xFF, ocorrencias);
-        }
-    }
-
-    private void imprimirCodigos(Map<Byte, String> codigos) {
-        for (Map.Entry<Byte, String> entry : codigos.entrySet()) {
-            byte b = entry.getKey();
-            String codigo = entry.getValue();
-            System.out.printf("Byte 0x%02X: %s%n", b & 0xFF, codigo);
-        }
-    }
-    
 }
