@@ -141,6 +141,11 @@ public class Huffman {
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
 
+                // Marcar primeiros bytes para possivel que houve corte dos bits ao final
+                outputFile.writeBoolean(false);
+                outputFile.writeShort(0);
+                outputFile.write(0xFF);
+
                 // Percorrer ate' fim de arquivo
                 while (posAtual != inputFile.length()) {
 
@@ -176,7 +181,14 @@ public class Huffman {
                     String byteStr = bits.toString();
                     byte byteCompleto = (byte)Integer.parseInt(byteStr, 2);
 
+                    // Reposicionar ponteiro no inicio
+                    outputFile.seek(0);
+
+                    // Marcar como houve sobra de bits
+                    outputFile.writeBoolean(true);
+
                     // Escrever em arquivo
+                    outputFile.writeShort(8 - bits.length());
                     outputFile.write(byteCompleto);
                 }
 
@@ -220,7 +232,7 @@ public class Huffman {
 
     /**
      * Metodo privado para descomprimir um arquivo binario, utilizando o algoritmo
-     * LZW.
+     * Huffman.
      * @return nomeArquivo gerado.
      */
     private String descomprimir() {
@@ -272,10 +284,15 @@ public class Huffman {
                 long tamArquivoOriginal = arquivoOriginal.length();
 
                 // Mostrar barra de progresso
-                System.out.println("\nDescomprimindo arquivo: ");
+                System.out.println("\n\nDescomprimindo arquivo: ");
 
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
+
+                // Ler informacoes inciais sobre sobra de bits
+                boolean sobrouBits = arqAntigo.readBoolean();
+                short tamBits = arqAntigo.readShort();
+                byte bitesFinais = arqAntigo.readByte();
 
                 // Percorrer ate' fim de arquivo
                 long posAtual = arqAntigo.getFilePointer();
@@ -325,6 +342,36 @@ public class Huffman {
 
                     // Atualizar ponteiro
                     posAtual = arqAntigo.getFilePointer();
+
+                }
+
+                // Completar bits finais se necessario
+                if(sobrouBits) {
+
+                    // Ajustar bits finais
+                    bitesFinais = (byte)(bitesFinais << tamBits);
+                    String byteStr = String.format(Integer.toBinaryString(bitesFinais));
+                    bits.append(byteStr);
+
+                    // Procurar ultimo elemento
+                    int pos = 0;
+                    No no = raiz;
+                    while (pos < bits.length() && no != null && !isFolha(no)) {
+
+                        // Procurar No folha com codigo valido
+                        char bit = bits.charAt(pos);
+                        pos++;
+
+                        if (bit == '0') {
+                            no = no.esquerda;
+                        } else {
+                            no = no.direita;
+                        }
+                    }
+
+                    // Obter valor do byte codificado e salvar
+                    byte byteOriginal = no.valor;
+                    arqNovo.write(byteOriginal);
 
                 }
                 
