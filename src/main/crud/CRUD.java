@@ -26,7 +26,8 @@ import java.util.Locale;
 import app.IO;
 import app.Musica;
 import arvores.arvoreB.ArvoreB;
-import arvores.arvoreBStar.ArvoreBStar;
+//import arvores.arvoreBStar.ArvoreBStar;
+import compressao.Compressao;
 import hashing.HashingExtensivel;
 import listaInvertida.ListaInvertida;
 
@@ -51,15 +52,19 @@ public class CRUD {
     private static final String arvoreBDB = "./src/resources/ArvoreB.db";
 
     // Arvore B*
-    private static ArvoreBStar arvoreBStar;
-    private static final String arvoreBStarDB = "./src/resources/ArvoreBStar.db";
+    //private static ArvoreBStar arvoreBStar;
+    //private static final String arvoreBStarDB = "./src/resources/ArvoreBStar.db";
 
     // Lista invertida
     private static ListaInvertida lista;
 
+    // Compressoes
+    private static Compressao compressao;
+    private static final String caminhoPastaCompressoes = "./src/resources/compressao";
+
     // IO
     private static IO io;
-
+    
     /**
      * Construtor padrao da classe CRUD.
     */
@@ -67,8 +72,9 @@ public class CRUD {
         io = new IO();
         hash = new HashingExtensivel();
         arvoreB = new ArvoreB();
-        arvoreBStar = new ArvoreBStar();
+        //arvoreBStar = new ArvoreBStar();
         lista = new ListaInvertida();
+        compressao = new Compressao();
     }
     
     /**
@@ -109,6 +115,10 @@ public class CRUD {
                 antigoDB.delete();
                 dbFile = new RandomAccessFile (registroDB, "rw");
 
+                // Apagar possivel antigo "Registro.txt"
+                File arqRegistroTXT = new File(registroTXT);
+                arqRegistroTXT.delete();
+
                 // Apagar antigo "Bucket.db"
                 File antigoBucket = new File(bucketDB);
                 antigoBucket.delete();
@@ -125,13 +135,16 @@ public class CRUD {
                 arvoreB.inicializarArvoreB();
 
                 // Apagar antiga "ArvoreBStar.db"
-                File antigaArvoreBStar = new File(arvoreBStarDB);
-                antigaArvoreBStar.delete();
-                arvoreBStar.inicializarArvoreB();
+                //File antigaArvoreBStar = new File(arvoreBStarDB);
+                //antigaArvoreBStar.delete();
+                //arvoreBStar.inicializarArvoreB();
 
                 // Apagar antigas listas invertidas
                 lista.delete();
                 lista.inicializarListas();
+
+                // Apagar antigas compressoes
+                compressao.reinicializar();
 
                 Musica musica = new Musica();
                 byte[] newId;
@@ -176,7 +189,7 @@ public class CRUD {
                     arvoreB.inserir(musica, posRegistro);
 
                     // Inserir, utilizando arvore B*
-                    arvoreBStar.inserir(musica, posRegistro);
+                    //arvoreBStar.inserir(musica, posRegistro);
 
                     // Inserir nas listas invertidas
                     lista.inserir(musica, posRegistro);
@@ -217,9 +230,12 @@ public class CRUD {
         RandomAccessFile dbFile = null;
 
         try {
-            dbFile = new RandomAccessFile (registroDB, "rw");
+            // Testar se arquivo existe
+            File arquivoRegistro = new File(registroDB);
 
-            if (dbFile.length() > 0) {
+            if (arquivoRegistro.length() > 0) {
+
+                dbFile = new RandomAccessFile (registroDB, "rw");
 
                 // Ler ultimo ID no cabecalho do arquivo
                 dbFile.seek(0);
@@ -250,21 +266,22 @@ public class CRUD {
                 arvoreB.inserir(musica, finalRegistro);
 
                 // Inserir na arvore B*
-                arvoreBStar.inserir(musica, finalRegistro);
+                //arvoreBStar.inserir(musica, finalRegistro);
 
                 // Inserir nas listas invertidas
                 lista.inserir(musica, finalRegistro);
+
+                // Fechar arquivos
+                dbFile.close();
 
                 System.out.println("\nMusica [" + musica.getId() + "]: \"" +
                                             musica.getNome() + "\" " +
                                             "cadastrada com sucesso!");
             } else {
+                arquivoRegistro.delete();
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
-
-            // Fechar arquivos
-            dbFile.close();
 
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: Registro vazio!" +
@@ -279,14 +296,13 @@ public class CRUD {
      * Metodo para exibir as informacoes de uma musica a partir do seu ID.
      * @return true, se a música foi encontrada; false, caso contrario.
     */
-
     public void read () {
         
         // Testar se arquivo existe
         File arquivoRegistro = new File(registroDB);
 
         // Se existir, fazer a busca
-        if (arquivoRegistro.exists()) {
+        if (arquivoRegistro.length() > 0) {
 
             int opcao = -1;
 
@@ -320,6 +336,7 @@ public class CRUD {
 
         // Senao, mensagem de erro
         } else {
+            arquivoRegistro.delete();
             System.out.println("\nERRO: Registro vazio!" +
                                "\n      Tente carregar os dados iniciais primeiro!\n");
         
@@ -387,15 +404,15 @@ public class CRUD {
         long arvoreBFim = now();
 
         // Procurar na Arvore B*
-        long arvoreBStarInicio = now();
-        long posicaoArvoreBStar = arvoreBStar.read(idProcurado);
-        long arvoreBStarFim = now();
+        //long arvoreBStarInicio = now();
+        //long posicaoArvoreBStar = arvoreBStar.read(idProcurado);
+        //long arvoreBStarFim = now();
 
         // Verificar se todas as estruturas encontraram a mesma musica com sucesso
         boolean find = (posicaoSequencial != -1)                &&
                        (posicaoSequencial == posicaoHash)       && 
-                       (posicaoSequencial == posicaoArvoreB)    && 
-                       (posicaoSequencial == posicaoArvoreBStar);
+                       (posicaoSequencial == posicaoArvoreB); //&& 
+                       //(posicaoSequencial == posicaoArvoreBStar);
         
         if(find) {
             // Mostrar musica
@@ -410,22 +427,22 @@ public class CRUD {
         String tempoSeq  = getTempoBusca(sequencialInicio, sequencialFim);
         String tempoHash = getTempoBusca(hashInicio, hashFim);
         String tempoB    = getTempoBusca(arvoreBInicio, arvoreBFim);
-        String tempoStar = getTempoBusca(arvoreBStarInicio, arvoreBStarFim);
+        //String tempoStar = getTempoBusca(arvoreBStarInicio, arvoreBStarFim);
 
         // Obter posicao no arquivo sequencial
         String posSeq  = getPosicao(posicaoSequencial);
         String posHash = getPosicao(posicaoHash);
         String posB    = getPosicao(posicaoArvoreB);
-        String posStar = getPosicao(posicaoArvoreBStar);
+        //String posStar = getPosicao(posicaoArvoreBStar);
 
         // Mostrar tempos de busca
         String temposBusca = "\n ________________________________________________"  +
-                             "\n|    Estruturas    |   Tempo Busca   |  Posicao  |" +
+                             "\n|    Estrutura     |   Tempo Busca   |  Posicao  |" +
                              "\n|------------------|-----------------|-----------|" +
                              "\n| Sequencialmente  | " + tempoSeq +" |"+posSeq +"|" +
                              "\n| Hash Estensivel  | " + tempoHash+" |"+posHash+"|" +
                              "\n| Arvore B         | " + tempoB   +" |"+posB   +"|" +
-                             "\n| Arvore B*        | " + tempoStar+" |"+posStar+"|" +
+                           //"\n| Arvore B*        | " + tempoStar+" |"+posStar+"|" +
                              "\n|__________________|_________________|___________|";
         System.out.println(temposBusca);
         
@@ -916,7 +933,7 @@ public class CRUD {
             arvoreB.delete(idProcurado);
 
             // Deletar na Arvore B*
-            arvoreBStar.delete(idProcurado);
+            //arvoreBStar.delete(idProcurado);
 
         // Senao, mensagem de erro
         } else {
@@ -932,20 +949,38 @@ public class CRUD {
      * @return true, se a música foi atualizada; false, caso contrario.
     */
     public boolean update () {
+
         int idProcurado = 0;
+        boolean updated = false;
 
-       do {
-           System.out.print("\nDigite o ID procurado: ");
-           try {
-               idProcurado = io.readInt();
-           } catch (InputMismatchException e) {
-               io.readLine();
-               System.out.println("\nERRO: ID invalido!\n");
-               idProcurado = 0;
-           }
-       } while (idProcurado == 0);
+        // Testar se arquivo existe
+        File arquivoRegistro = new File(registroDB);
 
-       return update(idProcurado);
+        // Se existir, fazer a atualizacao
+        if (arquivoRegistro.length() > 0) {
+
+            do {
+                System.out.print("\nDigite o ID procurado: ");
+                try {
+                    idProcurado = io.readInt();
+                } catch (InputMismatchException e) {
+                    io.readLine();
+                    System.out.println("\nERRO: ID invalido!\n");
+                    idProcurado = 0;
+                }
+            } while (idProcurado == 0);
+
+            updated = update(idProcurado);
+
+        // Senao, mensagem de erro
+        } else {
+            arquivoRegistro.delete();
+            System.out.println("\nERRO: Registro vazio!" +
+                                "\n      Tente carregar os dados iniciais primeiro!\n");
+
+        }
+
+       return updated;
     }
 
     /**
@@ -1208,7 +1243,7 @@ public class CRUD {
                                arvoreB.update(idProcurado, finalArquivo);
 
                                // Atualizar na ArvoreB*
-                               arvoreBStar.update(idProcurado, finalArquivo);
+                               //arvoreBStar.update(idProcurado, finalArquivo);
 
                                // Atualizar nas listas invertidas
                                lista.update(musica, newMusica, finalArquivo);
@@ -1258,20 +1293,33 @@ public class CRUD {
      * @return true, se a música foi encontrada; false, caso contrario.
     */
     public void abrirMusica() {
-        int idProcurado = 0;
+        // Testar se arquivo existe
+        File arquivoRegistro = new File(registroDB);
 
-       do {
-           System.out.print("\nDigite o ID procurado: ");
-           try {
-               idProcurado = io.readInt();
-           } catch (InputMismatchException e) {
-               io.readLine();
-               System.out.println("\nERRO: ID invalido!\n");
-               idProcurado = 0;
-           }
-       } while (idProcurado == 0);
+        // Se existir, abrir a musica
+        if (arquivoRegistro.length() > 0) {
 
-       abrirMusica(idProcurado);
+            int idProcurado = 0;
+
+            do {
+                System.out.print("\nDigite o ID procurado: ");
+                try {
+                    idProcurado = io.readInt();
+                } catch (InputMismatchException e) {
+                    io.readLine();
+                    System.out.println("\nERRO: ID invalido!\n");
+                    idProcurado = 0;
+                }
+            } while (idProcurado == 0);
+
+            abrirMusica(idProcurado);
+
+        // Senao, mensagem de erro
+        } else {
+            System.out.println("\nERRO: Registro vazio!" +
+                                "\n      Tente carregar os dados iniciais primeiro!\n");
+
+        }
     }
 
     /**
@@ -1285,9 +1333,14 @@ public class CRUD {
         Musica musica = new Musica();
 
         try {
-            dbFile = new RandomAccessFile (registroDB, "r");
 
-            if (dbFile.length() > 0) {
+            // Testar se arquivo existe
+            File arquivoRegistro = new File(registroDB);
+
+            // Se existir, abrir a musica
+            if (arquivoRegistro.length() > 0) {
+
+                dbFile = new RandomAccessFile (registroDB, "r");
 
                 boolean lapide;
                 int tamRegistro;
@@ -1325,6 +1378,9 @@ public class CRUD {
                     posicaoAtual = dbFile.getFilePointer();
                 }
 
+                // Fechar arquivo
+                dbFile.close();
+
                 if (find == false) {
                     System.out.println("\nMusica de ID (" + idProcurado + 
                                     ") nao esta cadastrada!");
@@ -1334,9 +1390,6 @@ public class CRUD {
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
-
-            // Fechar arquivos
-            dbFile.close();
 
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: Registro vazio!" +
@@ -1392,10 +1445,14 @@ public class CRUD {
             File antigoTXT = new File(registroTXT);
             antigoTXT.delete();
 
-            dbFileTXT = new BufferedWriter (new FileWriter (registroTXT));
-            dbFile = new RandomAccessFile (registroDB, "r");
+            // Testar se arquivo existe
+            File arquivoRegistro = new File(registroDB);
 
-            if (dbFile.length() > 0) {
+            // Se existir, salvar em TXT
+            if (arquivoRegistro.length() > 0) {
+
+                dbFileTXT = new BufferedWriter (new FileWriter (registroTXT));
+                dbFile = new RandomAccessFile (registroDB, "r");
 
                 Musica musica = null;
                 boolean lapide;
@@ -1429,17 +1486,18 @@ public class CRUD {
                     }
                     posicaoAtual = dbFile.getFilePointer();
                 }
+                // Fechar arquivos
+                dbFile.close();
+                dbFileTXT.close();
 
                 System.out.println("\nArquivo \"" + registroTXT + 
                                 "\" criado com sucesso!");
 
             } else {
+                arquivoRegistro.delete();
                 System.out.println("\nERRO: Registro vazio!" +
                                    "\n      Tente carregar os dados iniciais primeiro!\n");
             }
-            // Fechar arquivos
-            dbFile.close();
-            dbFileTXT.close();
 
         } catch (FileNotFoundException e) {
             System.out.println("\nERRO: Registro vazio!" +
@@ -1448,7 +1506,7 @@ public class CRUD {
             System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + dbFile + "\"\n");
         }
     }
-
+    
     /**
      * Metodo para ler uma musica diretamento do arquivo "Registro.db", a partir
      * de seu endereco no arquivo.
@@ -1488,4 +1546,17 @@ public class CRUD {
         return musicaProcurada;
     }
 
+    /**
+     * Metodo para comprimir o arquivo de registros.
+     */
+    public void comprimir() {
+        compressao.comprimir();
+    }
+
+    /**
+     * Metodo para descomprimir o arquivo de registros.
+     */
+    public void descomprimir() {
+        compressao.descomprimir();
+    }
 }
