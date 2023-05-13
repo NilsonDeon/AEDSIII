@@ -13,6 +13,7 @@ public class Dicionario {
 
     private HashMap<Integer, byte[]> mapPosByte;
     private HashMap<ByteBuffer, Integer> mapBytePos;
+    private int posInserir;
 
     /**
      * Construtor padrao da classe Dicionario
@@ -20,16 +21,17 @@ public class Dicionario {
     protected Dicionario() {
         mapPosByte = new HashMap<Integer, byte[]>();
         mapBytePos = new HashMap<ByteBuffer, Integer>();
+        posInserir = 0;
     }
 
     /**
      * Metodo para inserir um elemento e sua posicao no dicionario.
-     * @param pos - posicao do elemento.
      * @param bytes - array de bytes a ser adicionado.
      */
-    protected void put(int pos, byte[] bytes) {
-        mapPosByte.put(pos, bytes);
-        mapBytePos.put(ByteBuffer.wrap(bytes), pos);
+    protected void put(byte[] bytes) {
+        mapPosByte.put(posInserir, bytes);
+        mapBytePos.put(ByteBuffer.wrap(bytes), posInserir);
+        posInserir++;
     }
 
     /**
@@ -68,5 +70,6 @@ public class Dicionario {
             mapPosByte.remove(pos);
             mapBytePos.remove(ByteBuffer.wrap(bytes));
         }
+        posInserir--;
     }
 }

@@ -171,8 +171,7 @@ public class LZW {
 
                                 // Atualizar dicionario
                                 byte[] byteArray = toByteArray(bytesLido);
-                                dicionario.put(count, byteArray);
-                                count++;
+                                dicionario.put(byteArray);
 
                                 // Voltar ponteiro
                                 arqAntigo.seek(posAtual);
@@ -191,8 +190,7 @@ public class LZW {
 
                             // Atualizar dicionario
                             byte[] byteArray = toByteArray(bytesLido);
-                            dicionario.put(count, byteArray);
-                            count++;
+                            dicionario.put(byteArray);
                         }
                     }
                 }
@@ -293,9 +291,7 @@ public class LZW {
                 ArrayList<Byte> bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
 
                 // Adicionar no dicionario
-                int count = dicionario.size();
-                dicionario.put(count, bytesLido);
-                count++;
+                dicionario.put(bytesLido);
                 int ultimaPosicao = dicionario.size()-1;
 
                 // Escrever no arquivo
@@ -335,9 +331,8 @@ public class LZW {
                         }
                     }
 
-                    dicionario.remove(ultimaPosicao); count--;
-                    dicionario.put(count, toByteArray(bytesAntigo));
-                    count++;
+                    dicionario.remove(ultimaPosicao);
+                    dicionario.put(toByteArray(bytesAntigo));
 
                     // Atualizar posicao do array
                     bytesLido = dicionario.get(posDicionario);
@@ -349,8 +344,7 @@ public class LZW {
                     bytesAntigo = toByteArrayList(bytesLido);
 
                     // Atualizar posicao nova dicionario
-                    dicionario.put(count, bytesLido);
-                    count++;
+                    dicionario.put(bytesLido);
                     ultimaPosicao++;
 
                     // Atualizar ponteiro
@@ -444,7 +438,7 @@ public class LZW {
         for(int i = 0; i <= 255; i++) {
             byte[] item = new byte[1];
             item[0] = (byte) i;
-            dicionario.put(i, item);
+            dicionario.put(item);
         }
     }
 
