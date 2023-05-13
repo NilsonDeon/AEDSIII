@@ -1,8 +1,8 @@
 // Package
 package compressao;
 
-import java.io.File;
 // Bibliotecas
+import java.io.File;
 import java.util.InputMismatchException;
 
 // Bibliotecas proprias
@@ -11,6 +11,8 @@ import app.IO;
 public class Compressao {
 
     private static final String registroDB = "./src/resources/Registro.db";
+    private static final String caminhoPastaCompressao = "./src/resources/compressao";
+
     private static IO io;
     private static Huffman huffman;
     private static LZW lzw;
@@ -190,7 +192,7 @@ public class Compressao {
             }
 
             // Mensagem de sucesso
-            System.out.println("\nArquivo descomprimido com sucesso: \"" + nomeArquivo + "\"");
+            System.out.println("\n\nArquivo descomprimido com sucesso: \"" + nomeArquivo + "\"");
 
         // Senao, mensagem de erro
         } else {
@@ -198,6 +200,51 @@ public class Compressao {
 
         }
 
+    }
+
+    /**
+     * Metodo para reinicializar as informacoes sobre as compressoes atuais e
+     * apagar os arquivos antigos.
+     */
+    public void reinicializar() {
+
+        // Apagar pasta se existir
+        File pastaCompressao = new File(caminhoPastaCompressao);
+        deletePasta(pastaCompressao);
+
+        // Atualizar atributos da classe
+        huffman = new Huffman();
+        lzw = new LZW();
+
+        hasHuffman = (huffman.versaoAtual != 0);
+        hasLZW = (lzw.versaoAtual != 0);
+        this.versaoAtual = 0;    
+    }
+
+    /**
+     * Metodo para apagar uma pasta e todo seu conteudo.
+     * @param pasta - que se deseja deletar.
+     */
+    private void deletePasta (File pasta) {
+
+        // Testar se e' pasta com arquivo
+        if (pasta.exists() && pasta.isDirectory()) {
+            File[] arquivos = pasta.listFiles();
+
+            // Percorrer arquivo por arquivo e apagar
+            for (File arquivo : arquivos) {
+
+                // Se for pasta novamente, chamar recursividade
+                if (arquivo.isDirectory()) {
+                    deletePasta(arquivo);
+                } else {
+                    arquivo.delete();
+                }
+            }
+
+            // Apagar, de fato, a pasta desejada
+            pasta.delete();
+        }
     }
 
     /**

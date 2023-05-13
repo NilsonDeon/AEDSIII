@@ -117,9 +117,11 @@ public class Huffman {
                 // Obter tamanho do arquivo original
                 File arquivoOriginal = new File(nomeArquivoAntigo);
                 long tamArquivoOriginal = arquivoOriginal.length();
-
+                
                 // Mostrar barra de progresso
+                long posAtual = inputFile.getFilePointer();
                 System.out.println("\nComprimindo arquivo: ");
+                io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
 
                 // Obter frequencia de cada byte no arquivo
                 Map<Byte, Integer> frequencias = recorrenciaDeBytes(nomeArquivoAntigo);
@@ -140,7 +142,6 @@ public class Huffman {
                 StringBuilder bits = new StringBuilder();
 
                 // Percorrer ate' fim de arquivo
-                long posAtual = inputFile.getFilePointer();
                 while (posAtual != inputFile.length()) {
 
                     // Mostrar barra progresso

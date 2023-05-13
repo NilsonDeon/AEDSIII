@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.ArrayList;
 
 // Bibliotecas proprias
@@ -19,7 +18,7 @@ public class LZW {
     private static final String caminhoPasta = "./src/resources/compressao";
     private static final String registroDB = "./src/resources/Registro.db";
 
-    private ArrayList<byte[]> dicionario;
+    private Dicionario dicionario;
     protected int versaoAtual;
     protected String nomeArquivo;
 
@@ -30,7 +29,7 @@ public class LZW {
      */
     public LZW() {
 
-        // Inicializar o dicionario
+        // Incializar dicionario com os bytes de 0 a 255
         inicializarDicionario();
 
         // Atulizar versao e nome arquivo atuais
@@ -122,6 +121,7 @@ public class LZW {
                 System.out.println("\nComprimindo arquivo: ");
 
                 // Comprimir até o fim do arquivo
+                int count = dicionario.size();
                 while (posAtual != arqAntigo.length()) {
 
                     // Mostrar barra progresso
@@ -134,10 +134,10 @@ public class LZW {
                     bytesLido.add(arqAntigo.readByte());
                 
                     // Obter posicao do byte[] no dicionario
-                    int posDicionario = getPosicaoDicionario(bytesLido);
+                    Integer posDicionario = dicionario.get(toByteArray(bytesLido));
 
                     // Comparar se array esta' presente no dicionario, ate' encontrar um que nao esteja
-                    while (posDicionario != -1) {
+                    while (posDicionario != null) {
 
                         byte proximoByte;
 
@@ -154,10 +154,10 @@ public class LZW {
                             bytesLido.add(proximoByte);
 
                             // Testar se, ao ler o proximo byte, o array ainda existe no dicionario
-                            int newPosDicionario = getPosicaoDicionario(bytesLido);
+                            Integer newPosDicionario = dicionario.get(toByteArray(bytesLido));
 
                             // Se existir, continuar busca
-                            if (newPosDicionario != -1) {
+                            if (newPosDicionario != null) {
                             
                                 // Atualizar ponteiro
                                 posAtual = arqAntigo.getFilePointer();
@@ -171,7 +171,8 @@ public class LZW {
 
                                 // Atualizar dicionario
                                 byte[] byteArray = toByteArray(bytesLido);
-                                dicionario.add(byteArray);
+                                dicionario.put(count, byteArray);
+                                count++;
 
                                 // Voltar ponteiro
                                 arqAntigo.seek(posAtual);
@@ -186,11 +187,12 @@ public class LZW {
                             // Inserir no novo arquivo a posicao no dicionario como inteiro
                             byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
                             arqNovo.write(posDicionarioBytes);
-                            posDicionario = -1;
+                            posDicionario = null;
 
                             // Atualizar dicionario
                             byte[] byteArray = toByteArray(bytesLido);
-                            dicionario.add(byteArray);
+                            dicionario.put(count, byteArray);
+                            count++;
                         }
                     }
                 }
@@ -280,16 +282,21 @@ public class LZW {
                 arqNovo = new RandomAccessFile (nomeArquivo, "rw");
                 arqNovo.seek(0);
 
+                // Mostrar barra de progresso
+                System.out.println("\n\nDescomprimindo arquivo: ");
+
                 // Ler primeira posicao
-                int posDicionario = arqAntigo.readInt();
+                Integer posDicionario = arqAntigo.readInt();
 
                 // Obter array na posicao lida
                 byte[] bytesLido = dicionario.get(posDicionario);
                 ArrayList<Byte> bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
 
                 // Adicionar no dicionario
-                dicionario.add(dicionario.get(posDicionario));
-                int ultimaPosicao = dicionario.size() - 1;
+                int count = dicionario.size();
+                dicionario.put(count, bytesLido);
+                count++;
+                int ultimaPosicao = dicionario.size()-1;
 
                 // Escrever no arquivo
                 arqNovo.write(bytesLido);
@@ -300,9 +307,6 @@ public class LZW {
                 // Obter tamanho do arquivo original
                 File arquivoOriginal = new File(nomeArquivoAntigo);
                 long tamArquivoOriginal = arquivoOriginal.length();
-
-                // Mostrar barra de progresso
-                System.out.println("\nDescomprimindo arquivo: ");
 
                 // Descomprimir ate' acabar arquivo
                 while (posAtual != arqAntigo.length()) {
@@ -321,18 +325,19 @@ public class LZW {
                     for (int i = 0; i < bytesLido.length && stop == false; i++) {
 
                         // Testar se posicao ja existe no dicionario
-                        int posTeste = getPosicaoDicionario(bytesAntigo);
-                        if(posTeste != -1) {
+                        Integer posTeste = dicionario.get(toByteArray(bytesAntigo));
+                        if(posTeste != null) {
                             bytesAntigo.add(bytesLido[i]);
                         
                         // Se posicao ainda nao existir, parar de adicionar
                         } else {
                             stop = true;
                         }
-                        
                     }
-                    dicionario.remove(ultimaPosicao);
-                    dicionario.add(toByteArray(bytesAntigo));
+
+                    dicionario.remove(ultimaPosicao); count--;
+                    dicionario.put(count, toByteArray(bytesAntigo));
+                    count++;
 
                     // Atualizar posicao do array
                     bytesLido = dicionario.get(posDicionario);
@@ -344,7 +349,8 @@ public class LZW {
                     bytesAntigo = toByteArrayList(bytesLido);
 
                     // Atualizar posicao nova dicionario
-                    dicionario.add(bytesLido);
+                    dicionario.put(count, bytesLido);
+                    count++;
                     ultimaPosicao++;
 
                     // Atualizar ponteiro
@@ -397,29 +403,6 @@ public class LZW {
     }
 
     /**
-     * Metodo para obter a posicao de um array de bytes no dicionario.
-     * @param bytesLido - Array de bytes para se procurar no dicionario.
-     * @return posicao no dicionario, se existir; -1, se nao existir.
-     */
-    private int getPosicaoDicionario(ArrayList<Byte> bytesLido) {
-        int posicao = -1;
-    
-        // Converter ArrayList<Byte> para byte[]
-        byte[] bytesLidoArray = toByteArray(bytesLido);
-    
-        // Percorrer dicionario para testar se existe
-        for (int i = 0; i < dicionario.size() && posicao == -1; i++) {
-    
-            // Se existir marcar como encontrado
-            if (Arrays.equals(dicionario.get(i), bytesLidoArray)) {
-                posicao = i;
-            }
-        }
-    
-        return posicao;
-    }
-
-    /**
      * Metodo para converter um ArrayList em um array de bytes.
      * @param listBytes - ArrayList a ser convertido.
      * @return array de bytes.
@@ -452,18 +435,18 @@ public class LZW {
     }
 
     /**
-     * Metodo para inicializar dicionario com os valores de 0 a 255.
+     * Metodo para inicializar dicionario Hash com os valores de 0 a 255.
      */
     private void inicializarDicionario() {
 
-        dicionario = new ArrayList<>();
+        dicionario = new Dicionario();
         // Preencher dicionario com byte de 0 a 255 bits
         for(int i = 0; i <= 255; i++) {
             byte[] item = new byte[1];
             item[0] = (byte) i;
-            dicionario.add(item);
+            dicionario.put(i, item);
         }
-    } 
+    }
 
     /**
      * Metodo para atualizar a versao e o nome do arquivo atual.
@@ -504,8 +487,6 @@ public class LZW {
 
                 // Encontrar versao atual
                 String versaoAtualStr = arqEncontrado.substring(posInicio, posFim);
-                System.out.println("versaoAtualStr: " + versaoAtualStr);
-
                 versaoAtual = Integer.parseInt(versaoAtualStr);
                 nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
 

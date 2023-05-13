@@ -27,6 +27,7 @@ import app.IO;
 import app.Musica;
 import arvores.arvoreB.ArvoreB;
 //import arvores.arvoreBStar.ArvoreBStar;
+import compressao.Compressao;
 import hashing.HashingExtensivel;
 import listaInvertida.ListaInvertida;
 
@@ -57,6 +58,10 @@ public class CRUD {
     // Lista invertida
     private static ListaInvertida lista;
 
+    // Compressoes
+    private static Compressao compressao;
+    private static final String caminhoPastaCompressoes = "./src/resources/compressao";
+
     // IO
     private static IO io;
     
@@ -69,6 +74,7 @@ public class CRUD {
         arvoreB = new ArvoreB();
         //arvoreBStar = new ArvoreBStar();
         lista = new ListaInvertida();
+        compressao = new Compressao();
     }
     
     /**
@@ -109,6 +115,10 @@ public class CRUD {
                 antigoDB.delete();
                 dbFile = new RandomAccessFile (registroDB, "rw");
 
+                // Apagar possivel antigo "Registro.txt"
+                File arqRegistroTXT = new File(registroTXT);
+                arqRegistroTXT.delete();
+
                 // Apagar antigo "Bucket.db"
                 File antigoBucket = new File(bucketDB);
                 antigoBucket.delete();
@@ -132,6 +142,9 @@ public class CRUD {
                 // Apagar antigas listas invertidas
                 lista.delete();
                 lista.inicializarListas();
+
+                // Apagar antigas compressoes
+                compressao.reinicializar();
 
                 Musica musica = new Musica();
                 byte[] newId;
@@ -1533,4 +1546,17 @@ public class CRUD {
         return musicaProcurada;
     }
 
+    /**
+     * Metodo para comprimir o arquivo de registros.
+     */
+    public void comprimir() {
+        compressao.comprimir();
+    }
+
+    /**
+     * Metodo para descomprimir o arquivo de registros.
+     */
+    public void descomprimir() {
+        compressao.descomprimir();
+    }
 }
