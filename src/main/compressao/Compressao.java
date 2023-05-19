@@ -16,9 +16,10 @@ public class Compressao {
     private static IO io;
     private static Huffman huffman;
     private static LZW lzw;
+    private static LZ78 lz78;
 
     // Variaveis para controle dos arquivos de descompressao
-    private boolean hasHuffman, hasLZW;
+    private boolean hasHuffman, hasLZW, hasLZ78;
     private int versaoAtual;
 
     /**
@@ -28,14 +29,16 @@ public class Compressao {
         io = new IO();
         huffman = new Huffman();
         lzw = new LZW();
+        lz78 = new LZ78();
 
         hasHuffman = (huffman.versaoAtual != 0);
         hasLZW = (lzw.versaoAtual != 0);
+        hasLZ78 = (lz78.versaoAtual != 0);
         this.versaoAtual = 0;
     }
 
     /**
-     * Metodo para comprimir um arquivo binario, utilizando Huffman ou LZW.
+     * Metodo para comprimir um arquivo binario, utilizando Huffman, LZW ou LZ78.
      */
     public void comprimir() {
 
@@ -44,8 +47,9 @@ public class Compressao {
 
         hasHuffman = (huffman.versaoAtual != 0 || arquivoRegistro.length() > 0);
         hasLZW = (lzw.versaoAtual != 0 || arquivoRegistro.length() > 0);
+        hasLZ78 = (lz78.versaoAtual != 0 || arquivoRegistro.length() > 0);
 
-        if (hasHuffman || hasLZW) {
+        if (hasHuffman || hasLZW || hasLZ78) {
 
             int opcao = 0;
             int numCompressoes = 0;
@@ -55,6 +59,7 @@ public class Compressao {
                         "\n|------------------------------------------|" +
                         "\n| 1 - Huffman                              |" +
                         "\n| 2 - LZW                                  |" +
+                        "\n| 3 - LZ78                                 |" +
                         "\n+------------------------------------------+";
             
             // Obter opcao desejada
@@ -63,15 +68,15 @@ public class Compressao {
                     System.out.println(menu);
                     opcao = io.readInt("\nDigite o algoritmo desejado: ");
 
-                    if (opcao < 1 || opcao > 2) {
-                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 2.");
+                    if (opcao < 1 || opcao > 3) {
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 3.");
                     }
 
                 } catch (InputMismatchException e) {
-                    System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 2.");
+                    System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 3.");
                     io.readLine();
                 }
-            } while (opcao < 1 || opcao > 2);
+            } while (opcao < 1 || opcao > 3);
 
             // Obter numero de compressoes desejadas
             mostrarArquivoAtual(opcao);
@@ -94,6 +99,7 @@ public class Compressao {
             switch (opcao){
                 case 1: nomeArquivo = huffman.comprimir(numCompressoes); break;
                 case 2: nomeArquivo = lzw.comprimir(numCompressoes);     break;
+                case 3: nomeArquivo = lz78.comprimir(numCompressoes);    break;
             }
 
             // Mensagem de sucesso
@@ -110,15 +116,17 @@ public class Compressao {
     }
 
     /**
-     * Metodo para descomprimir um arquivo binario, utilizando Huffman ou LZW.
+     * Metodo para descomprimir um arquivo binario, utilizando Huffman, LZW ou
+     * LZ78.
      */
     public void descomprimir() {
 
         hasHuffman = (huffman.versaoAtual != 0);
         hasLZW = (lzw.versaoAtual != 0);
+        hasLZ78 = (lz78.versaoAtual != 0);
 
         // Somente se existir arquivo para descompressao
-        if (hasHuffman || hasLZW) {
+        if (hasHuffman || hasLZW || hasLZ78) {
 
             int opcao = 0;
             int numDescompressoes = 0;
@@ -131,31 +139,35 @@ public class Compressao {
                     try {
                         opcao = io.readInt("\nDigite o arquivo desejado: ");
         
-                        if (opcao < 1 || opcao > 2) {
-                            System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 2.");
+                        if (opcao < 1 || opcao > 3) {
+                            System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 3.");
                         }
         
                     } catch (InputMismatchException e) {
-                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 2.");
+                        System.out.println("\nERRO: Por favor, digite uma opcao valida de 1 a 3.");
                         io.readLine();
                     }
-                } while (opcao < 1 || opcao > 2);
+                } while (opcao < 1 || opcao > 3);
 
                 // Definir versao atual
-                if (opcao == 1) {
-                    versaoAtual = huffman.versaoAtual;
-                } else {
-                    versaoAtual = lzw.versaoAtual;
+                switch (opcao) {
+                    case 1: versaoAtual = huffman.versaoAtual; break;
+                    case 2: versaoAtual = lzw.versaoAtual;     break;
+                    case 3: versaoAtual = lz78.versaoAtual;    break;
                 }
-            
+
             // Se nao tiver, settar opcao automaticamente
             } else {
                 
-                // Huffman = 1 e LZW = 2
+                // Huffman = 1; LZW = 2; LZ78 = 3
                 if(hasHuffman) {
                     opcao = 1;
-                } else {
+
+                } else if(hasLZW){
                     opcao = 2;
+
+                } else {
+                    opcao = 3;
                 }
             }
 
@@ -189,6 +201,7 @@ public class Compressao {
             switch (opcao){
                 case 1: nomeArquivo = huffman.descomprimir(numDescompressoes); break;
                 case 2: nomeArquivo = lzw.descomprimir(numDescompressoes);     break;
+                case 3: nomeArquivo = lz78.descomprimir(numDescompressoes);    break;
             }
 
             // Mensagem de sucesso
@@ -215,9 +228,11 @@ public class Compressao {
         // Atualizar atributos da classe
         huffman = new Huffman();
         lzw = new LZW();
+        lz78 = new LZ78();
 
         hasHuffman = (huffman.versaoAtual != 0);
         hasLZW = (lzw.versaoAtual != 0);
+        hasLZ78 = (lz78.versaoAtual != 0);
         this.versaoAtual = 0;    
     }
 
@@ -260,28 +275,38 @@ public class Compressao {
         // Verificar arquivos para descomprimir
         hasHuffman = (huffman.versaoAtual != 0);
         hasLZW = (lzw.versaoAtual != 0);
+        hasLZ78 = (lz78.versaoAtual != 0);
 
         // Se apenas existir LZW
-        if(hasLZW && !hasHuffman) {
+        if(hasLZW && !hasHuffman && !hasLZ78) {
             menu = "\nArquivo para descomprimir: \"" + lzw.nomeArquivo + "\"";
             System.out.println(menu);
             versaoAtual = lzw.versaoAtual;
 
         // Se apenas existir Huffman
-        } else if(!hasLZW && hasHuffman) {
+        } else if(!hasLZW && hasHuffman && !hasLZ78) {
             menu = "\nArquivo para descomprimir: \"" + huffman.nomeArquivo + "\"";
             System.out.println(menu);
             versaoAtual = huffman.versaoAtual;
 
-        // Se existir os dois
+        // Se apenas existir LZ78
+        } else if (!hasLZW && !hasHuffman && hasLZ78) {
+            menu = "\nArquivo para descomprimir: \"" + lz78.nomeArquivo + "\"";
+            System.out.println(menu);
+            versaoAtual = lz78.versaoAtual;
+
+        // Se existir mais de um
         } else {
-            menu = "\nArquivos para descomprimir:" +
-                   "\n1 - \"" + huffman.nomeArquivo + "\"" +
-                   "\n2 - \"" + lzw.nomeArquivo + "\"";
+            menu = "\nArquivos para descomprimir:";
+
+            if (hasHuffman) menu += "\n1 - \"" + huffman.nomeArquivo + "\"";
+            if (hasLZW) menu += "\n2 - \"" + lzw.nomeArquivo + "\"";
+            if (hasLZ78) menu += "\n3 - \"" + lz78.nomeArquivo + "\"";
+                   
             System.out.println(menu);
         }
 
-        return (hasLZW && hasHuffman);
+        return (hasLZW && hasHuffman && hasLZ78);
     }
 
     /**
@@ -290,13 +315,11 @@ public class Compressao {
      */
     private void mostrarArquivoAtual(int opcao) {
 
-        // Se for Huffman
-        if (opcao == 1) {
-            System.out.println("\nVersao atual: " + huffman.versaoAtual);
-        
-        // Se for LZW
-        } else {
-            System.out.println("\nVersao atual: " + lzw.versaoAtual);
+        // Printar versao atual
+        switch (opcao) {
+            case 1: System.out.println("\nVersao atual: " + huffman.versaoAtual); break;
+            case 2: System.out.println("\nVersao atual: " + lzw.versaoAtual);     break;
+            case 3: System.out.println("\nVersao atual: " + lz78.versaoAtual);    break;
         }
     }
 

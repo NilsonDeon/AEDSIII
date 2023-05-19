@@ -141,10 +141,9 @@ public class Huffman {
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
 
-                // Marcar primeiros bytes para possivel que houve corte dos bits ao final
+                // Marcar primeiros bytes para possivel ocorrencia de corte dos bits ao final
                 outputFile.writeBoolean(false);
-                outputFile.writeShort(0);
-                outputFile.write(0xFF);
+                outputFile.write(0x00);
 
                 // Percorrer ate' fim de arquivo
                 while (posAtual != inputFile.length()) {
@@ -177,7 +176,7 @@ public class Huffman {
                 // Se faltou bits, escreve-los no arquivo
                 if (bits.length() > 0) {
 
-                    // Completar com zeros no fim
+                    // Converter para byte
                     String byteStr = bits.toString();
                     byte byteCompleto = (byte)Integer.parseInt(byteStr, 2);
 
@@ -187,8 +186,11 @@ public class Huffman {
                     // Marcar como houve sobra de bits
                     outputFile.writeBoolean(true);
 
+                    // Deslocar corretamente para inicio valido
+                    int deslocamento = 8 - bits.length();
+                    byteCompleto = (byte)(byteCompleto << deslocamento);
+
                     // Escrever em arquivo
-                    outputFile.writeShort(8 - bits.length());
                     outputFile.write(byteCompleto);
                 }
 
@@ -289,9 +291,8 @@ public class Huffman {
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
 
-                // Ler informacoes inciais sobre sobra de bits
+                // Ler informacoes inciais sobre possivel sobra de bits
                 boolean sobrouBits = arqAntigo.readBoolean();
-                short tamBits = arqAntigo.readShort();
                 byte bitesFinais = arqAntigo.readByte();
 
                 // Percorrer ate' fim de arquivo
@@ -349,29 +350,40 @@ public class Huffman {
                 if(sobrouBits) {
 
                     // Ajustar bits finais
-                    bitesFinais = (byte)(bitesFinais << tamBits);
-                    String byteStr = String.format(Integer.toBinaryString(bitesFinais));
+                    String byteStr = String.format("%8s", Integer.toBinaryString(bitesFinais & 0xFF)).replace(' ', '0');
                     bits.append(byteStr);
 
-                    // Procurar ultimo elemento
-                    int pos = 0;
-                    No no = raiz;
-                    while (pos < bits.length() && no != null && !isFolha(no)) {
+                    // Procurar ultimos elementos
+                    boolean findByte = true;
+                    while (findByte) {
+                        int pos = 0;
+                        No no = raiz;
+                        while (pos < bits.length() && no != null && !isFolha(no)) {
 
-                        // Procurar No folha com codigo valido
-                        char bit = bits.charAt(pos);
-                        pos++;
+                            // Procurar No folha com codigo valido
+                            char bit = bits.charAt(pos);
+                            pos++;
 
-                        if (bit == '0') {
-                            no = no.esquerda;
-                        } else {
-                            no = no.direita;
+                            if (bit == '0') {
+                                no = no.esquerda;
+                            } else {
+                                no = no.direita;
+                            }
+                        }
+
+                        // Testar se encontrou o codigo
+                        findByte = pos != bits.length();
+
+                        if (findByte) {
+
+                            // Obter valor do byte codificado e salvar
+                            byte byteOriginal = no.valor;
+                            arqNovo.write(byteOriginal);
+
+                            // Deletar String utilizada
+                            bits.delete(0, pos);
                         }
                     }
-
-                    // Obter valor do byte codificado e salvar
-                    byte byteOriginal = no.valor;
-                    arqNovo.write(byteOriginal);
 
                 }
                 
