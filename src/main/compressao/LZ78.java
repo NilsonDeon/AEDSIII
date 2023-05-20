@@ -179,11 +179,9 @@ public class LZ78 {
                             // Inserir no novo arquivo soemente a posicao no dicionario como inteiro
                             byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
                             arqNovo.write(posDicionarioBytes);
+                            
                             posDicionario = null;
-
-                            // Atualizar dicionario
-                            byte[] byteArray = toByteArray(bytesLido);
-                            dicionario.put(byteArray);
+                            primeiraOcorrencia = false;
                         }
                     }
 
@@ -309,7 +307,7 @@ public class LZ78 {
                     // Atualizar ponteiro
                     posAtual = arqAntigo.getFilePointer();
 
-                    // Testar se hoube ultimo byte ou se e' apenas posicao dicionario
+                    // Testar se houve ultimo byte ou se e' apenas posicao dicionario
                     if (posAtual != arqAntigo.length()) {
 
                         // Ler byte novo
@@ -341,6 +339,7 @@ public class LZ78 {
                             byte[] bytesAntigos = dicionario.get(posDicionario);
                             arqNovo.write(bytesAntigos);
                         }
+
                     }
 
                     // Atualizar ponteiro
