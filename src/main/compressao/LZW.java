@@ -291,7 +291,7 @@ public class LZW {
 
                 // Adicionar no dicionario
                 dicionario.put(bytesLido);
-                int ultimaPosicao = dicionario.size()-1;
+                int ultimaPosicao = dicionario.size();
 
                 // Escrever no arquivo
                 arqNovo.write(bytesLido);

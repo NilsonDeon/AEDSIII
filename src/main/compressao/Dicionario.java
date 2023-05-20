@@ -74,10 +74,10 @@ public class Dicionario {
      */
     protected void remove(int pos) {
         byte[] bytes = get(pos);
-        if (bytes != null) {
-            mapPosByte.remove(pos);
-            mapBytePos.remove(ByteBuffer.wrap(bytes));
-        }
+
+        mapPosByte.remove(pos);
+        mapBytePos.remove(ByteBuffer.wrap(bytes));
+
         posInserir--;
     }
 }
