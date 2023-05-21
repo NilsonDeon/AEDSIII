@@ -13,17 +13,19 @@ public class Compressao {
     private static final String registroDB = "./src/resources/Registro.db";
     private static final String caminhoPastaCompressao = "./src/resources/compressao";
 
+    // Classes para compressao
     private static IO io;
     private static Huffman huffman;
     private static LZW lzw;
     private static LZ78 lz78;
 
-    // Variaveis para controle
+    // Constantes
     private static final int NUM_COMPRESSOES = 3;
     private static final int posLZW = 1;
     private static final int posLZ78 = 2;
     private static final int posHuffman = 3;
 
+    // Variaveis para controle
     private boolean compressoes[];
     private String nomeArquivo;
     private int versaoAtual;
@@ -48,27 +50,6 @@ public class Compressao {
         nomeArquivo = "";
     }
 
-    private boolean temArquivo () {
-        return compressoes[posLZW] || compressoes[posLZ78] || compressoes[posHuffman];
-    }
-    
-    private boolean opcaoExiste (int opcao) {
-
-        boolean resp = false;
-
-        switch (opcao) {
-            case posLZW    : resp = (lzw.versaoAtual != 0);     break;
-            case posLZ78   : resp = (lz78.versaoAtual != 0);    break;
-            case posHuffman: resp = (huffman.versaoAtual != 0); break;
-        }
-
-        return resp;
-    }
-
-    private boolean opcaoInvalida (int opcao) {
-
-        return (opcao < 1 || opcao > NUM_COMPRESSOES);
-    }
     /**
      * Metodo para comprimir um arquivo binario, utilizando Huffman, LZW ou LZ78.
      */
@@ -87,12 +68,12 @@ public class Compressao {
             int numCompressoes = 0;
 
             String menu = "\n+------------------------------------------+" +
-                        "\n|   Escolha o algoritmo para compressao:   |" +
-                        "\n|------------------------------------------|" +
-                        "\n| 1 - LZW                                  |" +
-                        "\n| 2 - LZ78                                 |" +
-                        "\n| 3 - Huffman                              |" +
-                        "\n+------------------------------------------+";
+                         "\n|   Escolha o algoritmo para compressao:   |" +
+                         "\n|------------------------------------------|" +
+                         "\n| 1 - LZW                                  |" +
+                         "\n| 2 - LZ78                                 |" +
+                         "\n| 3 - Huffman                              |" +
+                         "\n+------------------------------------------+";
             
             // Obter opcao desejada
             do {
@@ -322,5 +303,42 @@ public class Compressao {
      */
     private boolean isInvalido(int numDescompressoes) {
         return (numDescompressoes <= 0 || numDescompressoes > versaoAtual);
+    }
+
+    /**
+     * Metodo para determinar se existe arquivo para comprimir ou descomprimir.
+     * @return true, se existir arquivo; false, caso contrario.
+     */
+    private boolean temArquivo () {
+        return compressoes[posLZW] || compressoes[posLZ78] || compressoes[posHuffman];
+    }
+    
+    /**
+     * Metodo para verificar se a opcao para descomprimir existe.
+     * @param opcao - que se deseja descomprimir.
+     * @return true, se existir; false, caso contrario.
+     */
+    private boolean opcaoExiste (int opcao) {
+
+        boolean resp = false;
+
+        switch (opcao) {
+            case posLZW    : resp = (lzw.versaoAtual != 0);     break;
+            case posLZ78   : resp = (lz78.versaoAtual != 0);    break;
+            case posHuffman: resp = (huffman.versaoAtual != 0); break;
+        }
+
+        return resp;
+    }
+
+    /**
+     * Metodo para determinar se a opcao selecionada corresponde a alguma
+     * possibilidade de algoritmo de compressao.
+     * @param opcao - desejada.
+     * @return true, se corresponder; false, caso contrario.
+     */
+    private boolean opcaoInvalida (int opcao) {
+
+        return (opcao < 1 || opcao > NUM_COMPRESSOES);
     }
 }

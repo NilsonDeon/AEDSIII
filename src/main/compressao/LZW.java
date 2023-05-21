@@ -45,7 +45,16 @@ public class LZW {
 
         String nomeArquivo = "";
         while (numCompressoes > 0) {
+
+            // Comprimir
+            long inicio = io.now();
             nomeArquivo = comprimir();
+            long fim = io.now();
+
+            // Mostrar tempo de execucao
+            String tempoCompressao = io.getTempo(inicio, fim);
+            System.out.println("Tempo compressao: " + tempoCompressao);
+
             numCompressoes--;
         }
 
@@ -58,10 +67,19 @@ public class LZW {
      * @return nomeArquivo gerado.
      */
     public String descomprimir(int numDescompressoes) {
-        
+
         String nomeArquivo = "";
         while (numDescompressoes > 0) {
+
+            // Descomprimir
+            long inicio = io.now();
             nomeArquivo = descomprimir();
+            long fim = io.now();
+
+            // Mostrar tempo de execucao
+            String tempoDescompressao = io.getTempo(inicio, fim);
+            System.out.println("\nTempo descompressao: " + tempoDescompressao);
+
             numDescompressoes--;
         }
 
@@ -208,6 +226,7 @@ public class LZW {
                 double compressao = (double)(tamArquivoRegistroDB - tamArquivoComprimido) / tamArquivoRegistroDB * 100;
                 System.out.println(String.format("\nTaxa compressao: %.2f%%", compressao));
 
+
             // Solicitar que carregue dados iniciais
             } else {
                 System.out.println("\nERRO: Registro vazio!" +
@@ -280,7 +299,7 @@ public class LZW {
                 arqNovo.seek(0);
 
                 // Mostrar barra de progresso
-                System.out.println("\n\nDescomprimindo arquivo: ");
+                System.out.println("\nDescomprimindo arquivo: ");
 
                 // Ler primeira posicao
                 Integer posDicionario = arqAntigo.readInt();

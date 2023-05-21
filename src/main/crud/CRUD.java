@@ -60,7 +60,6 @@ public class CRUD {
 
     // Compressoes
     private static Compressao compressao;
-    private static final String caminhoPastaCompressoes = "./src/resources/compressao";
 
     // IO
     private static IO io;
@@ -344,26 +343,6 @@ public class CRUD {
     }
 
     /**
-     * Metodo para obter horario atual.
-     * @return timestamp atual em milissegundos
-    */
-    private long now() {
-      return System.currentTimeMillis();
-    }
-
-    /**
-     * Metodo para obter o tempo de busca durante a pesquisa.
-     * @param inicio - horario de inicio da busca.
-     * @param fim - horario que a busca terminou.
-     * @return tempo relativo em segundos.
-    */
-    private String getTempoBusca(long inicio, long fim) {
-        double tempo = (fim - inicio) / 1000.0;
-        String strTempo = String.format("%.4f segundos", tempo);
-        return strTempo;
-    }
-
-    /**
      * Metodo para obter a posicao do registro no arquivo.
      * @param posicao - horario de inicio da busca.
      * @return tempo relativo em segundos.
@@ -389,24 +368,24 @@ public class CRUD {
         } while (idProcurado == 0);
 
         // Procurar sequenciamente
-        long sequencialInicio = now();
+        long sequencialInicio = io.now();
         long posicaoSequencial = read(idProcurado);
-        long sequencialFim = now();
+        long sequencialFim = io.now();
 
         // Procurar no hashing extensivel
-        long hashInicio = now();
+        long hashInicio = io.now();
         long posicaoHash = hash.read(idProcurado);
-        long hashFim = now();
+        long hashFim = io.now();
 
         // Procurar na Arvore B
-        long arvoreBInicio = now();
+        long arvoreBInicio = io.now();
         long posicaoArvoreB = arvoreB.read(idProcurado);
-        long arvoreBFim = now();
+        long arvoreBFim = io.now();
 
         // Procurar na Arvore B*
-        //long arvoreBStarInicio = now();
+        //long arvoreBStarInicio = io.now();
         //long posicaoArvoreBStar = arvoreBStar.read(idProcurado);
-        //long arvoreBStarFim = now();
+        //long arvoreBStarFim = io.now();
 
         // Verificar se todas as estruturas encontraram a mesma musica com sucesso
         boolean find = (posicaoSequencial != -1)                &&
@@ -424,10 +403,10 @@ public class CRUD {
         }
 
         // Obter tempos de buca
-        String tempoSeq  = getTempoBusca(sequencialInicio, sequencialFim);
-        String tempoHash = getTempoBusca(hashInicio, hashFim);
-        String tempoB    = getTempoBusca(arvoreBInicio, arvoreBFim);
-        //String tempoStar = getTempoBusca(arvoreBStarInicio, arvoreBStarFim);
+        String tempoSeq  = io.getTempo(sequencialInicio, sequencialFim);
+        String tempoHash = io.getTempo(hashInicio, hashFim);
+        String tempoB    = io.getTempo(arvoreBInicio, arvoreBFim);
+        //String tempoStar = io.getTempo(arvoreBStarInicio, arvoreBStarFim);
 
         // Obter posicao no arquivo sequencial
         String posSeq  = getPosicao(posicaoSequencial);

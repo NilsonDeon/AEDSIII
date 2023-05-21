@@ -42,7 +42,16 @@ public class LZ78 {
 
         String nomeArquivo = "";
         while (numCompressoes > 0) {
+
+            // Comprimir
+            long inicio = io.now();
             nomeArquivo = comprimir();
+            long fim = io.now();
+
+            // Mostrar tempo de execucao
+            String tempoCompressao = io.getTempo(inicio, fim);
+            System.out.println("Tempo compressao: " + tempoCompressao);
+
             numCompressoes--;
         }
 
@@ -55,10 +64,19 @@ public class LZ78 {
      * @return nomeArquivo gerado.
      */
     public String descomprimir(int numDescompressoes) {
-        
+
         String nomeArquivo = "";
         while (numDescompressoes > 0) {
+
+            // Descomprimir
+            long inicio = io.now();
             nomeArquivo = descomprimir();
+            long fim = io.now();
+
+            // Mostrar tempo de execucao
+            String tempoDescompressao = io.getTempo(inicio, fim);
+            System.out.println("\nTempo descompressao: " + tempoDescompressao);
+
             numDescompressoes--;
         }
 
@@ -286,7 +304,7 @@ public class LZ78 {
                 arqNovo.seek(0);
 
                 // Mostrar barra de progresso
-                System.out.println("\n\nDescomprimindo arquivo: ");
+                System.out.println("\nDescomprimindo arquivo: ");
 
                 // Atualizar ponteiro
                 long posAtual = arqAntigo.getFilePointer();
