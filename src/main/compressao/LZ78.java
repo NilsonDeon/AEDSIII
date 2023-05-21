@@ -12,7 +12,7 @@ import java.util.ArrayList;
 // Bibliotecas proprias
 import app.IO;
 
-public class LZW {
+public class LZ78 {
 
     // Caminhos para arquivos
     private static final String caminhoPasta = "./src/resources/compressao";
@@ -25,19 +25,16 @@ public class LZW {
     IO io = new IO();
 
     /**
-     * Construtor padrao da classe LZW.
+     * Construtor padrao da classe LZ78.
      */
-    public LZW() {
-
-        // Incializar dicionario com os bytes de 0 a 255
-        inicializarDicionario();
+    public LZ78() {
 
         // Atulizar versao e nome arquivo atuais
         updateVersaoAtual();
     }
 
     /**
-     * Metodo para comprimir um arquivo binario, utilizando o algoritmo LZW.
+     * Metodo para comprimir um arquivo binario, utilizando o algoritmo LZ78.
      * @param numCompressoes - numero de compressoes a serem realizadas.
      * @return nomeArquivo gerado.
      */
@@ -62,7 +59,7 @@ public class LZW {
     }
 
     /**
-     * Metodo para descomprimir um arquivo binario, utilizando o algoritmo LZW.
+     * Metodo para descomprimir um arquivo binario, utilizando o algoritmo LZ78.
      * @param numDescompressoes - numero de descompressoes a serem realizadas.
      * @return nomeArquivo gerado.
      */
@@ -88,7 +85,7 @@ public class LZW {
 
     /**
      * Metodo privado para comprimir um arquivo binario, utilizando o algoritmo
-     * LZW.
+     * LZ78.
      * @return nomeArquivo gerado.
      */
     private String comprimir() {
@@ -101,8 +98,8 @@ public class LZW {
 
         try {
 
-            // Inicializar o dicionario
-            inicializarDicionario();
+            // Reiniciar dicionario
+            dicionario = new Dicionario();
 
             // Abrir a pasta se nao existir
             File pasta = new File(caminhoPasta);
@@ -119,7 +116,7 @@ public class LZW {
 
                 // Abrir arquivo novo
                 versaoAtual++;
-                nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
+                nomeArquivo = caminhoPasta + "/RegistroLZ78Compressao" + versaoAtual + ".db";
                 arqNovo = new RandomAccessFile (nomeArquivo, "rw");
                 arqNovo.seek(0);
 
@@ -139,6 +136,7 @@ public class LZW {
                 System.out.println("\nComprimindo arquivo: ");
 
                 // Comprimir até o fim do arquivo
+                boolean primeiraOcorrencia = true;
                 while (posAtual != arqAntigo.length()) {
 
                     // Mostrar barra progresso
@@ -154,6 +152,7 @@ public class LZW {
                     Integer posDicionario = dicionario.get(toByteArray(bytesLido));
 
                     // Comparar se array esta' presente no dicionario, ate' encontrar um que nao esteja
+                    primeiraOcorrencia = true;
                     while (posDicionario != null) {
 
                         byte proximoByte;
@@ -172,26 +171,21 @@ public class LZW {
 
                             // Testar se, ao ler o proximo byte, o array ainda existe no dicionario
                             Integer newPosDicionario = dicionario.get(toByteArray(bytesLido));
-
-                            // Se existir, continuar busca
-                            if (newPosDicionario != null) {
                             
-                                // Atualizar ponteiro
-                                posAtual = arqAntigo.getFilePointer();
-                            
-                            // Senao, inserir no arquivo novo o byte codificado
-                            } else {
+                            // Se nao existir, inserir no arquivo novo o byte codificado
+                            if (newPosDicionario == null) {
                             
                                 // Inserir no novo arquivo a posicao no dicionario como inteiro
                                 byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
                                 arqNovo.write(posDicionarioBytes);
 
+                                // Inserir byte novo
+                                primeiraOcorrencia = false;
+                                arqNovo.write(proximoByte);
+
                                 // Atualizar dicionario
                                 byte[] byteArray = toByteArray(bytesLido);
                                 dicionario.put(byteArray);
-
-                                // Voltar ponteiro
-                                arqAntigo.seek(posAtual);
                             }
 
                             // Atualizar posicao
@@ -200,16 +194,28 @@ public class LZW {
                         // Se foi fim de arquivo, salvar o valor ja encontrado
                         } else {
 
-                            // Inserir no novo arquivo a posicao no dicionario como inteiro
+                            // Inserir no novo arquivo soemente a posicao no dicionario como inteiro
                             byte[] posDicionarioBytes = ByteBuffer.allocate(4).putInt(posDicionario).array();
                             arqNovo.write(posDicionarioBytes);
+                            
                             posDicionario = null;
-
-                            // Atualizar dicionario
-                            byte[] byteArray = toByteArray(bytesLido);
-                            dicionario.put(byteArray);
+                            primeiraOcorrencia = false;
                         }
                     }
+
+                    if (primeiraOcorrencia) {
+                        // Atualizar dicionario primeira ocorrencia do simbolo
+                        byte[] byteArray = toByteArray(bytesLido);
+                        dicionario.put(byteArray);
+
+                        // Escrever em arquivo posicao ZERO e novo valor
+                        byte[] zero = ByteBuffer.allocate(4).putInt(0).array();
+                        arqNovo.write(zero);
+                        arqNovo.write(byteArray);
+                    }
+
+                    // Atualizar ponteiro
+                    posAtual = arqAntigo.getFilePointer();
                 }
 
                 // Mostrar barra progresso completa
@@ -225,7 +231,6 @@ public class LZW {
                 // Mostrar compressao
                 double compressao = (double)(tamArquivoRegistroDB - tamArquivoComprimido) / tamArquivoRegistroDB * 100;
                 System.out.println(String.format("\nTaxa compressao: %.2f%%", compressao));
-
 
             // Solicitar que carregue dados iniciais
             } else {
@@ -255,7 +260,7 @@ public class LZW {
 
     /**
      * Metodo privado para descomprimir um arquivo binario, utilizando o algoritmo
-     * LZW.
+     * LZ78.
      * @return nomeArquivo gerado.
      */
     private String descomprimir() {
@@ -268,9 +273,9 @@ public class LZW {
 
         try {
 
-            // Inicializar o dicionario
-            inicializarDicionario();
-
+            // Reiniciar dicionario
+            dicionario = new Dicionario();
+            
             // Abrir arquivo antigo
             arqAntigo = new RandomAccessFile (nomeArquivoAntigo, "rw");
             arqAntigo.seek(0);
@@ -291,7 +296,7 @@ public class LZW {
                 
                 // Se for mais que zero, ainda esta comprimido
                 } else {
-                    nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
+                    nomeArquivo = caminhoPasta + "/RegistroLZ78Compressao" + versaoAtual + ".db";
                 }
 
                 // Abrir arquivo
@@ -300,20 +305,6 @@ public class LZW {
 
                 // Mostrar barra de progresso
                 System.out.println("\nDescomprimindo arquivo: ");
-
-                // Ler primeira posicao
-                Integer posDicionario = arqAntigo.readInt();
-
-                // Obter array na posicao lida
-                byte[] bytesLido = dicionario.get(posDicionario);
-                ArrayList<Byte> bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
-
-                // Adicionar no dicionario
-                dicionario.put(bytesLido);
-                int ultimaPosicao = dicionario.size();
-
-                // Escrever no arquivo
-                arqNovo.write(bytesLido);
 
                 // Atualizar ponteiro
                 long posAtual = arqAntigo.getFilePointer();
@@ -328,42 +319,46 @@ public class LZW {
                     // Mostrar barra progresso
                     io.gerarBarraProgresso(tamArquivoOriginal, (int)posAtual);
 
-                    // Ler proxima posicao
-                    posDicionario = arqAntigo.readInt();
+                    // Ler posicao de recuperacao
+                    Integer posDicionario = arqAntigo.readInt();
 
-                    // Obter proxima posicao do array
-                    bytesLido = dicionario.get(posDicionario);
+                    // Atualizar ponteiro
+                    posAtual = arqAntigo.getFilePointer();
 
-                    // Atualizar ultima posicao dicionario
-                    boolean stop = false;
-                    for (int i = 0; i < bytesLido.length && stop == false; i++) {
+                    // Testar se houve ultimo byte ou se e' apenas posicao dicionario
+                    if (posAtual != arqAntigo.length()) {
 
-                        // Testar se posicao ja existe no dicionario
-                        Integer posTeste = dicionario.get(toByteArray(bytesAntigo));
-                        if(posTeste != null) {
-                            bytesAntigo.add(bytesLido[i]);
-                        
-                        // Se posicao ainda nao existir, parar de adicionar
-                        } else {
-                            stop = true;
+                        // Ler byte novo
+                        byte byteNovo = arqAntigo.readByte();
+
+                        // Testar se ha' bytes para recuperar
+                        ArrayList<Byte> bytesAntigo = new ArrayList<>();
+                        if (posDicionario != 0) {
+
+                            // Escrever bytes antigos
+                            bytesAntigo = toByteArrayList(dicionario.get(posDicionario));
+                            byte[] bytesAntigos = dicionario.get(posDicionario);
+                            arqNovo.write(bytesAntigos);
                         }
+
+                        // Escrever byte novo
+                        arqNovo.write(byteNovo);
+
+                        // Atualizar dicionario
+                        bytesAntigo.add(byteNovo);
+                        dicionario.put(toByteArray(bytesAntigo));
+
+                    } else {
+                        
+                        // Recuperar ultimo array de byte
+                        if (posDicionario != 0) {
+
+                            // Escrever bytes antigos
+                            byte[] bytesAntigos = dicionario.get(posDicionario);
+                            arqNovo.write(bytesAntigos);
+                        }
+
                     }
-
-                    dicionario.remove(ultimaPosicao);
-                    dicionario.put(toByteArray(bytesAntigo));
-
-                    // Atualizar posicao do array
-                    bytesLido = dicionario.get(posDicionario);
-
-                    // Escrever no arquivo
-                    arqNovo.write(bytesLido);
-
-                    // Atualizar array antigo
-                    bytesAntigo = toByteArrayList(bytesLido);
-
-                    // Atualizar posicao nova dicionario
-                    dicionario.put(bytesLido);
-                    ultimaPosicao++;
 
                     // Atualizar ponteiro
                     posAtual = arqAntigo.getFilePointer();
@@ -447,20 +442,6 @@ public class LZW {
     }
 
     /**
-     * Metodo para inicializar dicionario Hash com os valores de 0 a 255.
-     */
-    private void inicializarDicionario() {
-
-        dicionario = new Dicionario();
-        // Preencher dicionario com byte de 0 a 255 bits
-        for(int i = 0; i <= 255; i++) {
-            byte[] item = new byte[1];
-            item[0] = (byte) i;
-            dicionario.put(item);
-        }
-    }
-
-    /**
      * Metodo para atualizar a versao e o nome do arquivo atual.
      */
     private void updateVersaoAtual () {
@@ -482,9 +463,9 @@ public class LZW {
                 // Verificar se tamanho e' valido (quando invalido significa que e' a pasta da arvore)
                 if(arquivos[i].isFile()) {
 
-                    // Testar se e' arquivo LZW
+                    // Testar se e' arquivo LZ78
                     String nomeCompressao = arquivos[i].getName().substring(8, 11);
-                    find = nomeCompressao.equals("LZW");
+                    find = nomeCompressao.equals("LZ78");
                 }
             }
 
@@ -492,7 +473,7 @@ public class LZW {
             if (find) {
 
                 // Posicionar ponteiro no nome do arquivo
-                String nomeCompressao = "RegistroLZWCompressao";
+                String nomeCompressao = "RegistroLZ78Compressao";
                 String arqEncontrado = arquivos[i-1].getName();
                 int posInicio = arqEncontrado.indexOf(nomeCompressao) + nomeCompressao.length();
                 int posFim = arqEncontrado.indexOf(".db");
@@ -500,7 +481,7 @@ public class LZW {
                 // Encontrar versao atual
                 String versaoAtualStr = arqEncontrado.substring(posInicio, posFim);
                 versaoAtual = Integer.parseInt(versaoAtualStr);
-                nomeArquivo = caminhoPasta + "/RegistroLZWCompressao" + versaoAtual + ".db";
+                nomeArquivo = caminhoPasta + "/RegistroLZ78Compressao" + versaoAtual + ".db";
 
             // Se ocorrer o erro de chegar ao fim do loop e nao encontrar, resetar arquivo
             } else {

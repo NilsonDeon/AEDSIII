@@ -46,7 +46,16 @@ public class Huffman {
 
         String nomeArquivo = "";
         while (numCompressoes > 0) {
+
+            // Comprimir
+            long inicio = io.now();
             nomeArquivo = comprimir();
+            long fim = io.now();
+
+            // Mostrar tempo de execucao
+            String tempoCompressao = io.getTempo(inicio, fim);
+            System.out.println("Tempo compressao: " + tempoCompressao);
+
             numCompressoes--;
         }
 
@@ -60,10 +69,19 @@ public class Huffman {
      * @return nomeArquivo gerado.
      */
     public String descomprimir(int numDescompressoes) {
-        
+
         String nomeArquivo = "";
         while (numDescompressoes > 0) {
+
+            // Descomprimir
+            long inicio = io.now();
             nomeArquivo = descomprimir();
+            long fim = io.now();
+
+            // Mostrar tempo de execucao
+            String tempoDescompressao = io.getTempo(inicio, fim);
+            System.out.println("\nTempo descompressao: " + tempoDescompressao);
+
             numDescompressoes--;
         }
 
@@ -141,6 +159,10 @@ public class Huffman {
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
 
+                // Marcar primeiros bytes para possivel ocorrencia de corte dos bits ao final
+                outputFile.writeBoolean(false);
+                outputFile.write(0x00);
+
                 // Percorrer ate' fim de arquivo
                 while (posAtual != inputFile.length()) {
 
@@ -172,9 +194,19 @@ public class Huffman {
                 // Se faltou bits, escreve-los no arquivo
                 if (bits.length() > 0) {
 
-                    // Completar com zeros no fim
+                    // Converter para byte
                     String byteStr = bits.toString();
                     byte byteCompleto = (byte)Integer.parseInt(byteStr, 2);
+
+                    // Reposicionar ponteiro no inicio
+                    outputFile.seek(0);
+
+                    // Marcar como houve sobra de bits
+                    outputFile.writeBoolean(true);
+
+                    // Deslocar corretamente para inicio valido
+                    int deslocamento = 8 - bits.length();
+                    byteCompleto = (byte)(byteCompleto << deslocamento);
 
                     // Escrever em arquivo
                     outputFile.write(byteCompleto);
@@ -220,7 +252,7 @@ public class Huffman {
 
     /**
      * Metodo privado para descomprimir um arquivo binario, utilizando o algoritmo
-     * LZW.
+     * Huffman.
      * @return nomeArquivo gerado.
      */
     private String descomprimir() {
@@ -277,6 +309,10 @@ public class Huffman {
                 // String para os codigos gerados
                 StringBuilder bits = new StringBuilder();
 
+                // Ler informacoes inciais sobre possivel sobra de bits
+                boolean sobrouBits = arqAntigo.readBoolean();
+                byte bitesFinais = arqAntigo.readByte();
+
                 // Percorrer ate' fim de arquivo
                 long posAtual = arqAntigo.getFilePointer();
                 while (posAtual != arqAntigo.length()) {
@@ -325,6 +361,47 @@ public class Huffman {
 
                     // Atualizar ponteiro
                     posAtual = arqAntigo.getFilePointer();
+
+                }
+
+                // Completar bits finais se necessario
+                if(sobrouBits) {
+
+                    // Ajustar bits finais
+                    String byteStr = String.format("%8s", Integer.toBinaryString(bitesFinais & 0xFF)).replace(' ', '0');
+                    bits.append(byteStr);
+
+                    // Procurar ultimos elementos
+                    boolean findByte = true;
+                    while (findByte) {
+                        int pos = 0;
+                        No no = raiz;
+                        while (pos < bits.length() && no != null && !isFolha(no)) {
+
+                            // Procurar No folha com codigo valido
+                            char bit = bits.charAt(pos);
+                            pos++;
+
+                            if (bit == '0') {
+                                no = no.esquerda;
+                            } else {
+                                no = no.direita;
+                            }
+                        }
+
+                        // Testar se encontrou o codigo
+                        findByte = pos != bits.length();
+
+                        if (findByte) {
+
+                            // Obter valor do byte codificado e salvar
+                            byte byteOriginal = no.valor;
+                            arqNovo.write(byteOriginal);
+
+                            // Deletar String utilizada
+                            bits.delete(0, pos);
+                        }
+                    }
 
                 }
                 

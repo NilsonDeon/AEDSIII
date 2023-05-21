@@ -13,23 +13,27 @@ public class Dicionario {
 
     private HashMap<Integer, byte[]> mapPosByte;
     private HashMap<ByteBuffer, Integer> mapBytePos;
+    private int posInserir;
 
     /**
      * Construtor padrao da classe Dicionario
      */
     protected Dicionario() {
-        mapPosByte = new HashMap<Integer, byte[]>();
-        mapBytePos = new HashMap<ByteBuffer, Integer>();
+        mapPosByte = new HashMap<Integer, byte[]>(0);
+        mapBytePos = new HashMap<ByteBuffer, Integer>(0);
+        posInserir = 1;
     }
 
     /**
      * Metodo para inserir um elemento e sua posicao no dicionario.
-     * @param pos - posicao do elemento.
      * @param bytes - array de bytes a ser adicionado.
+     * @return posicao de insercao do elemento
      */
-    protected void put(int pos, byte[] bytes) {
-        mapPosByte.put(pos, bytes);
-        mapBytePos.put(ByteBuffer.wrap(bytes), pos);
+    protected int put(byte[] bytes) {
+        mapPosByte.put(posInserir, bytes);
+        mapBytePos.put(ByteBuffer.wrap(bytes), posInserir);
+
+        return posInserir++;
     }
 
     /**
@@ -46,7 +50,13 @@ public class Dicionario {
      * @return - posicao do array; null se nao existir.
      */
     protected Integer get(byte[] bytes) {
-        return mapBytePos.get(ByteBuffer.wrap(bytes));
+        Integer posProcurada = null;
+
+        if (! mapBytePos.isEmpty()) {
+            posProcurada = mapBytePos.get(ByteBuffer.wrap(bytes));
+        }
+
+        return posProcurada;
     }
 
     /**
@@ -64,9 +74,10 @@ public class Dicionario {
      */
     protected void remove(int pos) {
         byte[] bytes = get(pos);
-        if (bytes != null) {
-            mapPosByte.remove(pos);
-            mapBytePos.remove(ByteBuffer.wrap(bytes));
-        }
+
+        mapPosByte.remove(pos);
+        mapBytePos.remove(ByteBuffer.wrap(bytes));
+
+        posInserir--;
     }
 }

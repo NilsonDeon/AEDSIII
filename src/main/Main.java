@@ -11,7 +11,6 @@ import java.util.InputMismatchException;
 import app.IO;
 import crud.CRUD;
 import sort.OrdenacaoExterna;
-import compressao.Compressao;
 
 class Main {
 

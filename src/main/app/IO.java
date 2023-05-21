@@ -111,5 +111,25 @@ public class IO {
       }
       barra += "] " + progresso + "%";
       System.out.print("\r" + barra);
-    }
+   }
+
+   /**
+     * Metodo para obter horario atual.
+     * @return timestamp atual em milissegundos
+    */
+   public long now() {
+      return System.currentTimeMillis();
+   }
+
+   /**
+    * Metodo para obter o tempo de busca durante a pesquisa.
+    * @param inicio - horario de inicio da busca.
+    * @param fim - horario que a busca terminou.
+    * @return tempo relativo em segundos.
+   */
+   public String getTempo(long inicio, long fim) {
+      double tempo = (fim - inicio) / 1000.0;
+      String strTempo = String.format("%.4f segundos", tempo);
+      return strTempo;
+   }
 }

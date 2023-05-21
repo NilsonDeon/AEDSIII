@@ -3,7 +3,7 @@
 * [Gabriel Vargas Bento de Souza](https://github.com/gabrielvargas00)
 * [Nilson Deon Cordeiro Filho](https://github.com/NilsonDeon/)
 
-## Parte 01 - CRUD e Ordenações
+## Parte 01 - CRUD e Ordenaçõs Externas
 
 [TP01](https://github.com/NilsonDeon/AEDSIII/archive/refs/tags/v1.0.0.zip) <br>
 [Vídeo Explicativo](https://youtu.be/kb8gb98yIVY)
@@ -14,9 +14,9 @@
 [TP02_Relatorio.pdf]()<br>
 [Vídeo Explicativo](https://youtu.be/1VcU_1pcU5U)
 
-## Parte 03 - Compreção Huffman e LZW
+## Parte 03 - Compressão de Dados
 
-## Parte 04 - EM BREVE
+## Parte 04 - Casamento de padrões
 
 ## Parte 05 - EM BREVE
 
