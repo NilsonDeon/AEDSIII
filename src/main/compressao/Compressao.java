@@ -39,9 +39,9 @@ public class Compressao {
         lzw = new LZW();
         lz78 = new LZ78();
 
-        compressoes = new boolean[NUM_COMPRESSOES+1];
-
         // Variaveis para definir se existe arquivo para cada tipo de compressao
+        compressoes = new boolean[NUM_COMPRESSOES+1];
+        
         compressoes[posLZW] = (lzw.versaoAtual != 0);
         compressoes[posLZ78] = (lz78.versaoAtual != 0);
         compressoes[posHuffman] = (huffman.versaoAtual != 0);
