@@ -10,11 +10,12 @@
 
 ## Parte 02 - Arquivos de Índices
 
-[TP02]() <br>
-[TP02_Relatorio.pdf]()<br>
+[TP02](https://github.com/NilsonDeon/AEDSIII/archive/refs/tags/v2.0.zip) <br>
 [Vídeo Explicativo](https://youtu.be/1VcU_1pcU5U)
 
 ## Parte 03 - Compressão de Dados
+
+[Vídeo Explicativo](https://youtu.be/DdguQDzB1BY)
 
 ## Parte 04 - Casamento de padrões
 
