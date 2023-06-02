@@ -15,10 +15,12 @@ public class CasamentoPadroes {
 
     private KMP KMP;
     private ForcaBruta FB;
+    private BoyerMoore BM;
 
     public CasamentoPadroes() {
         KMP = new KMP();
         FB = new ForcaBruta();
+        BM = new BoyerMoore();
     }
 
     public void procurarPadrao(String padrao) {
@@ -41,12 +43,22 @@ public class CasamentoPadroes {
         long KMPFim = io.now();
         String tempoKMP = io.getTempo(KMPInicio, KMPFim);
 
+        // Boyer Moore
+        Contador comparacoesBM = new Contador();
+        Contador ocorrenciasBM = new Contador();
+        List<Integer> listIdBM = new ArrayList<>();
+        long BMInicio = io.now();
+        BM.procurarPadrao(padrao, comparacoesBM, ocorrenciasBM, listIdBM);
+        long BMFim = io.now();
+        String tempoBM = io.getTempo(BMInicio, BMFim);
+
+
         // Exibir resultados
         String resultado = "\n _________________________________________________________"  +
                            "\n|  Algoritmo  | Comparacoes | Ocorrencias |  Tempo Busca  |" +
                            "\n|-------------|-------------|-------------|---------------|" +
                            "\n| Forca Bruta |" + mostrar(comparacoesFB, ocorrenciasFB, tempoFB) +
-                           "\n| Boyer-Moore |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
+                           "\n| Boyer-Moore |" + mostrar(comparacoesBM, ocorrenciasBM, tempoBM) +
                            "\n| Rabin-Karp  |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
                            "\n| Shift And   |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
                            "\n| KMP         |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
