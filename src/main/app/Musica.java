@@ -523,8 +523,7 @@ public class Musica {
             dos.write(tmp.toByteArray(), 0, tmp.size());
 
         } catch (IOException e) {
-            System.out.println("\nERRO ao converter Musica para um array de " +
-                               "bytes");
+            System.out.println("\nERRO ao converter Musica para um array de bytes");
         }
 
         return baos.toByteArray();
@@ -543,8 +542,7 @@ public class Musica {
         try {
             dos.writeBoolean(lapide);
         } catch (IOException e) {
-            System.out.println("\nERRO ao converter Booleano para um array de " +
-                               "bytes");
+            System.out.println("\nERRO ao converter Booleano para um array de bytes");
         }
 
         return baos.toByteArray();
@@ -563,8 +561,7 @@ public class Musica {
         try {
             dos.writeInt(inteiro);
         } catch (IOException e) {
-            System.out.println("\nERRO ao converter Inteiro para um array de " +
-                               "bytes");
+            System.out.println("\nERRO ao converter Inteiro para um array de bytes");
         }
 
         return baos.toByteArray();

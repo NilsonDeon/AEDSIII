@@ -25,6 +25,16 @@ public class Dicionario {
     }
 
     /**
+     * Construtor padrao da classe Dicionario
+     * @param posInicio - posicao de inicio do dicionario.
+     */
+    public Dicionario(int posInicio) {
+        mapPosByte = new HashMap<Integer, byte[]>(0);
+        mapBytePos = new HashMap<ByteBuffer, Integer>(0);
+        posInserir = posInicio;
+    }
+
+    /**
      * Metodo para inserir um elemento e sua posicao no dicionario.
      * @param bytes - array de bytes a ser adicionado.
      * @return posicao de insercao do elemento

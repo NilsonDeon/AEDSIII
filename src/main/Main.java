@@ -1,7 +1,7 @@
 /**
- * Main - Trabalho Pratico 03 de Algoritmos e Estruturas de Dados III
+ * Main - Trabalho Pratico 04 de Algoritmos e Estruturas de Dados IV
  * @author Gabriel Vargas Bento de Souza e Nilson Deon Cordeiro Filho
- * @version 3.0 05/2023
+ * @version 4.0 06/2023
 */
 
 // Bibliotecas
@@ -9,6 +9,7 @@ import java.util.InputMismatchException;
 
 // Bibliotecas proprias
 import app.IO;
+import casamentoPadroes.CasamentoPadroes;
 import crud.CRUD;
 import sort.OrdenacaoExterna;
 
@@ -24,12 +25,13 @@ class Main {
         OrdenacaoExterna sort = new OrdenacaoExterna();
         IO io = new IO();
         CRUD crud = new CRUD();
+        CasamentoPadroes casamento = new CasamentoPadroes();
 
-       String intro = "\n        Trabalho Pratico 03 - TP03         " +
+       String intro = "\n        Trabalho Pratico 04 - TP04         " +
                       "\n    Algoritmos e Estruturas de Dados III   " + 
                       "\n       Gabriel Vargas e Nilson Deon        " +
                       "\n     Base de dados: Musicas do Spotify     " +
-                      "\n                  05/2023                  ";
+                      "\n                  06/2023                  ";
 
        String menu = "\n+------------------------------------------+" +
                      "\n|              MENU PRINCIPAL              |" +
@@ -45,6 +47,7 @@ class Main {
                      "\n|  9 - Abrir musica no Spotify             |" +
                      "\n| 10 - Comprimir registro                  |" +
                      "\n| 11 - Descomprimir registro               |" +
+                     "\n| 12 - Casamento de padrao                 |" +
                      "\n+------------------------------------------+";
        int opcao = -1;
 
@@ -67,6 +70,7 @@ class Main {
                    case  9: crud.abrirMusica();     break;
                    case 10: crud.comprimir();       break;
                    case 11: crud.descomprimir();    break;
+                   case 12: String padrao = io.readLine("str: "); casamento.kmp.procurarPadrao(padrao);    break;
                    default: mostrarErro();          break;
                }
            } catch (InputMismatchException e) {
@@ -75,7 +79,7 @@ class Main {
            } finally {
                
                // Fazer um break para ser possivel ler os resultados obtidos
-               if(opcao >= 2 && opcao <= 11) {
+               if(opcao >= 2 && opcao <= 12) {
                    System.out.println("\nPressione ENTER para continuar");
                    io.readLine();
                }
