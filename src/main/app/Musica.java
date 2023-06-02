@@ -618,6 +618,34 @@ public class Musica {
     }
 
     /**
+     * Metodo para converter musica para String, na qual os atributos estao
+     * separados por espaco em branco
+     * @return musica como String
+     */
+    public String musicaToString() {
+
+        String listaImagens = "";
+        for(String img : getImagens()) {
+            listaImagens += img + " ";
+        }
+
+        String pais = getPais()[0] + getPais()[1] + " ";
+
+        return id + " " +
+               nome + " " +
+               artistas + " " +
+               nomeAlbum + " " + 
+               listaImagens + 
+               pais +
+               mostrarDataLancamento() + " " +
+               dancabilidade + " " +
+               duracao + " " +
+               vivacidade + " " +
+               popularidade + " " +
+               uri;
+    }
+
+    /**
     * Getter para o atributo lapide.
     * @return o valor atual do atributo lapide.
     */

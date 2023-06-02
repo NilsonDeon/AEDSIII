@@ -11,32 +11,17 @@ import java.util.List;
 import app.Musica;
 import casamentoPadroes.auxiliar.Contador;
 
-public class KMP {
+public class ForcaBruta {
 
     // Arquivo de registro
     private static final String registroDB = "./src/resources/Registro.db";
 
-    // Funcao de prefixo basico
-    private int prefixoBasico[];
-
     /**
-     * Construtor padrao da classe KMP.
+     * Construtor padrao da classe ForcaBruta.
      */
-    public KMP() {}
+    public ForcaBruta() {}
 
-    /**
-     * Metodo para procurar um padrao String nos registros de Musica.
-     * @param padraoProcurado - string, contendo o padrao procurado.
-     * @param numComparacoes - contador para contabilizar o numero de
-     * comparacoes que o algoritmo realiza.
-     * @param numOcorrencias - contador para contabilizar o numero de
-     * ocorrencias do padrao que o algoritmo encontrar.
-     * @param listID - arrayList com os IDs encontrados durante a busca.
-     */
     public void procurarPadrao (String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Integer> listID) {
-
-        // Montar tabela hash de prefixo basico;
-        montarPrefixoBasico(padraoProcurado);
 
         // Abrir arquivo para busca
         RandomAccessFile dbFile = null;
@@ -77,7 +62,6 @@ public class KMP {
 
                         posBak = posAtual+1;
                         
-                        int deslocamento = 0;
                         boolean find = true;
 
                         for(int i = 0; i < padraoProcurado.length() && find; i++){
@@ -85,24 +69,20 @@ public class KMP {
                             // Contabilizar comparacoes
                             numComparacoes.cont++;
 
-                            // Se nao houve correspondencia, analisar deslocamento possivel
+                            // Se nao houve correspondencia, quebrar loop e tentar novamente
                             if (textoAtual.charAt(posAtual++) != padraoProcurado.charAt(i)) {
-                                posAtual--;
-                                deslocamento = i - prefixoBasico[i];
                                 find = false;
                             }
                         }
 
                         // Testar se encontrou
                         if (find) {
-                            posAtual = posBak;
                             numOcorrencias.cont++;
                             listID.add(musica.getId());
-                        
-                        // Se nao encontrou, deslocar
-                        } else {
-                            posAtual = posAtual + deslocamento;
                         }
+
+                        // Mover sempre uma posicao
+                        posAtual = posBak;
                     }
                 
                 // Se nao for, pular o registro e reposicionar ponteiro
@@ -125,70 +105,4 @@ public class KMP {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
     }
-
-    /**
-     * Metodo para obter a funcao de prefixo basico para o deslocamento ao
-     * encontrar caractere errado no KMP.
-     * @param padraoProcurado
-     */
-    private void montarPrefixoBasico(String padraoProcurado) {
-
-        // Settar array
-        prefixoBasico = new int[padraoProcurado.length()];
-
-        // Duas primeiras posicoes, por definicao, -1 e 0
-        prefixoBasico[0] = -1;
-        if (padraoProcurado.length() > 1) prefixoBasico[1] = 0;
-
-        // Adicionar valor para outras posicoes
-        for(int i = 2; i < padraoProcurado.length(); i++) {
-
-            char charAnterior = padraoProcurado.charAt(i-1);
-
-            // Obter proxima posicao a ser analisada
-            int pos = i-2;
-
-            // Settar default para posicao atual
-            prefixoBasico[i] = prefixoBasico[i-1] + 1;
-
-            // Repetir ate' nao ser necessario mais a busca
-            boolean stop = false;
-            while (!stop) {
-
-                // Tentar encontrar padrao repetido
-                while(pos >= 0 && charAnterior != padraoProcurado.charAt(pos)) {
-                    prefixoBasico[i] = pos;
-                    pos--;
-                }
-
-                // Testar se encontrou de fato
-                if (pos > 0) {
-                    int newPos = pos;
-                    int dif = i-1;;
-
-                    // Verificar se o padrao se mantem aparecendo
-                    while (newPos > 0 && padraoProcurado.charAt(newPos--) == padraoProcurado.charAt(dif--));
-
-                    // Testar se ultimo prefixo a se analisar e' o prefixo do padrao
-                    if (newPos == 0 && padraoProcurado.charAt(newPos) == padraoProcurado.charAt(dif)) {
-                        stop = true;
-                    
-                    // Se nao for, resetar busca
-                    } else {
-                        prefixoBasico[i] = 0;
-                    }
-
-                // Marcar como fim se tiver chegado 'a ultima comparacao
-                } else {
-                    stop = true;
-                }
-
-                pos--;
-            }
-
-        }
-
-    }
-
-
 }

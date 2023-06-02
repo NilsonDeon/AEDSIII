@@ -70,7 +70,7 @@ class Main {
                    case  9: crud.abrirMusica();     break;
                    case 10: crud.comprimir();       break;
                    case 11: crud.descomprimir();    break;
-                   case 12: String padrao = io.readLine("str: "); casamento.kmp.procurarPadrao(padrao);    break;
+                   case 12: String padrao = io.readLine("str: "); casamento.procurarPadrao(padrao);    break;
                    default: mostrarErro();          break;
                }
            } catch (InputMismatchException e) {
