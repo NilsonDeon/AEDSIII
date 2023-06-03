@@ -15,11 +15,14 @@
 
 ## Parte 03 - Compressão de Dados
 
+[TP03](https://github.com/NilsonDeon/AEDSIII/archive/refs/tags/v3.0.zip)<br>
 [Vídeo Explicativo](https://youtu.be/DdguQDzB1BY)
 
 ## Parte 04 - Casamento de padrões
 
-## Parte 05 - EM BREVE
+[Vídeo Explicativo](https://youtu.be/DdguQDzB1BY)
+
+## Parte 05 - Criptografía
 
 ## Como Testar
 
