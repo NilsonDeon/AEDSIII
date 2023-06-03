@@ -17,12 +17,14 @@ public class CasamentoPadroes {
     private ForcaBruta FB;
     private BoyerMoore BM;
     private RabinKarp RK;
+    private ShiftAnd SA;
 
     public CasamentoPadroes() {
         KMP = new KMP();
         FB = new ForcaBruta();
         BM = new BoyerMoore();
         RK = new RabinKarp();
+        SA = new ShiftAnd();
     }
 
     public void procurarPadrao(String padrao) {
@@ -63,6 +65,15 @@ public class CasamentoPadroes {
         long RKFim = io.now();
         String tempoRK = io.getTempo(RKInicio, RKFim);
 
+        // Shift And
+        Contador comparacoesSA = new Contador();
+        Contador ocorrenciasSA = new Contador();
+        List<Integer> listIdSA = new ArrayList<>();
+        long SAInicio = io.now();
+        SA.procurarPadrao(padrao, comparacoesSA, ocorrenciasSA, listIdSA);
+        long SAFim = io.now();
+        String tempoSA = io.getTempo(SAInicio, SAFim);
+
 
         // Exibir resultados
         String resultado = "\n _________________________________________________________"  +
@@ -71,7 +82,7 @@ public class CasamentoPadroes {
                            "\n| Forca Bruta |" + mostrar(comparacoesFB, ocorrenciasFB, tempoFB) +
                            "\n| Boyer-Moore |" + mostrar(comparacoesBM, ocorrenciasBM, tempoBM) +
                            "\n| Rabin-Karp  |" + mostrar(comparacoesRK, ocorrenciasRK, tempoRK) +
-                           "\n| Shift And   |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
+                           "\n| Shift And   |" + mostrar(comparacoesSA, ocorrenciasSA, tempoSA) +
                            "\n| KMP         |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
                            "\n|_____________|_____________|_____________|_______________|";
         
