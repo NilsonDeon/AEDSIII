@@ -25,6 +25,9 @@ public class CasamentoPadroes {
     private RabinKarp RK;
     private ShiftAnd SA;
 
+    /**
+     * Construtor padrao da classe casamentoPadroes.
+     */
     public CasamentoPadroes() {
         KMP = new KMP();
         FB = new ForcaBruta();
@@ -33,6 +36,9 @@ public class CasamentoPadroes {
         SA = new ShiftAnd();
     }
 
+    /**
+     * Metodo para procurar um padrao (string) dentro do arquivo "Registro.db"
+     */
     public void procurarPadrao() {
 
         // Testar se registro existe
@@ -97,14 +103,14 @@ public class CasamentoPadroes {
 
             // Exibir resultados
             String resultado = "\n _________________________________________________________"  +
-                            "\n|  Algoritmo  | Comparacoes | Ocorrencias |  Tempo Busca  |" +
-                            "\n|-------------|-------------|-------------|---------------|" +
-                            "\n| Forca Bruta |" + mostrar(comparacoesFB, ocorrenciasFB, tempoFB) +
-                            "\n| Boyer-Moore |" + mostrar(comparacoesBM, ocorrenciasBM, tempoBM) +
-                            "\n| Rabin-Karp  |" + mostrar(comparacoesRK, ocorrenciasRK, tempoRK) +
-                            "\n| Shift And   |" + mostrar(comparacoesSA, ocorrenciasSA, tempoSA) +
-                            "\n| KMP         |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
-                            "\n|_____________|_____________|_____________|_______________|";
+                               "\n|  Algoritmo  | Comparacoes | Ocorrencias |  Tempo Busca  |" +
+                               "\n|-------------|-------------|-------------|---------------|" +
+                               "\n| Forca Bruta |" + mostrar(comparacoesFB, ocorrenciasFB, tempoFB) +
+                               "\n| Boyer-Moore |" + mostrar(comparacoesBM, ocorrenciasBM, tempoBM) +
+                               "\n| Rabin-Karp  |" + mostrar(comparacoesRK, ocorrenciasRK, tempoRK) +
+                               "\n| Shift And   |" + mostrar(comparacoesSA, ocorrenciasSA, tempoSA) +
+                               "\n| KMP         |" + mostrar(comparacoesKMP, ocorrenciasKMP, tempoKMP) +
+                               "\n|_____________|_____________|_____________|_______________|";
             
             System.out.println(resultado);
 

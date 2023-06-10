@@ -97,8 +97,6 @@ public class ArvoreBStar {
     private void inserir(long posInserir, Musica newMusica, long newEndereco, long filhoEsq, long filhoDir) {
         RandomAccessFile arvoreBFile = null;
 
-        IO io = new IO();
-
         try {
             arvoreBFile = new RandomAccessFile (arvoreBDB, "rw");
 
