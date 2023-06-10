@@ -190,6 +190,8 @@ public class CasamentoPadroes {
                         arqTXT.write(musica.getId() + " - " + musica.getNome() + "\n");
                     }
                     arqTXT.close();
+
+                    System.out.println("\nArquivo \"" + pathArquivo + "\" criado com sucesso!");
                 
                 } catch (IOException e) {
                     System.out.println("\nERRO: " + e.getMessage() + " ao escrever o arquivo \"" + arqTXT + "\"\n");
