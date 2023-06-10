@@ -19,7 +19,10 @@ public class RabinKarp {
     private static final String registroDB = "./src/resources/Registro.db";
 
     // Valor primo para cálculo do hash
-    private static final int PRIMO = 31;
+    private static final long PRIMO = 31L;
+
+    // Tamanho máximo do valor hash suportado
+    private static final long MAX_HASH_VALUE = Long.MAX_VALUE;
 
     /**
      * Construtor padrão da classe RabinKarp.
@@ -129,8 +132,8 @@ public class RabinKarp {
         long potencia = 1;
 
         for (int i = 0; i < str.length(); i++) {
-            hash = (hash + (str.charAt(i) - 'a' + 1) * potencia) % Integer.MAX_VALUE;
-            potencia = (potencia * PRIMO) % Integer.MAX_VALUE;
+            hash = (hash * PRIMO + (str.charAt(i) - 'a' + 1)) % MAX_HASH_VALUE;
+            potencia = (potencia * PRIMO) % MAX_HASH_VALUE;
         }
 
         return hash;
@@ -146,10 +149,18 @@ public class RabinKarp {
      * @return - O novo valor hash calculado.
      */
     private long recalculaHash(long oldHash, char charAntigo, char novoChar, int patternLength) {
-        long novoHash = oldHash - (charAntigo - 'a' + 1);
-        novoHash = (novoHash / PRIMO) % Integer.MAX_VALUE;
-        novoHash = (novoHash + (novoChar - 'a' + 1) * (long) Math.pow(PRIMO, patternLength - 1)) % Integer.MAX_VALUE;
+        long novoHash = (oldHash - (charAntigo - 'a' + 1) * calcularPotencia(PRIMO, patternLength - 1)) % MAX_HASH_VALUE;
+        novoHash = (novoHash * PRIMO + (novoChar - 'a' + 1)) % MAX_HASH_VALUE;
 
         return novoHash;
     }
+
+    private long calcularPotencia(long base, int expoente) {
+        long resultado = 1;
+        for (int i = 0; i < expoente; i++) {
+            resultado = (resultado * base) % Integer.MAX_VALUE;
+        }
+        return resultado;
+    }
+
 }
