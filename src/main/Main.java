@@ -59,19 +59,19 @@ class Main {
                opcao = io.readInt("\nDigite uma opcao: ");
 
                switch (opcao) {
-                   case  1:                         break;
-                   case  2: crud.carregarCSV();     break;
-                   case  3: crud.create();          break;
-                   case  4: crud.read();            break;
-                   case  5: crud.update();          break;
-                   case  6: crud.delete();          break;
-                   case  7: sort.ordenarArquivo();  break;
-                   case  8: crud.saveTXT();         break;
-                   case  9: crud.abrirMusica();     break;
-                   case 10: crud.comprimir();       break;
-                   case 11: crud.descomprimir();    break;
-                   case 12: String padrao = io.readLine("str: "); casamento.procurarPadrao(padrao);    break;
-                   default: mostrarErro();          break;
+                   case  1:                             break;
+                   case  2: crud.carregarCSV();         break;
+                   case  3: crud.create();              break;
+                   case  4: crud.read();                break;
+                   case  5: crud.update();              break;
+                   case  6: crud.delete();              break;
+                   case  7: sort.ordenarArquivo();      break;
+                   case  8: crud.saveTXT();             break;
+                   case  9: crud.abrirMusica();         break;
+                   case 10: crud.comprimir();           break;
+                   case 11: crud.descomprimir();        break;
+                   case 12: casamento.procurarPadrao(); break;
+                   default: mostrarErro();              break;
                }
            } catch (InputMismatchException e) {
                mostrarErro();
@@ -95,6 +95,6 @@ class Main {
     */
     public static void mostrarErro() {
         System.out.println("\nERRO: Por favor, digite uma opcao valida de " + 
-                           "1 a 11.");
+                           "1 a 12.");
     }
 }

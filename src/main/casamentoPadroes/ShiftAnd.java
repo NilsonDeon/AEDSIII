@@ -22,15 +22,13 @@ public class ShiftAnd {
     public ShiftAnd() {}
 
     /**
-     * Metodo para procurar um padrao String nos registros de Musica.
+     * Metodo para procurar um padrao String nos registros de Musica
      * @param padraoProcurado - string, contendo o padrao procurado.
-     * @param numComparacoes - contador para contabilizar o numero de
-     * comparacoes que o algoritmo realiza.
-     * @param numOcorrencias - contador para contabilizar o numero de
-     * ocorrencias do padrao que o algoritmo encontrar.
-     * @param listID - arrayList com os IDs encontrados durante a busca.
+     * @param numComparacoes  - contador para contabilizar o numero de comparacoes que o algoritmo realiza.
+     * @param numOcorrencias  - contador para contabilizar o numero de ocorrencias do padrao que o algoritmo encontrar.
+     * @param listID - ArrayList com as musicas encontrados durante a busca.
      */
-    public void procurarPadrao(String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Integer> listID) {
+    public void procurarPadrao(String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Musica> listMusic) {
 
         // Converter padrao para vetor de bytes
         byte[] padrao = padraoProcurado.getBytes();
@@ -82,6 +80,7 @@ public class ShiftAnd {
                         boolean find = true;
 
                         for (int i = padrao.length - 1; i >= 0 && find; i--) {
+                            
                             // Contabilizar comparacoes
                             numComparacoes.cont++;
 
@@ -95,8 +94,13 @@ public class ShiftAnd {
                         // Testar se encontrou
                         if (find) {
                             numOcorrencias.cont++;
-                            listID.add(musica.getId());
                             posAtual++;
+
+                            // Adicionar 'a lista se nao existir ainda
+                            if(! listMusic.contains(musica)) {
+                                listMusic.add(musica);
+                            }
+                            
                         }
 
                         // Deslocar a posicao atual
@@ -122,5 +126,4 @@ public class ShiftAnd {
             System.out.println("\nERRO: " + e.getMessage() + " ao ler o arquivo \"" + registroDB + "\"\n");
         }
     }
-
 }

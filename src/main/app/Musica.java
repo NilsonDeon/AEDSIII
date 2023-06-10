@@ -631,8 +631,7 @@ public class Musica {
 
         String pais = getPais()[0] + getPais()[1] + " ";
 
-        return id + " " +
-               nome + " " +
+        return nome + " " +
                artistas + " " +
                nomeAlbum + " " + 
                listaImagens + 

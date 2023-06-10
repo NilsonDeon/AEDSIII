@@ -25,15 +25,13 @@ public class KMP {
     public KMP() {}
 
     /**
-     * Metodo para procurar um padrao String nos registros de Musica.
+     * Metodo para procurar um padrao String nos registros de Musica
      * @param padraoProcurado - string, contendo o padrao procurado.
-     * @param numComparacoes - contador para contabilizar o numero de
-     * comparacoes que o algoritmo realiza.
-     * @param numOcorrencias - contador para contabilizar o numero de
-     * ocorrencias do padrao que o algoritmo encontrar.
-     * @param listID - arrayList com os IDs encontrados durante a busca.
+     * @param numComparacoes  - contador para contabilizar o numero de comparacoes que o algoritmo realiza.
+     * @param numOcorrencias  - contador para contabilizar o numero de ocorrencias do padrao que o algoritmo encontrar.
+     * @param listID - ArrayList com as musicas encontrados durante a busca.
      */
-    public void procurarPadrao (String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Integer> listID) {
+    public void procurarPadrao(String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Musica> listMusic) {
 
         // Montar tabela hash de prefixo basico;
         montarPrefixoBasico(padraoProcurado);
@@ -97,8 +95,12 @@ public class KMP {
                         if (find) {
                             posAtual = posBak;
                             numOcorrencias.cont++;
-                            listID.add(musica.getId());
-                        
+
+                            // Adicionar 'a lista se nao existir ainda
+                            if(! listMusic.contains(musica)) {
+                                listMusic.add(musica);
+                            }
+                                                    
                         // Se nao encontrou, deslocar
                         } else {
                             posAtual = posAtual + deslocamento;
@@ -137,7 +139,7 @@ public class KMP {
         prefixoBasico = new int[padraoProcurado.length()];
 
         // Duas primeiras posicoes, por definicao, -1 e 0
-        prefixoBasico[0] = -1;
+        if (padraoProcurado.length() > 0) prefixoBasico[0] = -1;
         if (padraoProcurado.length() > 1) prefixoBasico[1] = 0;
 
         // Adicionar valor para outras posicoes

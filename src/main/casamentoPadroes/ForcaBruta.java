@@ -20,8 +20,15 @@ public class ForcaBruta {
      * Construtor padrao da classe ForcaBruta.
      */
     public ForcaBruta() {}
-
-    public void procurarPadrao (String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Integer> listID) {
+    
+    /**
+     * Metodo para procurar um padrao String nos registros de Musica
+     * @param padraoProcurado - string, contendo o padrao procurado.
+     * @param numComparacoes  - contador para contabilizar o numero de comparacoes que o algoritmo realiza.
+     * @param numOcorrencias  - contador para contabilizar o numero de ocorrencias do padrao que o algoritmo encontrar.
+     * @param listID - ArrayList com as musicas encontrados durante a busca.
+     */
+    public void procurarPadrao(String padraoProcurado, Contador numComparacoes, Contador numOcorrencias, List<Musica> listMusic) {
 
         // Abrir arquivo para busca
         RandomAccessFile dbFile = null;
@@ -78,7 +85,13 @@ public class ForcaBruta {
                         // Testar se encontrou
                         if (find) {
                             numOcorrencias.cont++;
-                            listID.add(musica.getId());
+                            posAtual++;
+
+                            // Adicionar 'a lista se nao existir ainda
+                            if(! listMusic.contains(musica)) {
+                                listMusic.add(musica);
+                            }
+                            
                         }
 
                         // Mover sempre uma posicao
