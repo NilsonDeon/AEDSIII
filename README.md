@@ -20,7 +20,7 @@
 
 ## Parte 04 - Casamento de padrões
 
-[Vídeo Explicativo]()
+[Vídeo Explicativo](https://youtu.be/Hi1Co70hqC0)
 
 ## Parte 05 - Criptografia
 
