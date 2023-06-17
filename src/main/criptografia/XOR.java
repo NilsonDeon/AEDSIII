@@ -18,43 +18,18 @@ public class XOR {
     }
 
     /**
-     * Criptografa o arquivo especificado.
-     */
-    public void criptografar() {
-        try {
-            // Leitura do arquivo de bytes
-            FileInputStream fis = new FileInputStream(registroDB);
-            byte[] fileBytes = fis.readAllBytes();
-            fis.close();
-
-            // Criptografar os bytes
-            byte[] bytesCriptografados = criptografarBytes(fileBytes);
-
-            // Escrever os bytes criptografados no mesmo arquivo
-            FileOutputStream fos = new FileOutputStream(registroDB);
-            fos.write(bytesCriptografados);
-            fos.close();
-
-            System.out.println("Arquivo criptografado com sucesso!");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Criptografa um array de bytes usando o algoritmo XOR.
      *
      * @param registro o array de bytes a ser criptografado
      * @return um novo array de bytes contendo os bytes criptografados
      */
-    private byte[] criptografarBytes(byte[] registro) {
+    private byte[] criptografar(byte[] registro) {
         byte[] bytesCriptografados = new byte[registro.length];
-        int tamanhoChave = chave.length();
+        int tamanhoChave = CHAVE.length();
 
         for (int i = 0; i < registro.length; i++) {
             byte original = registro[i];
-            byte chaveBytes = (byte) chave.charAt(i % tamanhoChave);
+            byte chaveBytes = (byte) CHAVE.charAt(i % tamanhoChave);
 
             // Criptografar o byte
             byte criptografado = (byte) (original ^ chaveBytes);
@@ -65,43 +40,18 @@ public class XOR {
     }
 
     /**
-     * Descriptografa o arquivo especificado.
-     */
-    public void descriptografar() {
-        try {
-            // Leitura do arquivo de bytes criptografados
-            FileInputStream fis = new FileInputStream(registroDB);
-            byte[] bytesCriptografados = fis.readAllBytes();
-            fis.close();
-
-            // Descriptografar os bytes
-            byte[] bytesDescriptografados = descriptografarBytes(bytesCriptografados);
-
-            // Escrever os bytes descriptografados no mesmo arquivo
-            FileOutputStream fileOutputStream = new FileOutputStream(registroDB);
-            fileOutputStream.write(bytesDescriptografados);
-            fileOutputStream.close();
-
-            System.out.println("Arquivo descriptografado com sucesso!");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Descriptografa um array de bytes criptografados usando o algoritmo XOR.
      *
      * @param bytesCriptografados o array de bytes criptografados
      * @return um novo array de bytes contendo os bytes descriptografados
      */
-    private byte[] descriptografarBytes(byte[] bytesCriptografados) {
+    private byte[] descriptografar(byte[] bytesCriptografados) {
         byte[] bytesDescriptografados = new byte[bytesCriptografados.length];
-        int tamanhoChave = chave.length();
+        int tamanhoChave = CHAVE.length();
 
         for (int i = 0; i < bytesCriptografados.length; i++) {
             byte byteCriptografado = bytesCriptografados[i];
-            byte chaveBytes = (byte) chave.charAt(i % tamanhoChave);
+            byte chaveBytes = (byte) CHAVE.charAt(i % tamanhoChave);
 
             // Descriptografar o byte
             byte byteDescriptografado = (byte) (byteCriptografado ^ chaveBytes);
