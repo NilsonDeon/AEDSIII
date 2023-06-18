@@ -28,8 +28,8 @@ public class Colunas {
 
         int colunas = CHAVE.length();
         int linhas = (int)Math.ceil((double)registro.length/(double)colunas);
-        int ultimaColuna = (registro.length % colunas) - 1;
-
+        int ultimaColuna = (registro.length % colunas == 0) ? colunas : (registro.length % colunas) - 1;
+        
         // Colunas para armazenar os bytes
         byte[][] cifra = new byte[linhas][colunas];
 
@@ -94,7 +94,8 @@ public class Colunas {
 
         int colunas = CHAVE.length();
         int linhas = (int)Math.ceil((double)registroCriptografado.length/(double)colunas);
-        int ultimaColuna = (registroCriptografado.length % colunas) - 1;
+        int ultimaColuna = (registro.length % colunas == 0) ? colunas : (registro.length % colunas) - 1;
+
 
         // Colunas para armazenar os bytes
         byte[][] cifra = new byte[linhas][colunas];
@@ -127,7 +128,6 @@ public class Colunas {
                 
                 // Se registro acabar
                 } else {
-                    ultimaColuna = j-1;
                     break;
                 }
             }

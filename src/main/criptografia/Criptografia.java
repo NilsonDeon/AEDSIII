@@ -26,7 +26,7 @@ public class Criptografia {
         
         criptografado = cesar.criptografar(registroOriginal);
         criptografado = xor.criptografar(criptografado);
-        //criptografado = colunas.criptografar(criptografado);
+        criptografado = colunas.criptografar(criptografado);
         criptografado = vigenere.criptografar(criptografado);
 
         return criptografado;
@@ -43,7 +43,7 @@ public class Criptografia {
         byte[] decriptografado;
 
         decriptografado = vigenere.descriptografar(registroCriptografado);
-        //decriptografado = colunas.descriptografar(decriptografado);
+        decriptografado = colunas.descriptografar(decriptografado);
         decriptografado = xor.descriptografar(decriptografado);
         decriptografado = cesar.descriptografar(decriptografado);
 
