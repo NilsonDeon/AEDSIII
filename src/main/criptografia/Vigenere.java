@@ -1,87 +1,47 @@
-package src.main.criptografia;
-
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
+package criptografia;
 
 public class Vigenere {
-    private static final String registroDB = "./src/resources/Registro.db";
-    private static final String chave = "aedsiii";
 
-    public Vigenere() {
-    }
+    private static final String CHAVE = "hayalaessaehpravoce";
 
-   public void criptografar() {
-        try {
-            // Leitura do arquivo de bytes
-            FileInputStream fis = new FileInputStream(registroDB);
-            byte[] fileBytes = fis.readAllBytes();
-            fis.close();
+    public void Vigenere() {}
 
-            // Criptografar os bytes
-            byte[] bytesCriptografados = criptografarBytes(fileBytes);
-
-            // Escrever os bytes criptografados no mesmo arquivo
-            FileOutputStream fos = new FileOutputStream(registroDB);
-            fos.write(bytesCriptografados);
-            fos.close();
-
-            System.out.println("Arquivo criptografado com sucesso!");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private byte[] criptografarBytes(byte[] registro) {
+    /**
+     * Metodo para criptografar um array de bytes, usando vigenere.
+     * @param registroOriginal - registro original para se ciptografar.
+     * @return - registro criptografado.
+     */
+    public byte[] criptografar(byte[] registro) {
         byte[] bytesCriptografados = new byte[registro.length];
-        int tamanhoChave = chave.length();
+        int tamanhoChave = CHAVE.length();
 
         for (int i = 0; i < registro.length; i++) {
             byte original = registro[i];
-            byte ChaveBytes = (byte) chave.charAt(i % tamanhoChave);
+            byte ChaveBytes = (byte) CHAVE.charAt(i % tamanhoChave);
 
             // Criptografar o byte
-            byte criptografado = (byte) (original ^ ChaveBytes);
+            byte criptografado = (byte) ((int)original + (int)(ChaveBytes) % 256);
             bytesCriptografados[i] = criptografado;
         }
 
         return bytesCriptografados;
     }
-
-    public void descriptografar() {
-        try {
-            // Leitura do arquivo de bytes criptografados
-            FileInputStream fis = new FileInputStream(registroDB);
-            byte[] bytesCriptografados = fis.readAllBytes();
-            fis.close();
-
-            // Descriptografar os bytes
-            byte[] bytesDescriptografados = descriptografarBytes(bytesCriptografados);
-
-            // Escrever os bytes descriptografados no mesmo arquivo
-            FileOutputStream fileOutputStream = new FileOutputStream(registroDB);
-            fileOutputStream.write(bytesDescriptografados);
-            fileOutputStream.close();
-
-            System.out.println("Arquivo descriptografado com sucesso!");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private byte[] descriptografarBytes(byte[] bytesCriptografados) {
+    
+    /**
+     * Metodo para descriptografar o array de bytes, a partir da chave.
+     * @param registroCriptografado - registro sob criptografia
+     * @return - registro original.
+     */
+    public byte[] descriptografar(byte[] bytesCriptografados) {
         byte[] bytesDescriptografados = new byte[bytesCriptografados.length];
-        int tamanhoChave = chave.length();
+        int tamanhoChave = CHAVE.length();
 
         for (int i = 0; i < bytesCriptografados.length; i++) {
             byte byteCriptografado = bytesCriptografados[i];
-            byte ChaveBytes = (byte) chave.charAt(i % tamanhoChave);
+            byte ChaveBytes = (byte) CHAVE.charAt(i % tamanhoChave);
 
             // Descriptografar o byte
-            byte byteDescriptografado = (byte) (byteCriptografado ^ ChaveBytes);
+            byte byteDescriptografado = (byte) ((int)byteCriptografado - (int)(ChaveBytes) % 256);
             bytesDescriptografados[i] = byteDescriptografado;
         }
 

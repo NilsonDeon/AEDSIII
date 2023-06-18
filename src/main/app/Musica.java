@@ -14,11 +14,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+// Bibliotecas proprias
+import criptografia.Criptografia;
+
 /**
  * Classe Musica que contem todos os atributos presentes nos registros do
  * banco de dados do csv.
  */
 public class Musica {
+
+    // Algortimo de criptografia
+    Criptografia cripto = new Criptografia();
 
     // Implementada como boolean, por ser um byte
     protected boolean lapide;
@@ -420,7 +426,8 @@ public class Musica {
     }
 
       /**
-     * Metodo para converter os atributos da classe em um array de bytes.
+     * Metodo para converter os atributos da classe em um array de bytes, de 
+     * forma criptografada.
      * @param tamanho - do array de bytes pre-definido.
      * @return - array de bytes.
      */
@@ -428,11 +435,9 @@ public class Musica {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
+        byte[] registroCriptografado = new byte[0];
 
         try {
-
-            dos.writeBoolean(lapide);
-            dos.writeInt(tamanho);
  
             dos.writeInt(id);
 
@@ -465,22 +470,40 @@ public class Musica {
             dos.writeShort(uri.length());
             dos.writeUTF(uri);
 
-        } catch (IOException e) {
-            System.out.println("\nERRO ao converter Musica para um array de " +
-                               "bytes");
-        }
+            // Criptografar
+            byte[] registroBytes = baos.toByteArray();
+            registroBytes = cripto.criptografar(registroBytes);
 
-        return baos.toByteArray();
+            // Adicionar lapide e tamanho
+            baos.reset();
+            dos = new DataOutputStream(baos);
+            dos.writeBoolean(lapide);
+            dos.writeInt(tamanho);
+            byte[] infoRegistro = baos.toByteArray();
+
+            // Juntar todas as informacoes
+            registroCriptografado = new byte[infoRegistro.length + registroBytes.length];
+            System.arraycopy(infoRegistro, 0, registroCriptografado, 0, infoRegistro.length);
+            System.arraycopy(registroBytes, 0, registroCriptografado, infoRegistro.length, registroBytes.length);
+
+        } catch (IOException e) {
+            System.out.println("\nERRO ao converter Musica para um array de bytes");
+        }
+        
+        return registroCriptografado;
+    
     }
   
     /**
-     * Metodo para converter os atributos da classe em um array de bytes.
+     * Metodo para converter os atributos da classe em um array de bytes, de
+     * forma criptografada.
      * @return - array de bytes.
      */
     public byte[] toByteArray () {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
+        byte[] registroCriptografado = new byte[0];
 
         try {
 
@@ -518,15 +541,29 @@ public class Musica {
             aux.writeShort(uri.length());
             aux.writeUTF(uri);
 
+            dos.write(tmp.toByteArray(), 0, tmp.size());
+
+            // Criptografar
+            byte[] registroBytes = baos.toByteArray();
+            registroBytes = cripto.criptografar(registroBytes);
+
+            // Adicionar lapide e tamanho
+            baos.reset();
+            dos = new DataOutputStream(baos);
             dos.writeBoolean(lapide);
             dos.writeInt(aux.size());
-            dos.write(tmp.toByteArray(), 0, tmp.size());
+            byte[] infoRegistro = baos.toByteArray();
+
+            // Juntar todas as informacoes
+            registroCriptografado = new byte[infoRegistro.length + registroBytes.length];
+            System.arraycopy(infoRegistro, 0, registroCriptografado, 0, infoRegistro.length);
+            System.arraycopy(registroBytes, 0, registroCriptografado, infoRegistro.length, registroBytes.length);
 
         } catch (IOException e) {
             System.out.println("\nERRO ao converter Musica para um array de bytes");
         }
 
-        return baos.toByteArray();
+        return registroCriptografado;
     }
 
     /**
@@ -568,13 +605,18 @@ public class Musica {
     }
 
     /**
-     * Metodo para converter um array de bytes em um objeto Musica.
+     * Metodo para converter um array de bytes criptografado em um objeto 
+     * Musica.
      * @return - array de bytes.
      */
     public void fromByteArray (byte ba[]) {
 
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(ba);
+
+            // Descriptografar
+            byte[] registroDescriptografado = cripto.descriptografar(ba);
+    
+            ByteArrayInputStream bais = new ByteArrayInputStream(registroDescriptografado);
             DataInputStream dis = new DataInputStream(bais);
 
             lapide = false;

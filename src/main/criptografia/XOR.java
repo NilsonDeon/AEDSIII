@@ -1,14 +1,9 @@
 package criptografia;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
 /**
  * A classe XOR é responsável por criptografar e descriptografar um arquivo usando o algoritmo XOR.
  */
 public class XOR {
-    private static final String registroDB = "./src/resources/Registro.db";
     private static final String CHAVE = "aedsiii";
 
     /**
@@ -23,7 +18,7 @@ public class XOR {
      * @param registro o array de bytes a ser criptografado
      * @return um novo array de bytes contendo os bytes criptografados
      */
-    private byte[] criptografar(byte[] registro) {
+    public byte[] criptografar(byte[] registro) {
         byte[] bytesCriptografados = new byte[registro.length];
         int tamanhoChave = CHAVE.length();
 
@@ -45,7 +40,7 @@ public class XOR {
      * @param bytesCriptografados o array de bytes criptografados
      * @return um novo array de bytes contendo os bytes descriptografados
      */
-    private byte[] descriptografar(byte[] bytesCriptografados) {
+    public byte[] descriptografar(byte[] bytesCriptografados) {
         byte[] bytesDescriptografados = new byte[bytesCriptografados.length];
         int tamanhoChave = CHAVE.length();
 

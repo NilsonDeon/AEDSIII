@@ -28,6 +28,7 @@ import app.Musica;
 import arvores.arvoreB.ArvoreB;
 //import arvores.arvoreBStar.ArvoreBStar;
 import compressao.Compressao;
+import criptografia.Criptografia;
 import hashing.HashingExtensivel;
 import listaInvertida.ListaInvertida;
 

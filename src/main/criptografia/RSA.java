@@ -1,7 +1,6 @@
-package src.main.criptografia;
+package criptografia;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -39,7 +38,6 @@ public class RSA {
      */
     private void gerarPublicKey() {
         n = primoP.multiply(primoQ);
-        BigInteger phi = primoP.subtract(BigInteger.ONE).multiply(primoQ.subtract(BigInteger.ONE));
         e = BigInteger.valueOf(65537);
     }
 
@@ -47,8 +45,8 @@ public class RSA {
      * Gera a chave privada 'd' com base na chave publica gerada.
      */
     private void gerarPrivateKey() {
-        BigInteger phi = primoP.subtract(BigInteger.ONE).multiply(primoQ.subtract(BigInteger.ONE));
-        d = e.modInverse(phi);
+        BigInteger z = primoP.subtract(BigInteger.ONE).multiply(primoQ.subtract(BigInteger.ONE));
+        d = e.modInverse(z);
     }
 
     /**
@@ -57,18 +55,19 @@ public class RSA {
      * @param bytesOriginais A bytes a ser criptografada.
      * @return Os bytes criptografados como um BigInteger.
      */
-    private BigInteger criptografar(byte[] bytesOriginais) {
+    public byte[] criptografar(byte[] bytesOriginais) {
         BigInteger messageInt = new BigInteger(bytesOriginais);
-        return messageInt.modPow(e, n);
+        return messageInt.modPow(e, n).toByteArray();
     }
 
     /**
      * Descriptografa um byte criptografado representado como um BigInteger.
      *
-     * @param bytesCifrados O byte criptografado a ser descriptografado.
+     * @param registroCifrado O byte criptografado a ser descriptografado.
      * @return Os bytes da mensagem original descriptografada.
      */
-    private byte[] descriptografar(BigInteger bytesCifrados) {
+    public byte[] descriptografar(byte[] registroCifrado) {
+        BigInteger bytesCifrados = new BigInteger(registroCifrado);
         BigInteger descriptografaredInt = bytesCifrados.modPow(d, n);
         byte[] descriptografaredBytes = descriptografaredInt.toByteArray();
 
