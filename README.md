@@ -19,10 +19,12 @@
 [Vídeo Explicativo](https://youtu.be/DdguQDzB1BY)
 
 ## Parte 04 - Casamento de padrões
-
+[TP04](https://github.com/NilsonDeon/AEDSIII/archive/refs/tags/v4.0.zip)
 [Vídeo Explicativo](https://youtu.be/Hi1Co70hqC0)
 
 ## Parte 05 - Criptografia
+
+[Vídeo Explicativo](https://youtu.be/O9GAa-zpZPU)
 
 ## Como Testar
 
